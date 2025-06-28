@@ -43,7 +43,7 @@ public final strictfp class World {
 			AnimationManager.ANIMATION_SECONDS_PER_TICK/2,
 			AnimationManager.ANIMATION_SECONDS_PER_TICK,
 			AnimationManager.ANIMATION_SECONDS_PER_TICK*1.75f,
-			AnimationManager.ANIMATION_SECONDS_PER_TICK*4};
+			AnimationManager.ANIMATION_SECONDS_PER_TICK*10};
 
 	private final HeightMap world;
 	private final Random random;

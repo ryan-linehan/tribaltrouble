@@ -134,7 +134,7 @@ public strictfp class RegistrationClient {
 	}
 
 	public boolean isRegistered() {
-		return registration_info != null || registered_offline;
+        return true;
 	}
 
 	public final String getRegKey() {
