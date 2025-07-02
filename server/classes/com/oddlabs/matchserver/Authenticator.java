@@ -109,16 +109,6 @@ public final strictfp class Authenticator implements MatchmakingServerLoginInter
 			return;
 		}
 		
-		try {
-			if (DBInterface.getRegKeyUsername(reg_key_encoded) != null) {
-				client_interface.loginError(MatchmakingClientInterface.USERNAME_ERROR_TOO_MANY);
-				return;
-			}
-		} catch (IllegalArgumentException e) {
-			close();
-			return;
-		}
-
 		if (DBInterface.usernameExists(login.getUsername())) {
 			client_interface.loginError(MatchmakingClientInterface.USERNAME_ERROR_ALREADY_EXISTS);
 			return;
@@ -139,13 +129,7 @@ public final strictfp class Authenticator implements MatchmakingServerLoginInter
 		if (!revisionOK(revision)) {
 			return;
 		}
-		
-		try {
-			DBInterface.getRegKeyUsername(reg_key_encoded);
-		} catch (IllegalArgumentException e) {
-			close();
-			return;
-		}
+
 		String username = login.getUsername().trim();
 		if (!DBInterface.queryUser(username, login.getPasswordDigest())) {
 			client_interface.loginError(MatchmakingClientInterface.USER_ERROR_NO_SUCH_USER);
@@ -175,11 +159,8 @@ public final strictfp class Authenticator implements MatchmakingServerLoginInter
 		String reg_code = null;
 		if (reg_key != null) {
 			try {
-				if (RegistrationKey.verify(server.getPublicRegKey(), reg_key)) {
-					// This cast should not fail, because we signed it and the signature checked out ok
-					RegistrationInfo reg_info = (RegistrationInfo)reg_key.getObject();
-					reg_code = RegistrationKey.encode(reg_info.getKey());
-				}
+				RegistrationInfo reg_info = (RegistrationInfo)reg_key.getObject();
+				reg_code = RegistrationKey.encode(reg_info.getKey());
 			} catch (Exception e) {
 				MatchmakingServer.getLogger().warning("Could not verify signature because of: " + e.getMessage());
 			}

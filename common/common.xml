@@ -115,8 +115,9 @@
 			<jvmarg value="-Djava.library.path=${nativelib}"/>
 			<jvmarg value="-Dorg.lwjgl.util.Debug=true"/>
 			<jvmarg value="-Xmx80000000"/>
+			<jvmarg value="-Djdk.crypto.KeyAgreement.legacyKDF=true"/>
 			<!--<jvmarg value="-Djavax.net.debug=ssl,handshake,trustmanager"/>-->
-			<!--    <jvmarg value="-Dorg.lwjgl.opengl.Window.undecorated=true"/>-->
+			<!--	<jvmarg value="-Dorg.lwjgl.opengl.Window.undecorated=true"/>-->
 		</java>
 	</target>
 </project>

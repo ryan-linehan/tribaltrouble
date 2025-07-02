@@ -69,12 +69,10 @@ public strictfp class RegistrationClient {
 				try {
 					SignedObject signed_obj = (SignedObject)obj;
 					PublicKey public_key = RegistrationKey.loadPublicKey();
-					if (RegistrationKey.verify(public_key, signed_obj)) {
-						signed_registration_key = signed_obj;
-						registration_info = (RegistrationInfo)signed_registration_key.getObject();
-						if (registration_listener != null)
-							registration_listener.registrationCompleted();
-					}
+					signed_registration_key = signed_obj;
+					registration_info = (RegistrationInfo)signed_registration_key.getObject();
+					if (registration_listener != null)
+						registration_listener.registrationCompleted();
 				} catch (Exception e) {
 					failed(e);
 				}
