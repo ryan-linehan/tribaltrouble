@@ -176,3 +176,13 @@ CREATE TABLE `settings` (
 LOCK TABLES `settings` WRITE;
 INSERT INTO `settings` VALUES ('14','revision'),('4','min_username_length'),('64','max_username_length'),('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_0123456789','allowed_chars'),('10','max_profiles');
 UNLOCK TABLES;
+
+--
+-- Table structure for table `messages`
+--
+
+DROP TABLE IF EXISTS `messages`;
+CREATE TABLE `messages` (
+  `time` datetime DEFAULT (curdate()),
+  `message` varchar(512) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
