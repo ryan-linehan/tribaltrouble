@@ -50,6 +50,8 @@ Building the server:
 - The only time they actually need to be on the same machine is when one logs a crashing event to the database.
 - To build and start the servers, run their respective scripts from the `server` directory.
 
+```
 cd ./server
 ./matchmaker &
 ./router &
+```
