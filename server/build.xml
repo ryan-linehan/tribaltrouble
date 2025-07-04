@@ -1,6 +1,8 @@
 <project name="servers" basedir="." default="all">
 	<import file="../common/common.xml"/>
-	<property name="classpath" value="../common/build/classes:${lib}/commons-pool-1.2.jar:${lib}/commons-dbcp-1.2.1.jar:${lib}/commons-collections-3.1.jar"/>
+	<property name="classpath" value="../common/build/classes:${lib}/commons-pool-1.2.jar:${lib}/commons-dbcp-1.2.1.jar:${lib}/commons-collections-3.1.jar:${lib}/mysql-connector-j-9.3.0.jar"/>
+
+	<property name="main_class" value="com.oddlabs.matchserver.MatchmakingServer"/>
 
 	<target name="compiledeps" depends="compile-common">
 	</target>
@@ -34,6 +36,9 @@
 			<fileset dir="../common/build/classes" includes="com/oddlabs/registration/**/*class"/>
 			<fileset dir="${build}/classes" includes="com/oddlabs/matchserver/**/*class"/>
 			<fileset dir="${commonstatic}" includes="public_reg_key"/>
+			<fileset dir="${lib}">
+				<include name="mysql-connector-j-9.3.0.jar"/>
+			</fileset>
 		</jar>
 	</target>
 

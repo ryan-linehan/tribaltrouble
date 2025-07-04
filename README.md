@@ -1,41 +1,55 @@
-Tribal Trouble
-==============
-Tribal Trouble is a realtime strategy game released by Oddlabs in 2004. In 2014 the source was released under GPL2 license, and can be found in this repository.
+Built with JDK 24
 
-The source is released "as is", and Oddlabs will not be available for help building it, modifying it or any other kind of support. Due to the age of the game, it is reasonable to expect there to be some problems on some systems. Oddlabs has not released updates to the game for years, and do not intend to start updating it now that it is open sourced.
+Dependencies: Apache ant, lwjgl2, xrandr, openal-soft, git
 
-**If** you know how to code Java, configure ant, use MySQL, and have a **genuine intention** of actually working on the game, you can create an issue for detailed questions about the source.
+==========================================================
 
-Binaries
---------
-If you are simply looking for a working binary version of the game, you can find the latest released installers here:
+Building the game/client:
+-------------------------
 
-- [Windows](binaries/TribalTroubleSetup.exe)
-- [Mac](binaries/TribalTrouble.dmg)
-- [Linux](binaries/TribalTroubleSetup.sh)
+Simply run "ant run" from the ./tt directory.
 
-Please note that the multiplayer server referenced in these builds, is no longer available.
-
-You can register the binaries by putting the registration file in the binaries folder into this folder:
-- Windows XP: `C:\Documents and Settings\Username\TribalTrouble\`
-- Windows Vista or newer: `C:\Users\Username\TribalTrouble\`
-- Mac OS X: `Library/Application Support/TribalTrouble/`
-- Linux: `~/.TribalTrouble/`
-
-
-Building
---------
-Clone the repository:
-```
-git clone https://github.com/sunenielsen/tribaltrouble.git
-```
-Make sure you have Java SDK at least version 6, and Apache Ant.
-
-
-To build the game client, do this:
-```
 cd tt
 ant run
-```
 
-Setting up a server is a lot more complex, and not something we have done in many years. It will take some work to get it working, but try looking at the server folder and see if you can figure it out. At the very least, you should know a bit about setting up a MySQL server.
+==========================================================
+
+Building the server:
+--------------------
+
+1. Database:
+
+- Install mysql-server.
+- Create the database schema from `initmysql.sql`.
+- Create the user `matchmaker` with the password `U46TawOp`.
+
+2. Revision number:
+
+- The game client automatically detects the revision number using a git command when it's built.
+- The server should set a minimum revision number for what clients can use it.
+- That number goes as an entry in the database.
+- The revision number of a certain git commit is retrieved using this command:
+
+`git rev-list --count HEAD`
+
+- Store that number in the `settings` table using the following query.
+
+`UPDATE settings SET value = REVISION_NUMBER WHERE property = 'revision';`
+
+3. Key generation:
+
+- Go to the tools directory `cd tools`.
+- Run `ant run generatekeys`.
+- Enter a password when it asks for one.
+- Make sure the keys are generated under `./common/static/`.
+
+4. Building and launching:
+
+- There are two main servers needed. The matchmaker and the router.
+- They could be hosted separately or with the same machine.
+- The only time they actually need to be on the same machine is when one logs a crashing event to the database.
+- To build and start the servers, run their respective scripts from the `server` directory.
+
+cd ./server
+./matchmaker &
+./router &

@@ -33,27 +33,6 @@ import com.oddlabs.util.DBUtils;
 
 public final strictfp class DBInterface {
 	
-	public final static String getRegKeyUsername(String reg_key) throws IllegalArgumentException {
-		try {
-			PreparedStatement stmt = DBUtils.createStatement("SELECT username FROM registrations R WHERE R.reg_key = ? AND NOT R.disabled AND NOT R.banned");
-			try {
-				stmt.setString(1, reg_key);
-				ResultSet result = stmt.executeQuery();
-				try {
-					result.next();
-					return result.getString("username");
-				} finally {
-					result.close();
-				}
-			} finally {
-				stmt.getConnection().close();
-			}
-		} catch (SQLException e) {
-			MatchmakingServer.getLogger().throwing(DBInterface.class.getName(), "getRegKeyUsername", e);
-			throw new IllegalArgumentException("key " + reg_key + " not i DB");
-		}
-	}
-	
 	public final static boolean usernameExists(String username) {
 		try {
 			PreparedStatement stmt = DBUtils.createStatement("SELECT username FROM registrations R WHERE lower(R.username) = lower(?)");
@@ -61,7 +40,7 @@ public final strictfp class DBInterface {
 				stmt.setString(1, username);
 				ResultSet result = stmt.executeQuery();
 				try {
-					boolean user_exists = result.first();
+					boolean user_exists = result.next();
 					return user_exists;
 				} finally {
 					result.close();
@@ -70,19 +49,18 @@ public final strictfp class DBInterface {
 				stmt.getConnection().close();
 			}
 		} catch (SQLException e) {
-			MatchmakingServer.getLogger().throwing(DBInterface.class.getName(), "queryUser", e);
+			MatchmakingServer.getLogger().throwing(DBInterface.class.getName(), "usernameExists", e);
 			throw new RuntimeException(e);
 		}
 	}
 
 	public final static void createUser(Login login, LoginDetails login_details, String reg_key) {
 		try {
-			PreparedStatement stmt = DBUtils.createStatement("UPDATE registrations R SET username = ?, email = ?, password = ? WHERE R.reg_key = ? AND R.username IS NULL AND R.password IS NULL AND R.email IS NULL");
+			PreparedStatement stmt = DBUtils.createStatement("INSERT INTO registrations (username, email, password) values (?, ?, ?)");
 			try {
 				stmt.setString(1, login.getUsername());
 				stmt.setString(2, login_details.getEmail());
 				stmt.setString(3, CryptUtils.digest(login.getPasswordDigest()));
-				stmt.setString(4, reg_key);
 				int row_count = stmt.executeUpdate();
 				assert row_count == 1;
 			} finally {
@@ -102,7 +80,7 @@ public final strictfp class DBInterface {
 				stmt.setString(2, CryptUtils.digest(password));
 				ResultSet result = stmt.executeQuery();
 				try {
-					boolean user_exists = result.first();
+					boolean user_exists = result.next();
 					return user_exists;
 				} finally {
 					result.close();
@@ -243,7 +221,7 @@ public final strictfp class DBInterface {
 				stmt.setString(1, nick);
 				ResultSet result = stmt.executeQuery();
 				try {
-					boolean nick_exists = result.first();
+					boolean nick_exists = result.next();
 					return nick_exists;
 				} finally {
 					result.close();
@@ -276,7 +254,7 @@ public final strictfp class DBInterface {
 				stmt.getConnection().close();
 			}
 		} catch (SQLException e) {
-			MatchmakingServer.getLogger().throwing(DBInterface.class.getName(), "createProfile", e);
+			MatchmakingServer.getLogger().throwing(DBInterface.class.getName(), "saveGameReport", e);
 			throw new RuntimeException(e);
 		}
 	}
@@ -458,7 +436,7 @@ public final strictfp class DBInterface {
 			throw new RuntimeException(e);
 		}
 	}
-	
+
 	public final static RankingEntry[] getTopRankings(int number) {
 		try {
 			PreparedStatement stmt = DBUtils.createStatement("SELECT nick, rating, wins, losses, invalid FROM profiles P WHERE P.wins >= "+ GameSession.MIN_WINS_FOR_RANKING +" ORDER BY rating DESC, (wins - losses) DESC, wins DESC LIMIT ?");

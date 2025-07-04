@@ -141,10 +141,10 @@
 	</target>
 
 	<target name="revision">
-		<exec executable="hg" output="${revision_number_file}">
-			<arg value="tip"/>
-			<arg value="--template"/>
-			<arg value="{rev}"/>
+		<exec executable="git" output="${revision_number_file}">
+			<arg value="rev-list"/>
+			<arg value="--count"/>
+			<arg value="HEAD"/>
 		</exec>
 	</target>
 

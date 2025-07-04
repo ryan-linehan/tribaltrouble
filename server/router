@@ -1,8 +1,11 @@
 #!/bin/bash
 
 SENDMAIL=/usr/sbin/sendmail
-SENDTO=all@oddlabs.com
+SENDTO=omar.ali.mokhtar@gmail.com
 ERRORMAIL=./error_mail
 
-until java -Djava.security.manager -Djava.security.policy=router.policy -server -ea -cp router.jar com.oddlabs.routerserver.RouterServer; do echo "Service crashed, sending report";
+ant compile router
+
+until java -Djdk.crypto.KeyAgreement.legacyKDF=true -cp "build/router.jar:../common/lib/java/commons-pool-1.2.jar:../common/lib/java/commons-dbcp-1.2.1.jar:../common/lib/java/commons-collections-3.1.jar:../common/lib/java/mysql-connector-j-9.3.0.jar" com.oddlabs.routerserver.RouterServer; do
+echo "Service crashed, sending report";
 cat $ERRORMAIL | $SENDMAIL -oi $SENDTO; done
