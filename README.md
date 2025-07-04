@@ -1,18 +1,23 @@
-Built with JDK 24
+Tribal Trouble
+==============
 
-Dependencies: Apache ant, lwjgl2, xrandr, openal-soft, git
+Tribal Trouble is a realtime strategy game released by Oddlabs in 2004. In 2014 the source was released under GPL2 license.
 
-==========================================================
+This fork aims to:
+
+1. Bring the game back online and make it available for everyone to play as it was originally.
+2. Remaster and modernize the graphics.
+3. Add more playable features later.
 
 Building the game/client:
 -------------------------
+
+Dependencies: JDK-24 (or Open-JDK-24), Apache ant, lwjgl2, xrandr, openal-soft, git
 
 Simply run "ant run" from the ./tt directory.
 
 cd tt
 ant run
-
-==========================================================
 
 Building the server:
 --------------------
