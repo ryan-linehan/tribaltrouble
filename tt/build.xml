@@ -22,7 +22,6 @@
 	<property name="gamedata-svnurl" value="http://update.oddlabs.com/public_svnroot/games/tt"/>
 	<property name="jar.compress" value="true"/>
 	<property name="dist" location="${build}/dist"/>
-	<property name="svndist" location="svndist"/>
 	
 	<!--	<property name="webstartdist" location="webstartdist"/>-->
 
@@ -164,11 +163,7 @@
 	</target>
 
 	<!-- installer stuff -->
-	<target name="dist" depends="mrproper, copydist" description="generate the distribution"/>
-
-	<target name="cleaninstallers">
-		<delete dir="${installers.assembly}"/>
-	</target>
+	<target name="dist" depends="mrproper, makedist" description="generate the distribution"/>
 
 	<target name="loader" depends="compile-common">
 		<ant inheritAll="false" dir="../loader" target="loader"/>
@@ -246,7 +241,6 @@
 				<include name="textures/models/*jpg"/>-->
 			</fileset>
 			<fileset dir="${lib}">
-				<include name="javasvn.jar"/>
 				<include name="lwjgl.jar"/>
 				<include name="lwjgl_util.jar"/>
 				<include name="jorbis.jar"/>
@@ -256,7 +250,9 @@
 		<copy todir="${dist}/windows-x86">
 			<fileset dir="${nativelib}">
 				<include name="lwjgl.dll"/>
+				<include name="lwjgl64.dll"/>
 				<include name="OpenAL32.dll"/>
+				<include name="OpenAL64.dll"/>
 			</fileset>
 		</copy>
 		<copy todir="${dist}/macosx-ppc">
@@ -269,137 +265,15 @@
 		<copy todir="${dist}/linux-x86">
 			<fileset dir="${nativelib}">
 				<include name="liblwjgl.so"/>
+				<include name="liblwjgl64.so"/>
 				<include name="libopenal.so"/>
+				<include name="libopenal64.so"/>
 			</fileset>
 		</copy>
-	</target>
 
-	<target name="-checkoutgamedata">
-		<mkdir dir="${svn.dest}"/>
-		<java failonerror="true" classname="org.tmatesoft.svn.cli.SVN"
-			fork="true">
-			<arg value="checkout"/>
-			<arg value="${gamedata-svnurl}/${svn.src}"/>
-			<arg path="${svn.dest}/${svn.localname}"/>
-			<classpath>
-				<pathelement location="${lib}/javasvn.jar" />
-				<pathelement location="${lib}/javasvn-cli.jar" />
-			</classpath>
-		</java>
-		<delete>
-			<fileset dir="${svn.dest}/">
-				<exclude name="**/.svn"/>
-			</fileset>
-		</delete>
-	</target>
-
-	<target name="copybuynowfile">
-		<copy todir="${installers.tmp}" >
-			<fileset dir="${installers}" defaultexcludes="false">
-				<include name="BuyNow.html"/>
-			</fileset>
-		</copy>
-		<replace file="${installers.tmp}/BuyNow.html" token="@BUYNOW_URL@" value="${buynow_url}"/>
-	</target>
-	
-	<target name="assembleplatforms">
-		<!-- linux -->
-		<mkdir dir="${installers.assembly}/linux-x86/gamedata"/>
-		<antcall target="-checkoutgamedata">
-			<param name="svn.dest" location="${installers.assembly}/linux-x86/gamedata/data-1"/>
-			<param name="svn.src" value="linux-x86"/>
-			<param name="svn.localname" value="native"/>
-		</antcall>
-		<copy todir="${installers.assembly}/linux-x86">
-			<fileset dir="${installers}/linux/data" includes="*"/>
-		</copy>
-		<chmod file="${installers.assembly}/linux-x86/tribaltrouble" perm="755"/>
-
-		<!-- mac os x -->
-		<mkdir dir="${installers.assembly}/macosx-ppc/gamedata"/>
-		<antcall target="-checkoutgamedata">
-			<param name="svn.dest" location="${installers.assembly}/macosx-ppc/gamedata/data-1"/>
-			<param name="svn.src" value="macosx-ppc"/>
-			<param name="svn.localname" value="native"/>
-		</antcall>
-		<!-- windows -->
-		<mkdir dir="${installers.assembly}/windows-x86/gamedata"/>
-		<antcall target="-checkoutgamedata">
-			<param name="svn.dest" location="${installers.assembly}/windows-x86/gamedata/data-1"/>
-			<param name="svn.src" value="windows-x86"/>
-			<param name="svn.localname" value="native"/>
-		</antcall>
-	</target>
-
-	<target name="assemblejre">
-		<mkdir dir="${jre.dst}"/>
-		<exec failonerror="true" executable="cp">
-			<arg value="-R"/>
-			<arg value="${jre.src}"/>
-			<arg path="${jre.dst}"/>
-		</exec>
-		<!-- Clean .svn dirs -->
-		<delete includeEmptyDirs="true">
-			<fileset dir="${jre.dst}" defaultexcludes="no">
-				<include name="**/.svn/**"/>
-			</fileset>
-		</delete>
-	</target>
-
-	<target name="assemblesupport">
-		<mkdir dir="${installers.assembly}/support"/>
-		<copy todir="${installers.assembly}/support">
-			<fileset dir="${installers}">
-				<include name="ReadMe.html"/>
-				<include name="Manual.html"/>
-				<include name="license.txt"/>
-				<include name="oddlabs_license.txt"/>
-			</fileset>
-		</copy>
-	</target>
-	
-	<target name="assemblecommon" depends="loader">
-		<mkdir dir="${installers.assembly}/common"/>
-		<mkdir dir="${installers.assembly}/common/gamedata"/>
-		<copy todir="${installers.assembly}/common">
-			<fileset dir="../loader/build">
-				<include name="loader.jar"/>
-			</fileset>
-		</copy>
-		<antcall target="-checkoutgamedata">
-			<param name="svn.dest" location="${installers.assembly}/common/gamedata/data-1"/>
-			<param name="svn.src" value="common"/>
-			<param name="svn.localname" value="common"/>
-		</antcall>
-	</target>
-
-	<target name="assembleinstaller" depends="cleaninstallers">
-		<antcall target="assemblecommon"/>
-		<antcall target="assemblesupport"/>
-		<antcall target="assembleplatforms"/>
-		<antcall target="assemblejres"/>
-	</target>
-
-	<target name="assemblejres">
-		<!-- linux -->
-		<antcall target="assemblejre">
-			<param name="jre.src" location="${installers}/linux/jre/${jre}"/>
-			<param name="jre.dst" location="${installers.assembly}/linuxjre"/>
-		</antcall>
-	</target>
-
-	<!--<target name="initinstalltmp" depends="cleaninstallertmp, copybuynowfile"/>-->
-	<target name="initinstalltmp" depends="assembleinstaller, cleaninstallertmp, copybuynowfile"/>
-
-	<target name="cleaninstallertmp">
-		<delete dir="${installers.tmproot}"/>
-	</target>
-
-	<target name="copydist" depends="makedist">
-		<ant inheritAll="false" dir="../tools" target="copydist">
-			<property name="svnsrc" location="${dist}"/>
-			<property name="svndst" location="${svndist}"/>
-		</ant>
+		<copy todir="${dist}/windows-x86" file="start.ps1"/>
+		<copy todir="${dist}/linux-x86" file="start.sh"/>
+		<copy todir="${dist}/common" file="../binaries/registration"/>
 	</target>
 
 </project>
