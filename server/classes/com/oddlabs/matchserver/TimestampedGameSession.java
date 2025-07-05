@@ -102,12 +102,14 @@ public final strictfp class TimestampedGameSession {
 						if (DBInterface.getWins(nick) < GameSession.MIN_WINS_FOR_RANKING)
 							all_5_wins = false;
 					} catch (SQLException e) {
+						System.out.println("Exception: " + e);
 						all_5_wins = false; //participant must be a guest
 						return true;
 					}
 					try {
 						player_ratings[i] = DBInterface.getRating(participants[i].getNick());
 					} catch (SQLException e) {
+						System.out.println("Exception: " + e);
 						throw new RuntimeException("Could you find rating for nick=" + nick + " e=" + e);
 					}
 				}

@@ -28,19 +28,19 @@ final strictfp class ToolTipAdapter implements ToolTipVisitor, ToolTip {
 	private void visitPlayer(Player player) {
 		tool_tip_box.append(player.getPlayerInfo().getName());
 		tool_tip_box.append(" - ");
-		//      tool_tip_box.append(team_tip);
-		//      tool_tip_box.append(" ");
-		//      if (Settings.getSettings().inDeveloperMode()) {
-		//          tool_tip_box.append("total_units=");
-		//          tool_tip_box.append(unit_count.getNumSupplies());
-		//          tool_tip_box.append(" ");
-		//      }
+		//	  tool_tip_box.append(team_tip);
+		//	  tool_tip_box.append(" ");
+		//	  if (Settings.getSettings().inDeveloperMode()) {
+		//		  tool_tip_box.append("total_units=");
+		//		  tool_tip_box.append(unit_count.getNumSupplies());
+		//		  tool_tip_box.append(" ");
+		//	  }
 	}
 
 	private void visitSelectable(Selectable selectable) {
 		assert !selectable.isDead();
 		visitPlayer(selectable.getOwner());
-		/*      if (Settings.getSettings().developer_mode) {
+		/*	  if (Settings.getSettings().developer_mode) {
 				if (getCurrentBehaviour() instanceof WalkBehaviour)
 				((WalkBehaviour)getCurrentBehaviour()).appendToolTip(tool_tip_box);
 				else*/
@@ -70,10 +70,10 @@ final strictfp class ToolTipAdapter implements ToolTipVisitor, ToolTip {
 		Quad[] watch = Icons.getIcons().getWatch();
 		icon[0] = watch[(int)((watch.length - 1)*building.getHitPoints()/building.getBuildingTemplate().getMaxHitPoints())];
 		tool_tip_box.append(icon);
-		//      if (getUnitContainer() != null && Settings.getSettings().developer_mode) {
-		//          tool_tip_box.append(" units_in_building ");
-		//          tool_tip_box.append(getUnitContainer().getNumSupplies());
-		//      }
+		//	  if (getUnitContainer() != null && Settings.getSettings().developer_mode) {
+		//		  tool_tip_box.append(" units_in_building ");
+		//		  tool_tip_box.append(getUnitContainer().getNumSupplies());
+		//	  }
 
 	}
 
@@ -96,7 +96,7 @@ final strictfp class ToolTipAdapter implements ToolTipVisitor, ToolTip {
 			GatherController gc = (GatherController)c;
 			tool_tip_box.append(Icons.getIcons().getToolTipIcon(gc.getSupplyType()));
 		}
-		/*      if (getCurrentBehaviour() instanceof WalkBehaviour)
+		/*	  if (getCurrentBehaviour() instanceof WalkBehaviour)
 				((WalkBehaviour)getCurrentBehaviour()).appendToolTip(tool_tip_box);*/
 
 	}

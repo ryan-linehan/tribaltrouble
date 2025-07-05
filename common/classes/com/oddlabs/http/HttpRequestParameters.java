@@ -30,6 +30,7 @@ public final strictfp class HttpRequestParameters {
 			}
 			return buffer.toString();
 		} catch (UnsupportedEncodingException e) {
+			System.out.println("Exception: " + e);
 			throw new RuntimeException(e);
 		}
 	}

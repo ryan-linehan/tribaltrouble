@@ -59,6 +59,7 @@ public final strictfp class TaskThread {
 					try {
 						lock.wait();
 					} catch (InterruptedException e) {
+						System.out.println("Exception: " + e);
 						// ignore
 					}
 				}
@@ -70,6 +71,7 @@ public final strictfp class TaskThread {
 				Object callable_result = callable.call();
 				result = new TaskSucceeded(callable_result);
 			} catch (Exception e) {
+				System.out.println("Exception: " + e);
 				result = new TaskFailed(e);
 			}
 			synchronized (lock) {

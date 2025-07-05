@@ -39,6 +39,7 @@ public final strictfp class RouterClient implements ConnectionInterface {
 		try {
 			armi_event.execute(interface_methods, router_handler);
 		} catch (IllegalARMIEventException e) {
+			System.out.println("Exception: " + e);
 			close();
 			router_handler.routerFailed(e);
 		}

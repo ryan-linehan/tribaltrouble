@@ -96,6 +96,7 @@ public final strictfp class UpdaterProcess {
 			try {
 				status_out.writeObject(new UpdateStatus(UpdateStatus.LOG, UpdateStatus.CHECKED, path));
 			} catch (IOException e) {
+				System.out.println("Exception: " + e);
 				throw new RuntimeException(e);
 			}
 		}
@@ -156,9 +157,11 @@ public final strictfp class UpdaterProcess {
 				} else
 					status_out.writeObject(new UpdateStatus(UpdateStatus.NO_UPDATES, null));
 			} catch (Throwable t) {
+				System.out.println("Exception (Throwable): " + t);
 				status_out.writeObject(new UpdateStatus(t));
 			}
 		} catch (IOException e) {
+			System.out.println("Exception: " + e);
 			// there's nothing we can do, really
 			throw new RuntimeException(e);
 		}
@@ -178,6 +181,7 @@ public final strictfp class UpdaterProcess {
 				try {
 					status_out.writeObject(new UpdateStatus(UpdateStatus.LOG, UpdateStatus.UPDATED, path));
 				} catch (IOException e) {
+					System.out.println("Exception: " + e);
 					throw new RuntimeException(e);
 				}
 			}

@@ -151,6 +151,7 @@ public final strictfp class Client implements ARMIEventBroker, GameClientInterfa
 		try {
 			armi_event.execute(interface_methods, this);
 		} catch (IllegalARMIEventException e) {
+			System.out.println("Exception: " + e);
 			error();
 		}
 	}

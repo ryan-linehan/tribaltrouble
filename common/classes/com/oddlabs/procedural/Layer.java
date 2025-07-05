@@ -114,6 +114,7 @@ public final strictfp class Layer {
 			ImageIO.write(image, "PNG", fos);
 			fos.close();
 		} catch (IOException e) {
+			System.out.println("Exception: " + e);
 			e.printStackTrace();
 		}
 	}

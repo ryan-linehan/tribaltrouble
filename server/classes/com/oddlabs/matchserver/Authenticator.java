@@ -45,6 +45,7 @@ public final strictfp class Authenticator implements MatchmakingServerLoginInter
 		try {
 			event.execute(interface_methods, this);
 		} catch (IllegalARMIEventException e) {
+			System.out.println("Exception: " + e);
 			error(e);
 		}
 	}
@@ -100,6 +101,7 @@ public final strictfp class Authenticator implements MatchmakingServerLoginInter
 		try {
 			checkUsername(login.getUsername());
 		} catch (InvalidUsernameException e) {
+			System.out.println("Exception: " + e);
 			client_interface.loginError(e.getErrorCode());
 			return;
 		}
@@ -162,6 +164,7 @@ public final strictfp class Authenticator implements MatchmakingServerLoginInter
 				RegistrationInfo reg_info = (RegistrationInfo)reg_key.getObject();
 				reg_code = RegistrationKey.encode(reg_info.getKey());
 			} catch (Exception e) {
+				System.out.println("Exception: " + e);
 				MatchmakingServer.getLogger().warning("Could not verify signature because of: " + e.getMessage());
 			}
 		}

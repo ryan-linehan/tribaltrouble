@@ -30,6 +30,7 @@ public final strictfp class RouterServer {
 			logger.addHandler(fh);
 			logger.setLevel(Level.ALL);
 		} catch (Exception e) {
+			System.out.println("Exception: " + e);
 			e.printStackTrace();
 		}
 	}
@@ -68,6 +69,7 @@ public final strictfp class RouterServer {
 			DBUtils.initConnection("jdbc:mysql://localhost/oddlabs", "matchmaker", "U46TawOp");
 			DBUtils.postHermesMessage("elias, xar, jacob, thufir: Router crashed!");
 		} catch (Throwable t) {
+			System.out.println("Exception (Throwable): " + t);
 			logger.throwing("Router", "postPanic", t);
 		}
 	}
@@ -76,6 +78,7 @@ public final strictfp class RouterServer {
 		try {
 			run();
 		} catch (Throwable t) {
+			System.out.println("Exception (Throwable): " + t);
 			logger.throwing("Router", "main", t);
 			postPanic();
 			System.exit(1);

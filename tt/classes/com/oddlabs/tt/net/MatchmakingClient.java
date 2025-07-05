@@ -385,6 +385,7 @@ public final strictfp class MatchmakingClient implements MatchmakingClientInterf
 		try {
 			event.execute(interface_methods, this);
 		} catch (IllegalARMIEventException e) {
+			System.out.println("Exception: " + e);
 			handleError(e);
 		}
 	}

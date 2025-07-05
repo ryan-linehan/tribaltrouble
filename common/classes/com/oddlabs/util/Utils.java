@@ -24,6 +24,7 @@ public final strictfp class Utils {
 		try {
 			return tryGetLoopbackAddress();
 		} catch (IOException e) {
+			System.out.println("Exception: " + e);
 			throw new RuntimeException(e);
 		}
 	}
@@ -76,8 +77,10 @@ System.out.println("loopback address = " + best_address);
 		try {
 			return tryLoadObject(url, zipped);
 		} catch (IOException e) {
+			System.out.println("Exception: " + e);
 			throw new RuntimeException(e);
 		} catch (ClassNotFoundException e) {
+			System.out.println("Exception: " + e);
 			throw new RuntimeException(e);
 		}
 	}
@@ -136,6 +139,7 @@ System.out.println("loopback address = " + best_address);
 		try {
 			return tryMakeURL(location);
 		} catch (IOException e) {
+			System.out.println("Exception: " + e);
 			throw new RuntimeException(e);
 		}
 	}

@@ -39,6 +39,7 @@ public final strictfp class ConnectionListener extends AbstractConnectionListene
 			}
 			exception = null;
 		} catch (IOException e) {
+			System.out.println("Exception: " + e);
 			exception = e;
 		}
 		if (network.getDeterministic().log(exception != null))
@@ -60,9 +61,11 @@ public final strictfp class ConnectionListener extends AbstractConnectionListene
 			try {
 				Connection.configureChannel(channel);
 			} catch (IOException e) {
+				System.out.println("Exception: " + e);
 				try {
 					channel.close();
 				} catch (IOException e2) {
+					System.out.println("Exception: " + e);
 					e2.printStackTrace();
 				}
 				exception = e;
@@ -109,6 +112,7 @@ public final strictfp class ConnectionListener extends AbstractConnectionListene
 			SelectionKey socket_key = channel.register(network.getSelector(), SelectionKey.OP_READ);
 			return socket_key;
 		} catch (ClosedChannelException e) {
+			System.out.println("Exception: " + e);
 			throw new RuntimeException(e);
 		}
 	}
@@ -128,6 +132,7 @@ public final strictfp class ConnectionListener extends AbstractConnectionListene
 			if (!network.getDeterministic().isPlayback())
 				channel.close();
 		} catch (IOException e) {
+			System.out.println("Exception: " + e);
 			e.printStackTrace();
 		}
 	}
@@ -139,6 +144,7 @@ public final strictfp class ConnectionListener extends AbstractConnectionListene
 				while (incoming_connections.size() > 0)
 					removeNextChannel().close();
 			} catch (IOException e) {
+				System.out.println("Exception: " + e);
 				e.printStackTrace();
 			}
 		}

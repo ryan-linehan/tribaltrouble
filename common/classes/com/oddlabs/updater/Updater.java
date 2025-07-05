@@ -50,6 +50,7 @@ System.out.println("workspace_path.getAbsolutePath() = " + workspace_path.getAbs
 				System.out.println("Started update process");
 				thread.start();
 			} catch (IOException e) {
+				System.out.println("Exception: " + e);
 				throw new RuntimeException(e);
 			}
 		}
@@ -71,6 +72,7 @@ System.out.println("workspace_path.getAbsolutePath() = " + workspace_path.getAbs
 			try {
 				thread.join();
 			} catch (InterruptedException e) {
+				System.out.println("Exception: " + e);
 				throw new RuntimeException(e);
 			}
 		}
@@ -93,6 +95,7 @@ System.out.println("workspace_path.getAbsolutePath() = " + workspace_path.getAbs
 						} else
 							addStatus(status);
 					} catch (EOFException e) {
+						System.out.println("Exception: " + e);
 						break;
 					}
 				}
@@ -103,6 +106,7 @@ System.out.println("workspace_path.getAbsolutePath() = " + workspace_path.getAbs
 			try {
 				updater_process.waitFor();
 			} catch (InterruptedException e) {
+				System.out.println("Exception: " + e);
 				throw new RuntimeException(e);
 			}
 		}
@@ -145,6 +149,7 @@ System.out.println("workspace_path.getAbsolutePath() = " + workspace_path.getAbs
 		try {
 			Thread.sleep(THREAD_SLEEP);
 		} catch (InterruptedException e) {
+			System.out.println("Exception: " + e);
 			throw new RuntimeException(e);
 		}
 	}

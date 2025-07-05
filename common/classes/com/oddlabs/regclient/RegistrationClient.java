@@ -74,6 +74,7 @@ public strictfp class RegistrationClient {
 					if (registration_listener != null)
 						registration_listener.registrationCompleted();
 				} catch (Exception e) {
+					System.out.println("Exception: " + e);
 					failed(e);
 				}
 			}
@@ -115,6 +116,7 @@ public strictfp class RegistrationClient {
 			RegistrationKey.decode(potential_key);
 			return true;
 		} catch (RegistrationKeyFormatException e) {
+			System.out.println("Exception: " + e);
 			if (registration_listener != null)
 				registration_listener.registrationFailed(KEY_FORMAT_EXCEPTION, e);
 			return false;

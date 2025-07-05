@@ -49,6 +49,7 @@ public final strictfp class DBInterface {
 				stmt.getConnection().close();
 			}
 		} catch (SQLException e) {
+			System.out.println("Exception: " + e);
 			MatchmakingServer.getLogger().throwing(DBInterface.class.getName(), "usernameExists", e);
 			throw new RuntimeException(e);
 		}
@@ -67,6 +68,7 @@ public final strictfp class DBInterface {
 				stmt.getConnection().close();
 			}
 		} catch (SQLException e) {
+			System.out.println("Exception: " + e);
 			MatchmakingServer.getLogger().throwing(DBInterface.class.getName(), "createUser", e);
 			throw new RuntimeException(e);
 		}
@@ -89,6 +91,7 @@ public final strictfp class DBInterface {
 				stmt.getConnection().close();
 			}
 		} catch (SQLException e) {
+			System.out.println("Exception: " + e);
 			MatchmakingServer.getLogger().throwing(DBInterface.class.getName(), "queryUser", e);
 			throw new RuntimeException(e);
 		}
@@ -123,6 +126,7 @@ public final strictfp class DBInterface {
 				stmt.getConnection().close();
 			}
 		} catch (SQLException e) {
+			System.out.println("Exception: " + e);
 			MatchmakingServer.getLogger().throwing(DBInterface.class.getName(), "getProfiles", e);
 			throw new RuntimeException(e);
 		}
@@ -149,6 +153,7 @@ public final strictfp class DBInterface {
 				stmt.getConnection().close();
 			}
 		} catch (SQLException e) {
+			System.out.println("Exception: " + e);
 			return null;
 		}
 	}
@@ -165,6 +170,7 @@ public final strictfp class DBInterface {
 				stmt.getConnection().close();
 			}
 		} catch (SQLException e) {
+			System.out.println("Exception: " + e);
 			MatchmakingServer.getLogger().throwing(DBInterface.class.getName(), "setLastUsedProfile", e);
 			throw new RuntimeException(e);
 		}
@@ -187,6 +193,7 @@ public final strictfp class DBInterface {
 				stmt.getConnection().close();
 			}
 		} catch (SQLException e) {
+			System.out.println("Exception: " + e);
 			MatchmakingServer.getLogger().throwing(DBInterface.class.getName(), "getLastUsedProfile", e);
 			throw new RuntimeException(e);
 		}
@@ -209,6 +216,7 @@ public final strictfp class DBInterface {
 				stmt.getConnection().close();
 			}
 		} catch (SQLException e) {
+			System.out.println("Exception: " + e);
 			MatchmakingServer.getLogger().throwing(DBInterface.class.getName(), "private getRegID", e);
 			throw new RuntimeException(e);
 		}
@@ -230,6 +238,7 @@ public final strictfp class DBInterface {
 				stmt.getConnection().close();
 			}
 		} catch (SQLException e) {
+			System.out.println("Exception: " + e);
 			MatchmakingServer.getLogger().throwing(DBInterface.class.getName(), "queryUser", e);
 			throw new RuntimeException(e);
 		}
@@ -254,6 +263,7 @@ public final strictfp class DBInterface {
 				stmt.getConnection().close();
 			}
 		} catch (SQLException e) {
+			System.out.println("Exception: " + e);
 			MatchmakingServer.getLogger().throwing(DBInterface.class.getName(), "saveGameReport", e);
 			throw new RuntimeException(e);
 		}
@@ -274,6 +284,7 @@ public final strictfp class DBInterface {
 				stmt.getConnection().close();
 			}
 		} catch (SQLException e) {
+			System.out.println("Exception: " + e);
 			MatchmakingServer.getLogger().throwing(DBInterface.class.getName(), "logPriority", e);
 			throw new RuntimeException(e);
 		}
@@ -293,6 +304,7 @@ public final strictfp class DBInterface {
 				stmt.getConnection().close();
 			}
 		} catch (SQLException e) {
+			System.out.println("Exception: " + e);
 			MatchmakingServer.getLogger().throwing(DBInterface.class.getName(), "createProfile", e);
 			throw new RuntimeException(e);
 		}
@@ -318,6 +330,7 @@ public final strictfp class DBInterface {
 					stmt.getConnection().close();
 				}
 			} catch (SQLException e) {
+				System.out.println("Exception: " + e);
 				MatchmakingServer.getLogger().throwing(DBInterface.class.getName(), "deleteProfile INSERT", e);
 			}
 			// drop profile
@@ -331,6 +344,7 @@ public final strictfp class DBInterface {
 					stmt.getConnection().close();
 				}
 			} catch (SQLException e) {
+				System.out.println("Exception: " + e);
 				MatchmakingServer.getLogger().throwing(DBInterface.class.getName(), "deleteProfile DELETE", e);
 			}
 		}
@@ -358,6 +372,7 @@ public final strictfp class DBInterface {
 				stmt.getConnection().close();
 			}
 		} catch (SQLException e) {
+			System.out.println("Exception: " + e);
 			MatchmakingServer.getLogger().throwing(DBInterface.class.getName(), "update" + field, e);
 		}
 	}
@@ -373,6 +388,7 @@ public final strictfp class DBInterface {
 				stmt.getConnection().close();
 			}
 		} catch (SQLException e) {
+			System.out.println("Exception: " + e);
 			MatchmakingServer.getLogger().throwing(DBInterface.class.getName(), "updateRating", e);
 		}
 	}
@@ -422,6 +438,7 @@ public final strictfp class DBInterface {
 				stmt.getConnection().close();
 			}
 		} catch (SQLException e) {
+			System.out.println("Exception: " + e);
 			MatchmakingServer.getLogger().throwing(DBInterface.class.getName(), "getSetting", e);
 			throw new RuntimeException(e);
 		}
@@ -432,6 +449,7 @@ public final strictfp class DBInterface {
 			String value = getSetting(setting);
 			return (Integer.valueOf(value)).intValue();
 		} catch (Exception e) {
+			System.out.println("Exception: " + e);
 			MatchmakingServer.getLogger().throwing(DBInterface.class.getName(), "getSettingsInt", e);
 			throw new RuntimeException(e);
 		}
@@ -466,6 +484,7 @@ public final strictfp class DBInterface {
 				stmt.getConnection().close();
 			}
 		} catch (SQLException e) {
+			System.out.println("Exception: " + e);
 			MatchmakingServer.getLogger().throwing(DBInterface.class.getName(), "getTopRankings", e);
 			return new RankingEntry[0];
 		}
@@ -496,6 +515,7 @@ public final strictfp class DBInterface {
 				stmt.getConnection().close();
 			}
 		} catch (SQLException e) {
+			System.out.println("Exception: " + e);
 			MatchmakingServer.getLogger().throwing(DBInterface.class.getName(), "createGame", e);
 			return;
 		}
@@ -516,6 +536,7 @@ public final strictfp class DBInterface {
 				stmt.getConnection().close();
 			}
 		} catch (SQLException e) {
+			System.out.println("Exception: " + e);
 			MatchmakingServer.getLogger().throwing(DBInterface.class.getName(), "createGame", e);
 			return;
 		}
@@ -532,6 +553,7 @@ public final strictfp class DBInterface {
 				stmt.getConnection().close();
 			}
 		} catch (SQLException e) {
+			System.out.println("Exception: " + e);
 			MatchmakingServer.getLogger().throwing(DBInterface.class.getName(), "initDropGames", e);
 		}
 	}
@@ -548,6 +570,7 @@ public final strictfp class DBInterface {
 				stmt.getConnection().close();
 			}
 		} catch (SQLException e) {
+			System.out.println("Exception: " + e);
 			MatchmakingServer.getLogger().throwing(DBInterface.class.getName(), "dropGame", e);
 		}
 	}
@@ -584,6 +607,7 @@ public final strictfp class DBInterface {
 				stmt.getConnection().close();
 			}
 		} catch (SQLException e) {
+			System.out.println("Exception: " + e);
 			MatchmakingServer.getLogger().throwing(DBInterface.class.getName(), "startGame", e);
 		}
 	}
@@ -604,6 +628,7 @@ public final strictfp class DBInterface {
 				stmt.getConnection().close();
 			}
 		} catch (SQLException e) {
+			System.out.println("Exception: " + e);
 			MatchmakingServer.getLogger().throwing(DBInterface.class.getName(), "endGame", e);
 		}
 	}
@@ -619,6 +644,7 @@ public final strictfp class DBInterface {
 				stmt.getConnection().close();
 			}
 		} catch (SQLException e) {
+			System.out.println("Exception: " + e);
 			MatchmakingServer.getLogger().throwing(DBInterface.class.getName(), "profileOnline", e);
 		}
 	}
@@ -635,6 +661,7 @@ public final strictfp class DBInterface {
 				stmt.getConnection().close();
 			}
 		} catch (SQLException e) {
+			System.out.println("Exception: " + e);
 			MatchmakingServer.getLogger().throwing(DBInterface.class.getName(), "profileOffline", e);
 		}
 	}
@@ -651,6 +678,7 @@ public final strictfp class DBInterface {
 				stmt.getConnection().close();
 			}
 		} catch (SQLException e) {
+			System.out.println("Exception: " + e);
 			MatchmakingServer.getLogger().throwing(DBInterface.class.getName(), "profileOffline", e);
 		}
 	}
@@ -664,6 +692,7 @@ public final strictfp class DBInterface {
 				stmt.getConnection().close();
 			}
 		} catch (SQLException e) {
+			System.out.println("Exception: " + e);
 			MatchmakingServer.getLogger().throwing(DBInterface.class.getName(), "clearOnlineProfiles", e);
 		}
 	}

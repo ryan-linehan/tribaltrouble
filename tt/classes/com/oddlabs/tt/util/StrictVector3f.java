@@ -167,7 +167,7 @@ public strictfp class StrictVector3f {
 				);
 
 		return dest;
-	}    
+	}	
 
 
 

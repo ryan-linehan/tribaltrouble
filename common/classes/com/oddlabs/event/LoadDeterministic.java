@@ -24,6 +24,7 @@ public final strictfp class LoadDeterministic extends Deterministic {
 			buffer.limit(0);
 			System.out.println("Reading log from " + logging_file);
 		} catch (IOException e) {
+			System.out.println("Exception: " + e);
 			throw new RuntimeException(e);
 		}
 		isDefault(0);
@@ -39,6 +40,7 @@ public final strictfp class LoadDeterministic extends Deterministic {
 		try {
 			channel.close();
 		} catch (IOException e) {
+			System.out.println("Exception: " + e);
 			throw new RuntimeException(e);
 		}
 	}
@@ -81,6 +83,7 @@ public final strictfp class LoadDeterministic extends Deterministic {
 			total_bytes_read += current_total;
 			return bytes_read == -1 && current_total == 0;
 		} catch (IOException e) {
+			System.out.println("Exception: " + e);
 			throw new RuntimeException(e);
 		}
 	}
@@ -156,8 +159,10 @@ public final strictfp class LoadDeterministic extends Deterministic {
 			object_input_stream.close();
 			return o;
 		} catch (IOException e) {
+			System.out.println("Exception: " + e);
 			throw new RuntimeException(e);
 		} catch (ClassNotFoundException e) {
+			System.out.println("Exception: " + e);
 			throw new RuntimeException(e);
 		}
 	}

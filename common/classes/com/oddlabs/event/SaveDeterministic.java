@@ -21,6 +21,7 @@ public final strictfp class SaveDeterministic extends Deterministic {
 			channel = new FileOutputStream(logging_file).getChannel();
 			System.out.println("Logging to " + logging_file);
 		} catch (IOException e) {
+			System.out.println("Exception: " + e);
 			throw new RuntimeException(e);
 		}
 	}
@@ -37,6 +38,7 @@ public final strictfp class SaveDeterministic extends Deterministic {
 			}
 			buffer.compact();
 		} catch (IOException e) {
+			System.out.println("Exception: " + e);
 			throw new RuntimeException(e);
 		}
 	}
@@ -48,6 +50,7 @@ public final strictfp class SaveDeterministic extends Deterministic {
 			channel.close();
 			System.out.println("Closed log file, bytes written: " + total_bytes_written);
 		} catch (IOException e) {
+			System.out.println("Exception: " + e);
 			throw new RuntimeException(e);
 		}
 	}
@@ -105,6 +108,7 @@ public final strictfp class SaveDeterministic extends Deterministic {
 			object_output_stream.close();
 			return o;
 		} catch (IOException e) {
+			System.out.println("Exception: " + e);
 			throw new RuntimeException(e);
 		}
 	}

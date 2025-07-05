@@ -53,7 +53,7 @@ public class MultiPartFormOutputStream{
 	 * but it is recommended to be at least 6 characters.  (Or use the
 	 * static createBoundary() method to create one.)
 	 *
-	 * @param  os        the output stream
+	 * @param  os		the output stream
 	 * @param  boundary  the boundary
 	 * @see  #createBoundary()
 	 * @see  #getContentType(String)
@@ -186,9 +186,9 @@ public class MultiPartFormOutputStream{
 	 * is a directory, a <code>java.lang.IllegalArgumentException</code>
 	 * will be thrown.
 	 *
-	 * @param  name      the field name
+	 * @param  name	  the field name
 	 * @param  mimeType  the file content type (optional, recommended)
-	 * @param  file      the file (the file must exist)
+	 * @param  file	  the file (the file must exist)
 	 * @throws  java.io.IOException  on input/output errors
 	 */
 	public void writeFile(String name, String mimeType, File file) throws java.io.IOException{
@@ -222,10 +222,10 @@ public class MultiPartFormOutputStream{
 	 * Writes a input stream's contents.  If the input stream is null, a
 	 * <code>java.lang.IllegalArgumentException</code> will be thrown.
 	 *
-	 * @param  name      the field name
+	 * @param  name	  the field name
 	 * @param  mimeType  the file content type (optional, recommended)
 	 * @param  fileName  the file name (required)
-	 * @param  is        the input stream
+	 * @param  is		the input stream
 	 * @throws  java.io.IOException  on input/output errors
 	 */
 	public void writeFile(String name, String mimeType, String fileName, InputStream is) throws java.io.IOException{
@@ -263,10 +263,10 @@ public class MultiPartFormOutputStream{
 	 * of a file, and will be sent as such.  If the data is null, a
 	 * <code>java.lang.IllegalArgumentException</code> will be thrown.
 	 *
-	 * @param  name      the field name
+	 * @param  name	  the field name
 	 * @param  mimeType  the file content type (optional, recommended)
 	 * @param  fileName  the file name (required)
-	 * @param  data      the file data
+	 * @param  data	  the file data
 	 * @throws  java.io.IOException  on input/output errors
 	 */
 	public void writeFile(String name, String mimeType, String fileName, byte[] data) throws java.io.IOException{

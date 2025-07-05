@@ -107,6 +107,7 @@ public final strictfp class Client implements MatchmakingServerInterface, Connec
 			try {
 				Authenticator.checkUsername(nick);
 			} catch (InvalidUsernameException e) {
+				System.out.println("Exception: " + e);
 				client_interface.createProfileError(e.getErrorCode());
 				return;
 			}
@@ -278,6 +279,7 @@ public final strictfp class Client implements MatchmakingServerInterface, Connec
 		try {
 			event.execute(interface_methods, this);
 		} catch (IllegalARMIEventException e) {
+			System.out.println("Exception: " + e);
 			error(e);
 		}
 	}

@@ -68,6 +68,7 @@ public final strictfp class ARMIEvent implements Serializable {
 				}
 				return static_byte_stream.toByteArray();
 			} catch (IOException e) {
+				System.out.println("Exception: " + e);
 				throw new RuntimeException(e);
 			}
 		} else
@@ -107,6 +108,7 @@ public final strictfp class ARMIEvent implements Serializable {
 		try {
 			method = interface_methods.getMethod(method_id);
 		} catch (ArrayIndexOutOfBoundsException e) {
+			System.out.println("Exception: " + e);
 			throw new IllegalARMIEventException(e);
 		}
 		assert instance != null;
@@ -114,6 +116,7 @@ public final strictfp class ARMIEvent implements Serializable {
 		try {
 			args = parseArgs(reader, method);
 		} catch (Throwable e) {
+			System.out.println("Exception: " + e);
 			throw new IllegalARMIEventException(e);
 		}
 		interface_methods.invoke(instance, method, args);

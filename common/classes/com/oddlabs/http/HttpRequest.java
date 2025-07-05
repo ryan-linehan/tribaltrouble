@@ -18,6 +18,7 @@ public final strictfp class HttpRequest {
 			URL url = new URL(parameters.url);
 			return spawnPostRequest(task_thread, url, parameters, parser, callback);
 		} catch (MalformedURLException e) {
+			System.out.println("Exception: " + e);
 			throw new RuntimeException(e);
 		}
 	}
@@ -98,6 +99,7 @@ public final strictfp class HttpRequest {
 				CryptUtils.setupHttpsConnection((HttpsURLConnection)conn);
 			return conn;
 		} catch (Exception e) {
+			System.out.println("Exception: " + e);
 			throw new RuntimeException(e);
 		}
 	}
@@ -113,6 +115,7 @@ public final strictfp class HttpRequest {
 				is.close();
 			}
 		} catch (IOException e) {
+			System.out.println("Exception: " + e);
 			int response_code = ((HttpURLConnection)conn).getResponseCode();
 			String response_message = ((HttpURLConnection)conn).getResponseMessage();
 			ByteArrayOutputStream byte_os = new ByteArrayOutputStream();
@@ -130,6 +133,7 @@ public final strictfp class HttpRequest {
 		try {
 			return new URL(parameters.url + "?" + parameters.createQueryString());
 		} catch (MalformedURLException e) {
+			System.out.println("Exception: " + e);
 			throw new RuntimeException(e);
 		}
 	}

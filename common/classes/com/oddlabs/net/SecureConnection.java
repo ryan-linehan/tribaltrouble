@@ -61,8 +61,10 @@ public final strictfp class SecureConnection extends AbstractConnection implemen
 		try {
 			return new SealedObject(event, encrypt_cipher);
 		} catch (IllegalBlockSizeException e) {
+			System.out.println("Exception: " + e);
 			throw new RuntimeException(e);
 		} catch (IOException e) {
+			System.out.println("Exception: " + e);
 			throw new RuntimeException(e);
 		}
 	}
@@ -86,8 +88,10 @@ public final strictfp class SecureConnection extends AbstractConnection implemen
 				tunnel(event);
 			}
 		} catch (IOException e) {
+			System.out.println("Exception: " + e);
 			notifyError(e);
 		} catch (GeneralSecurityException e) {
+			System.out.println("Exception: " + e);
 			notifyError(new IOException(e.getMessage()));
 		}
 	}
@@ -99,12 +103,16 @@ public final strictfp class SecureConnection extends AbstractConnection implemen
 			ARMIEvent event = (ARMIEvent)sealed_event.getObject(decrypt_cipher);
 			receiveEvent(event);
 		} catch (BadPaddingException e) {
+			System.out.println("Exception: " + e);
 			notifyError(new IOException(e.getMessage()));
 		} catch (IllegalBlockSizeException e) {
+			System.out.println("Exception: " + e);
 			notifyError(new IOException(e.getMessage()));
 		} catch (ClassNotFoundException e) {
+			System.out.println("Exception: " + e);
 			notifyError(new IOException(e.getMessage()));
 		} catch (IOException e) {
+			System.out.println("Exception: " + e);
 			notifyError(e);
 		}
 	}
@@ -126,6 +134,7 @@ public final strictfp class SecureConnection extends AbstractConnection implemen
 		try {
 			event.execute(interface_methods, this);
 		} catch (Exception e) {
+			System.out.println("Exception: " + e);
 			notifyError(new IOException(e.getMessage()));
 		}
 	}

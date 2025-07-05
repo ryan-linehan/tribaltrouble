@@ -46,6 +46,7 @@ public final strictfp class NetworkSelector {
 		try {
 			initSelector();
 		} catch (IOException e) {
+			System.out.println("Exception: " + e);
 			throw new RuntimeException(e);
 		}
 		DNSTask task = new DNSTask(dns_name, port, conn);
@@ -72,6 +73,7 @@ public final strictfp class NetworkSelector {
 		try {
 			initSelector();
 		} catch (IOException e) {
+			System.out.println("Exception: " + e);
 			throw new RuntimeException(e);
 		}
 		return selector;
@@ -155,6 +157,7 @@ public final strictfp class NetworkSelector {
 			if (deterministic.log(selector != null && selector.selectNow() > 0))
 				doTick();
 		} catch (IOException e) {
+			System.out.println("Exception: " + e);
 			throw new RuntimeException(e);
 		}
 	}
@@ -204,6 +207,7 @@ public final strictfp class NetworkSelector {
 			try {
 				handler.handle();
 			} catch (IOException e) {
+				System.out.println("Exception: " + e);
 				handler.handleError(e);
 				cancelKey(key, handler);
 			}

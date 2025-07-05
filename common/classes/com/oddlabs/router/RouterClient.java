@@ -130,6 +130,7 @@ final strictfp class RouterClient implements ConnectionInterface {
 		try {
 			event.execute(current_interface.methods, current_interface.instance);
 		} catch (IllegalARMIEventException e) {
+			System.out.println("Exception: " + e);
 			doError(false, e);
 		}
 	}

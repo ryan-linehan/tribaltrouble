@@ -48,6 +48,7 @@ public final class MatchmakingServer implements ConnectionListenerInterface {
 			logger.addHandler(fh);
 			logger.setLevel(Level.ALL);
 		} catch (Exception e) {
+			System.out.println("Exception: " + e);
 			e.printStackTrace();
 		}
 	}
@@ -134,6 +135,7 @@ public final class MatchmakingServer implements ConnectionListenerInterface {
 		try {
 			DBUtils.postHermesMessage("elias, xar, jacob, thufir: Matchmaking service crashed!");
 		} catch (Throwable t) {
+			System.out.println("Exception (Throwable): " + t);
 			logger.throwing("MatchmakingServer", "postPanic", t);
 		}
 	}
@@ -142,6 +144,7 @@ public final class MatchmakingServer implements ConnectionListenerInterface {
 		try {
 			new MatchmakingServer();
 		} catch (Throwable t) {
+			System.out.println("Exception (Throwable): " + t);
 			logger.throwing("MatchmakingServer", "main", t);
 			postPanic();
 			System.exit(1);

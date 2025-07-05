@@ -27,6 +27,7 @@ public class UpdateEntryFactory extends SVNWorkspaceManager implements ISVNEntry
 			FSAdminArea area = new FSAdminArea(dir);
 			return new UpdateRootEntry(area, dir.getCanonicalPath(), null);
 		} catch (IOException e) {
+			System.out.println("Exception: " + e);
 			throw new SVNException(e);
 		}
 	}

@@ -189,6 +189,7 @@ public final strictfp class PeerHub implements Animated, RouterHandler {
 		try {
 			event.execute(interface_methods, peer);
 		} catch (IllegalARMIEventException e) {
+			System.out.println("Exception: " + e);
 			peerDisconnected(peer, e.getMessage());
 		}
 	}
@@ -300,6 +301,7 @@ public final strictfp class PeerHub implements Animated, RouterHandler {
 				try {
 					peer.executeEvents(getTick());
 				} catch (IllegalARMIEventException e) {
+					System.out.println("Exception: " + e);
 					peerDisconnected(peer, e.getMessage());
 				}
 			}
@@ -323,7 +325,7 @@ public final strictfp class PeerHub implements Animated, RouterHandler {
 		else if (!is_multiplayer && !p)
 			paused--;
 			// FIXME er ikke et problem naar hver gui_root har sin egen World
-			//      assert world_singleton.paused >= 0;
+			//	  assert world_singleton.paused >= 0;
 	}
 
 	private boolean isPaused() {

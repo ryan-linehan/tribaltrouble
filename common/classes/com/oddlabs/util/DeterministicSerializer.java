@@ -19,6 +19,7 @@ public final strictfp class DeterministicSerializer {
 			os.writeObject(object);
 			exception = null;
 		} catch (IOException e) {
+			System.out.println("Exception: " + e);
 			exception = e;
 		}
 		if (deterministic.log(exception != null))
@@ -35,6 +36,7 @@ public final strictfp class DeterministicSerializer {
 			object = is.readObject();
 			exception = null;
 		} catch (Exception e) {
+			System.out.println("Exception: " + e);
 			exception = e;
 			object = null;
 		}

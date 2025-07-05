@@ -22,6 +22,7 @@ public final strictfp class FileLoader implements FileLoaderInterface {
 			tmp_channel = new FileInputStream(file).getChannel();
 			exception = null;
 		} catch (IOException e) {
+			System.out.println("Exception: " + e);
 			tmp_channel = null;
 			exception = e;
 		}
@@ -52,6 +53,7 @@ public final strictfp class FileLoader implements FileLoaderInterface {
 				file_channel.close();
 			exception = null;
 		} catch (IOException e) {
+			System.out.println("Exception: " + e);
 			exception = e;
 			eof = true;
 		}
@@ -77,6 +79,7 @@ public final strictfp class FileLoader implements FileLoaderInterface {
 			try {
 				file_channel.close();
 			} catch (IOException e) {
+				System.out.println("Exception: " + e);
 				//ignore
 			}
 		}

@@ -33,6 +33,7 @@ public final strictfp class ReflexiveRegistrationClient extends RegistrationClie
 				try {
 					Thread.sleep(300);
 				} catch (InterruptedException e) {
+					System.out.println("Exception: " + e);
 					// ignore
 				}
 			} while (!result.exists());
@@ -45,12 +46,14 @@ public final strictfp class ReflexiveRegistrationClient extends RegistrationClie
 					if (number == (appid*13 + session_id)/7)
 						registered_temp = true;
 				} catch (NumberFormatException e) {
+					System.out.println("Exception: " + e);
 					// ignore
 				}
 			} finally {
 				br.close();
 			}
 		} catch (IOException e) {
+			System.out.println("Exception: " + e);
 			// ignore;
 		}
 		registered = registered_temp;

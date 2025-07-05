@@ -138,6 +138,7 @@ public final strictfp class Utils {
 			fout.flush();
 			fout.close();
 		} catch (IOException e) {
+			System.out.println("Exception: " + e);
 			e.printStackTrace();
 		}
 		long after = System.currentTimeMillis();
@@ -178,6 +179,7 @@ public final strictfp class Utils {
 			fout.flush();
 			fout.close();
 		} catch (IOException e) {
+			System.out.println("Exception: " + e);
 			e.printStackTrace();
 		}
 		long after = System.currentTimeMillis();

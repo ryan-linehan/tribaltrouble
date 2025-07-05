@@ -14,6 +14,7 @@ public final strictfp class TotalgamingRegistrationClient extends RegistrationCl
 		try {
 			reg_key =  WindowsRegistryInterface.queryRegistrationKey("HKEY_LOCAL_MACHINE", "SOFTWARE\\Stardock\\ComponentManager\\Drengin.net\\trib", "Serial No");
 		} catch (Exception e) {
+			System.out.println("Exception: " + e);
 			reg_key = null;
 			System.out.println("Failed to read key from reg db, e = " + e);
 		}

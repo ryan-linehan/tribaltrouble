@@ -26,6 +26,7 @@ public final strictfp class CryptUtils {
 			// The digest length is the length of the digest encoded as a unsigned hex string
 			PASSWORD_DIGEST_LENGTH = digest.getDigestLength()*2;
 		} catch (NoSuchAlgorithmException e) {
+			System.out.println("Exception: " + e);
 			throw new RuntimeException(e);
 		}
 	}
@@ -57,6 +58,7 @@ public final strictfp class CryptUtils {
 			byte[] message_bytes = str.getBytes("UTF-8");
 			return buggyDigest(message_bytes);
 		} catch (UnsupportedEncodingException e) {
+			System.out.println("Exception: " + e);
 			throw new RuntimeException(e);
 		}
 	}

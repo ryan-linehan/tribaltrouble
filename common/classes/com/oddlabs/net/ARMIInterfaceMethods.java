@@ -33,10 +33,13 @@ public final strictfp class ARMIInterfaceMethods {
 		try {
 			method.invoke(instance, args);
 		} catch (IllegalAccessException e) {
+			System.out.println("Exception: " + e);
 			throw new IllegalARMIEventException(e);
 		} catch (InvocationTargetException e) {
+			System.out.println("Exception: " + e);
 			throw new RuntimeException(e);
 		} catch (IllegalArgumentException e) {
+			System.out.println("Exception: " + e);
 			throw new IllegalARMIEventException(e);
 		}
 	}

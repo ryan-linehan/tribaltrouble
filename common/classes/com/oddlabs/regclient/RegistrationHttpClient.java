@@ -40,6 +40,7 @@ final strictfp class RegistrationHttpClient {
 				try {
 					return ois.readObject();
 				} catch (ClassNotFoundException e) {
+					System.out.println("Exception: " + e);
 					throw new RuntimeException(e);
 				}
 			}

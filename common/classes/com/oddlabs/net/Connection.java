@@ -121,10 +121,12 @@ public final strictfp class Connection extends AbstractConnection implements Han
 						key = channel.register(selector, SelectionKey.OP_CONNECT);
 					}
 				} catch (IOException e) {
+					System.out.println("Exception: " + e);
 					channel.close();
 					throw e;
 				}
 			} catch (IOException e) {
+				System.out.println("Exception: " + e);
 				exception = e;
 			}
 		}
@@ -243,6 +245,7 @@ public final strictfp class Connection extends AbstractConnection implements Han
 				num_bytes_read = channel.read(read_buffer);
 			exception = null;
 		} catch (IOException e) {
+			System.out.println("Exception: " + e);
 			exception = e;
 		}
 		if (network.getDeterministic().log(exception != null))
@@ -278,6 +281,7 @@ public final strictfp class Connection extends AbstractConnection implements Han
 					try {
 						event.execute(interface_methods, this);
 					} catch (IllegalARMIEventException e) {
+						System.out.println("Exception: " + e);
 						IOException ioe = new IOException();
 						ioe.initCause(e);
 						throw ioe;
@@ -304,6 +308,7 @@ public final strictfp class Connection extends AbstractConnection implements Han
 					success = channel.finishConnect();
 				exception = null;
 			} catch (IOException e) {
+				System.out.println("Exception: " + e);
 				exception = e;
 			}
 			if (network.getDeterministic().log(exception != null))
@@ -341,16 +346,19 @@ public final strictfp class Connection extends AbstractConnection implements Han
 				try {
 					channel.socket().shutdownInput();
 				} catch (IOException e) {
+					System.out.println("Exception: " + e);
 					// ignore
 				}
 				try {
 					channel.socket().shutdownOutput();
 				} catch (IOException e) {
+					System.out.println("Exception: " + e);
 					// Ignore
 				}
 				try {
 					channel.close();
 				} catch (IOException e) {
+					System.out.println("Exception: " + e);
 					// ignore
 				}
 			}

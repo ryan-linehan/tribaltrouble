@@ -24,6 +24,7 @@ public final strictfp class TrymediaRegistrationClient extends RegistrationClien
 				br.close();
 			}
 		} catch (IOException e) {
+			System.out.println("Exception: " + e);
 			key = null;
 			// ignore
 		}

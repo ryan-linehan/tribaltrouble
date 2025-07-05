@@ -172,6 +172,7 @@ public final strictfp class Settings implements Serializable {
 				} else
 					throw new RuntimeException("Unsupported Settings type " + field_type);
 			} catch (IllegalAccessException e) {
+				System.out.println("Exception: " + e);
 				throw new RuntimeException(e);
 			}
 		}
@@ -180,6 +181,7 @@ public final strictfp class Settings implements Serializable {
 			OutputStream out = new FileOutputStream(settings_file);
 			props.store(out, "comment");
 		} catch (Exception e) {
+			System.out.println("Exception: " + e);
 			System.err.println("Failed to write settings to " + settings_file + " exception: " + e);
 		}
 	}
@@ -192,6 +194,7 @@ public final strictfp class Settings implements Serializable {
 			InputStream in = new FileInputStream(settings_file);
 			props.load(in);
 		} catch (Exception e) {
+			System.out.println("Exception: " + e);
 			System.err.println("Could not read settings from " + settings_file);
 			return;
 		}
@@ -222,6 +225,7 @@ public final strictfp class Settings implements Serializable {
 				} else
 					throw new RuntimeException("Unsupported Settings type " + field_type);
 			} catch (Exception e) {
+				System.out.println("Exception: " + e);
 				System.out.println("WARNING: " + field.getName() + " is not of type: " + field.getType() + ". Skipped");
 			}
 		}

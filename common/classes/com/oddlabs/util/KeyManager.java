@@ -50,6 +50,7 @@ public final strictfp class KeyManager {
 			KeyPair key_pair = key_pair_gen.generateKeyPair();
 			return key_pair;
 		} catch (GeneralSecurityException e) {
+			System.out.println("Exception: " + e);
 			throw new RuntimeException(e);
 		}
 	}
@@ -62,8 +63,10 @@ public final strictfp class KeyManager {
 			cipher.init(cipher_mode, secret_key);
 			return cipher;
 		} catch (NoSuchPaddingException e) {
+			System.out.println("Exception: " + e);
 			throw new RuntimeException(e);
 		} catch (NoSuchAlgorithmException e) {
+			System.out.println("Exception: " + e);
 			throw new RuntimeException(e);
 		}
 	}
@@ -74,6 +77,7 @@ public final strictfp class KeyManager {
 			KeySpec key_spec = new PKCS8EncodedKeySpec(encoded_private_key);
 			return key_factory.generatePrivate(key_spec);
 		} catch (NoSuchAlgorithmException e) {
+			System.out.println("Exception: " + e);
 			throw new RuntimeException(e);
 		}
 	}
@@ -84,6 +88,7 @@ public final strictfp class KeyManager {
 			KeySpec key_spec = new X509EncodedKeySpec(encoded_public_key);
 			return key_factory.generatePublic(key_spec);
 		} catch (NoSuchAlgorithmException e) {
+			System.out.println("Exception: " + e);
 			throw new RuntimeException(e);
 		}
 	}
@@ -94,6 +99,7 @@ public final strictfp class KeyManager {
 			key_agreement.init(private_key);
 			return key_agreement;
 		} catch (GeneralSecurityException e) {
+			System.out.println("Exception: " + e);
 			throw new RuntimeException(e);
 		}
 	}
@@ -107,6 +113,7 @@ public final strictfp class KeyManager {
 			key_pair_gen.initialize(dh_param_spec);
 			return key_pair_gen.generateKeyPair();
 		} catch (GeneralSecurityException e) {
+			System.out.println("Exception: " + e);
 			throw new RuntimeException(e);
 		}
 	}

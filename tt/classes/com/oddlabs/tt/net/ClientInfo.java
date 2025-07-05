@@ -24,6 +24,7 @@ public final strictfp class ClientInfo implements GameServerInterface, Connectio
 		try {
 			armi_event.execute(interface_methods, this);
 		} catch (IllegalARMIEventException e) {
+			System.out.println("Exception: " + e);
 			server.handleError((AbstractConnection)sender, e);
 		}
 	}

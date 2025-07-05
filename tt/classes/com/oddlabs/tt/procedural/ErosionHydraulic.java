@@ -220,7 +220,7 @@ public final strictfp class ErosionHydraulic {
 	private final static void save(int i) {
 		if (i%10 == 0) {
 			System.out.println("height   " + i + " checksum: " + height.sum());
-			System.out.println("water    " + i + " checksum: " + water.sum());
+			System.out.println("water	" + i + " checksum: " + water.sum());
 			if (sediment != null) System.out.println("sediment " + i + " checksum: " + sediment.sum());
 			//System.out.println("material " + i + " checksum: " + (height.sum() + sediment.sum()));
 			if (i < 10) {
