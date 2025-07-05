@@ -9,6 +9,16 @@ This fork aims to:
 2. Remaster and modernize the graphics.
 3. Add more playable features later.
 
+Mandatory step: Key generation:
+-------------------------------
+
+For both the client and the servers, before building any of them, perform this step:
+
+- Go to the tools directory `cd tools`.
+- Run `ant run generatekeys`.
+- Enter a password when it asks for one.
+- Make sure the keys are generated under `./common/static/`.
+
 Building the game/client:
 -------------------------
 
@@ -41,14 +51,7 @@ Building the server:
 
 `UPDATE settings SET value = REVISION_NUMBER WHERE property = 'revision';`
 
-3. Key generation:
-
-- Go to the tools directory `cd tools`.
-- Run `ant run generatekeys`.
-- Enter a password when it asks for one.
-- Make sure the keys are generated under `./common/static/`.
-
-4. Building and launching:
+3. Building and launching:
 
 - There are two main servers needed. The matchmaker and the router.
 - They could be hosted separately or with the same machine.
