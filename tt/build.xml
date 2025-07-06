@@ -22,6 +22,7 @@
 	<property name="gamedata-svnurl" value="http://update.oddlabs.com/public_svnroot/games/tt"/>
 	<property name="jar.compress" value="true"/>
 	<property name="dist" location="${build}/dist"/>
+	<property name="launch4j.dir" location="C:\Program Files (x86)\Launch4j"/>
 	
 	<!--	<property name="webstartdist" location="webstartdist"/>-->
 
@@ -276,4 +277,11 @@
 		<copy todir="${dist}/common" file="../binaries/registration"/>
 	</target>
 
+	<!-- In order to build the windows exe file, change the launch4j directory from launch4j.dir variable -->
+	<!-- ant dist must be ran first. -->
+	<target name="create-exe">
+		<taskdef name="launch4j" classname="net.sf.launch4j.ant.Launch4jTask" classpath="${launch4j.dir}/launch4j.jar
+		    :${launch4j.dir}/lib/xstream.jar" />
+		<launch4j configFile="./windows/tt.xml" />
+	</target>
 </project>
