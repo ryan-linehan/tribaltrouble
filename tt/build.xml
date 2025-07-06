@@ -273,7 +273,6 @@
 		</copy>
 
 		<copy todir="${dist}/windows-x86" file="start.ps1"/>
-		<copy todir="${dist}/linux-x86" file="start.sh"/>
 		<copy todir="${dist}/common" file="../binaries/registration"/>
 	</target>
 

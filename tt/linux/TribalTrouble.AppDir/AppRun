@@ -1,0 +1,10 @@
+#!/bin/bash
+
+export SCRIPT_DIR=$(realpath $(dirname $0))
+export JAVA_HOME="$SCRIPT_DIR/usr/lib/jre"
+export LIB_DIR=$SCRIPT_DIR/linux-x86
+export PATH=$JAVA_HOME/bin:$PATH
+export JRT=$(realpath $SCRIPT_DIR/usr/lib/jre/lib/jrt-fs.jar)
+
+cd $SCRIPT_DIR/common
+java -ea -Djava.library.path=${LIB_DIR} -Xmx1G -Djdk.crypto.KeyAgreement.legacyKDF=true -cp "$JRT:.:*" com.oddlabs.tt.Main
