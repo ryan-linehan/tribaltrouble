@@ -395,11 +395,24 @@ System.out.println("last_event_log_path = " + last_event_log_path);
 			}
 		}
 		HttpRequestParameters request_parameters = createRegistrationParameters();
+		
+		//Checking original registration file location
 		File registration_file = new File(game_dir, Globals.REG_FILE_NAME);
-		if (!registration_file.canRead()) {
-			File install_reg_file = new File(Utils.getInstallDir(), Globals.REG_FILE_NAME);
-			if (install_reg_file.canRead())
-				registration_file = install_reg_file;
+
+		if (!registration_file.exists()) {
+
+			// Check if the file is in working dir
+			System.out.println("Registration file not found, trying from working directory.");
+			registration_file = new File(System.getProperty("user.dir"), Globals.REG_FILE_NAME);
+			
+			// With windows, the working directory is above, so check it in /app
+			if (!registration_file.exists()) {
+				System.out.println("Registration file not found, trying from windows working directory.");
+				registration_file = new File(System.getProperty("user.dir") + "/app", Globals.REG_FILE_NAME);
+			}
+		}
+		if (!registration_file.exists()) {
+			System.out.println("Registration file not found, multiplayer will not work");
 		}
 		
 		new LocalInput();

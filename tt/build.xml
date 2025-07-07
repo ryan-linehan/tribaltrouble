@@ -1,6 +1,6 @@
 <project name="tt" basedir="." default="compile">
 	<import file="../common/common.xml"/>
-	<property name="jre" value="jre1.5.0_04"/>
+	<property name="jre" value="jre1.8.0_381"/>
 	<property name="main_class" value="com.oddlabs.tt.Main"/>
 	<property name="classpath" value="../common/build/classes:${lib}/javasvn.jar:${lib}/lwjgl.jar:${lib}/lwjgl_util.jar:${lib}/jorbis.jar:${lib}/jsquish.jar"/>
 	<property name="res_classpath" value="${build}:static:i18n:${commonstatic}"/>
@@ -22,7 +22,6 @@
 	<property name="gamedata-svnurl" value="http://update.oddlabs.com/public_svnroot/games/tt"/>
 	<property name="jar.compress" value="true"/>
 	<property name="dist" location="${build}/dist"/>
-	<property name="launch4j.dir" location="C:\Program Files (x86)\Launch4j"/>
 	
 	<!--	<property name="webstartdist" location="webstartdist"/>-->
 
@@ -174,7 +173,7 @@
 		<!-- Create the distribution directory -->
 		<mkdir dir="${dist}/common"/>
 		<mkdir dir="${dist}/linux-x86"/>
-		<mkdir dir="${dist}/windows-x86"/>
+		<mkdir dir="${dist}/windows"/>
 		<mkdir dir="${dist}/macosx-ppc"/>
 		<jar compress="false" destfile="${dist}/common/tt-code.jar">
 			<fileset dir="${build}/classes">
@@ -248,14 +247,6 @@
 				<include name="jsquish.jar"/>
 			</fileset>
 		</copy>
-		<copy todir="${dist}/windows-x86">
-			<fileset dir="${nativelib}">
-				<include name="lwjgl.dll"/>
-				<include name="lwjgl64.dll"/>
-				<include name="OpenAL32.dll"/>
-				<include name="OpenAL64.dll"/>
-			</fileset>
-		</copy>
 		<copy todir="${dist}/macosx-ppc">
 			<fileset dir="${nativelib}">
 				<include name="liblwjgl.jnilib"/>
@@ -271,16 +262,47 @@
 				<include name="libopenal64.so"/>
 			</fileset>
 		</copy>
-
-		<copy todir="${dist}/windows-x86" file="start.ps1"/>
+		
 		<copy todir="${dist}/common" file="../binaries/registration"/>
 	</target>
 
-	<!-- In order to build the windows exe file, change the launch4j directory from launch4j.dir variable -->
-	<!-- ant dist must be ran first. -->
-	<target name="create-exe">
-		<taskdef name="launch4j" classname="net.sf.launch4j.ant.Launch4jTask" classpath="${launch4j.dir}/launch4j.jar
-		    :${launch4j.dir}/lib/xstream.jar" />
-		<launch4j configFile="./windows/tt.xml" />
+	<!-- ant dist MUST be ran first. -->
+	<target name="build-windows">
+
+		<!-- Set app name -->
+		<property name="app_name" value="TribalTrouble"/>
+
+		<!-- Delete if already exists -->
+		<delete dir="${dist}/windows/TribalTrouble"/>
+
+		<exec executable="jpackage" dir="." failonerror="true">
+			<arg value="--name"/>
+			<arg value="${app_name}"/>
+			<arg value="--dest"/>
+			<arg value="${dist}/windows"/>
+			<arg value="--input"/>
+			<arg value="${dist}/common"/>
+			<arg value="--main-jar"/>
+			<arg value="tt-code.jar"/>
+			<arg value="--main-class"/>
+			<arg value="com.oddlabs.tt.Main"/>
+			<arg value="--java-options"/>
+			<arg value="-ea -Djdk.crypto.KeyAgreement.legacyKDF=true -Xmx512m -cp $APPDIR\;$APPDIR\*"/>
+			<arg value="--type"/>
+			<arg value="app-image"/>
+			<arg value="--win-console"/>
+			<arg value="--icon"/>
+			<arg value="tribaltrouble.ico"/>
+		</exec>
+
+		<!-- Add lwjgl dependencies to build bin -->
+		<copy todir="${dist}/windows/TribalTrouble/runtime/bin">
+			<fileset dir="${nativelib}">
+				<include name="lwjgl.dll"/>
+				<include name="lwjgl64.dll"/>
+				<include name="OpenAL32.dll"/>
+				<include name="OpenAL64.dll"/>
+			</fileset>
+		</copy>
 	</target>
 </project>
