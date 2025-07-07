@@ -39,17 +39,11 @@ ant dist
 
 The game is now built in `tt/builds/dist/common`
 
-To generate an exe file, you will need launch4j and a succesful ant dist build.
-By default, the `build.xml` points to `C:\Program Files (x86)\Launch4j`
-
-If this isn't the location of your launch4j, change the `launch4j.dir` property in `./tt/build.xml`
-and run in `./tt`
+To build the game on windows `ant dist` MUST be ran first, then run
 
 ```
-ant create-exe
+ant build-windows
 ```
-
-The required dependencies to run the game are in `tt/builds/dist/windows-x86` with the generated exe.
 
 Building the server:
 --------------------
