@@ -3,8 +3,8 @@ package com.oddlabs.tt.global;
 import org.lwjgl.opengl.*;
 
 public final strictfp class Globals {
-	public final static String DOMAIN_NAME = "tribaltrouble";
-	public final static String SUPPORT_ADDRESS = "http://" + DOMAIN_NAME + ".org/support";
+	public final static String DOMAIN_NAME = "tribaltrouble.org";
+	public final static String SUPPORT_ADDRESS = "http://" + DOMAIN_NAME + "/support";
 
 	public final static int BOUNDING_NONE = 0;
 	public final static int BOUNDING_UNIT_GRID = 1;
