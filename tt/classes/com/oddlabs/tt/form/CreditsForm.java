@@ -36,33 +36,6 @@ public final strictfp class CreditsForm extends Form {
 		String about_text = Utils.getBundleString(bundle, "about_text", new Object[]{
 								Integer.toString(LocalInput.getRevision())});
 		about_box.append(about_text);
-		if (Renderer.isRegistered()) {
-			RegistrationInfo info = Renderer.getRegistrationClient().getRegistrationInfo();
-			if (info != null) {
-				about_box.append(Utils.getBundleString(bundle, "registered_to") + "\n");
-
-				about_box.append(info.getName() + "\n");
-				about_box.append(info.getAddress1() + "\n");
-				if (info.getAddress2() != null && !info.getAddress2().trim().equals(""))
-					about_box.append(info.getAddress2() + "\n");
-				about_box.append(info.getZip() + "\n");
-				about_box.append(info.getCity() + "\n");
-				if (info.getState() != null && !info.getState().trim().equals(""))
-					about_box.append(info.getState() + "\n");
-				about_box.append(info.getCountry() + "\n");
-				about_box.append("\n");
-			}
-			if (!Settings.getSettings().hide_regkey) {
-				about_box.append(Utils.getBundleString(bundle, "registration_key") + "\n");
-				if (info != null) {
-					about_box.append(info.getRegKey());
-				} else {
-					about_box.append(Settings.getSettings().reg_key);
-				}
-			}
-		} else {
-			about_box.append(Utils.getBundleString(bundle, "unregistered"));
-		}
 
 		about_box.place();
 		about.compileCanvas();
