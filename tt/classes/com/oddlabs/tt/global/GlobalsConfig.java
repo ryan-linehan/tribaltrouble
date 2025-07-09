@@ -13,11 +13,16 @@ public class GlobalsConfig {
         try (InputStream input = new FileInputStream("./config.properties")) {
             props.load(input);
         } catch (IOException e) {
-            throw new RuntimeException("Config file missing", e);
+            System.out.println("Config file missing: " + e);
         }
     }
 
     public static String get(String key) {
         return props.getProperty(key);
+    }
+    
+    public static String getDomainName() {
+        String domainName = get("DOMAIN_NAME");
+        return domainName == null ? "domain.local" : domainName;
     }
 }
