@@ -476,34 +476,23 @@ e.printStackTrace();
 		try {
 			while (!finished) {
 				runGameLoop(network, gui);
-				if (Display.isVisible()) {
-					if (AL.isCreated())
-						AL10.alListenerf(AL10.AL_GAIN, 1f);
-					if (reset_keyboard) {
-						reset_keyboard = false;
-						LocalInput.getLocalInput().resetKeyboard();
-					}
-					if (!first_frame && !BackBufferRenderer.isBackBufferDirty()) {
-						Display.update();
-					}
-					display(gui);
-					if (first_frame) {
-						long startup_time = System.currentTimeMillis() - start_time;
-						System.out.println("First frame rendered after " + startup_time + " milliseconds");
-						first_frame = false;
-					}
-					if (grab_frames && movie_recording_started)
-						GLUtils.takeScreenshot("");
-				} else {
-					reset_keyboard = true;
-					if (AL.isCreated())
-						AL10.alListenerf(AL10.AL_GAIN, 0f);
-					try {
-						Thread.sleep(10);
-					} catch (InterruptedException e) {
-						throw new RuntimeException(e);
-					}
+				if (AL.isCreated())
+					AL10.alListenerf(AL10.AL_GAIN, 1f);
+				if (reset_keyboard) {
+					reset_keyboard = false;
+					LocalInput.getLocalInput().resetKeyboard();
 				}
+				if (!first_frame && !BackBufferRenderer.isBackBufferDirty()) {
+					Display.update();
+				}
+				display(gui);
+				if (first_frame) {
+					long startup_time = System.currentTimeMillis() - start_time;
+					System.out.println("First frame rendered after " + startup_time + " milliseconds");
+					first_frame = false;
+				}
+				if (grab_frames && movie_recording_started)
+					GLUtils.takeScreenshot("");
 			}
 			LocalEventQueue.getQueue().getDeterministic().setEnabled(true);
 			Settings.getSettings().save();
