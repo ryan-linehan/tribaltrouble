@@ -4,8 +4,7 @@ import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 
 import org.lwjgl.BufferUtils;
-import org.lwjgl.opengl.ARBBufferObject;
-import org.lwjgl.opengl.ARBVertexBufferObject;
+import org.lwjgl.opengl.GL15;
 
 import com.oddlabs.tt.global.Settings;
 import com.oddlabs.tt.resource.NativeResource;
@@ -25,28 +24,28 @@ public abstract strictfp class VBO extends NativeResource {
 	}
 
 	private final int createBuffer(int target, int usage, int size) {
-		ARBBufferObject.glGenBuffersARB(handle_buffer);
+		GL15.glGenBuffers(handle_buffer);
 		int handle = handle_buffer.get(0);
 		assert handle != 0;
 		makeCurrent(target, handle);
-		ARBBufferObject.glBufferDataARB(target, size, usage);
+		GL15.glBufferData(target, size, usage);
 		return handle;
 	}
 
 	private final static void makeCurrent(int target, int handle) {
-		ARBBufferObject.glBindBufferARB(target, handle);
+        GL15.glBindBuffer(target, handle);
 	}
 
 	public final static void releaseAll() {
 		if (Settings.getSettings().useVBO()) {
-			makeCurrent(ARBVertexBufferObject.GL_ARRAY_BUFFER_ARB, 0);
+			makeCurrent(GL15.GL_ARRAY_BUFFER, 0);
 		}
 		releaseIndexVBO();
 	}
 
 	public final static void releaseIndexVBO() {
 		if (Settings.getSettings().useVBO()) {
-			makeCurrent(ARBVertexBufferObject.GL_ELEMENT_ARRAY_BUFFER_ARB, 0);
+			makeCurrent(GL15.GL_ELEMENT_ARRAY_BUFFER, 0);
 		}
 	}
 
@@ -72,7 +71,7 @@ public abstract strictfp class VBO extends NativeResource {
 	protected final void doDelete() {
 		if (use_vbo) {
 			handle_buffer.put(0, handle);
-			ARBBufferObject.glDeleteBuffersARB(handle_buffer);
+			GL15.glDeleteBuffers(handle_buffer);
 		}
 	}
 
@@ -84,7 +83,7 @@ public abstract strictfp class VBO extends NativeResource {
 		assert mapped_buffer == null;
 		if (use_vbo) {
 			makeCurrent();
-			mapped_buffer = ARBBufferObject.glMapBufferARB(target, access, size, saved_buffer);
+			mapped_buffer = GL15.glMapBuffer(target, access, size, saved_buffer);
 			assert mapped_buffer != null;
 			mapped_buffer.order(ByteOrder.nativeOrder());
 			boolean result = mapped_buffer == saved_buffer;
@@ -104,7 +103,7 @@ public abstract strictfp class VBO extends NativeResource {
 		mapped_buffer = null;
 		if (use_vbo) {
 			makeCurrent();
-			return ARBBufferObject.glUnmapBufferARB(target);
+			return GL15.glUnmapBuffer(target);
 		} else
 			return true;
 	}

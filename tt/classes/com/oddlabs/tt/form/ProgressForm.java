@@ -25,6 +25,7 @@ import com.oddlabs.tt.global.Settings;
 import com.oddlabs.tt.global.Globals;
 import com.oddlabs.tt.landscape.LandscapeResources;
 import com.oddlabs.tt.render.Texture;
+import com.oddlabs.tt.render.Display;
 import com.oddlabs.tt.resource.TextureFile;
 import com.oddlabs.tt.resource.Resources;
 import com.oddlabs.tt.util.Utils;
@@ -107,7 +108,7 @@ public final strictfp class ProgressForm {
 	}
 
 	private ProgressForm(NetworkSelector network, final GUI gui, final Fadable load_fadable, boolean first_progress, ProgressBarInfo[] info, String texture_name, int texture_width, int texture_height, int image_width, int image_height, int progress_x, int progress_y, int progress_width, boolean show_tip) {
-		if (AL.isCreated())
+		if (Display.isALCreated())
 			AudioManager.getManager().stopSources();
 		final GUIRoot gui_root;
 		if (!first_progress) {
@@ -151,7 +152,7 @@ public final strictfp class ProgressForm {
 
 		Fadable start_sources_fadable = new Fadable() {
 			public final void fadingDone() {
-				if (AL.isCreated())
+				if (Display.isALCreated())
 					AudioManager.getManager().startSources();
 			}
 		};

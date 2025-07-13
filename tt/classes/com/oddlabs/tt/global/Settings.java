@@ -10,8 +10,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.Properties;
 
-import org.lwjgl.opengl.GLContext;
-import org.lwjgl.opengl.Pbuffer;
+import org.lwjgl.opengl.GL;
 
 import com.oddlabs.tt.gui.LocalInput;
 import com.oddlabs.tt.render.Renderer;
@@ -65,7 +64,6 @@ public final strictfp class Settings implements Serializable {
 	// control
 	public boolean invert_camera_pitch = false;
 	public boolean aggressive_units = false;
-	public boolean use_native_cursor = true;
 	
 	public float mapmode_delay = .5f;
 	public float tooltip_delay = .5f;
@@ -100,7 +98,7 @@ public final strictfp class Settings implements Serializable {
 	/* optional extensions */
 	public boolean use_vbo_draw_range_elements = false;
 	private boolean use_vbo = false;
-	private boolean use_pbuffer = true;
+	private boolean use_pbuffer = false;
 	private boolean use_fbo = true;
 	public boolean use_copyteximage = false;
 	private boolean use_texture_compression = true;
@@ -116,19 +114,19 @@ public final strictfp class Settings implements Serializable {
 	}
 
 	public final boolean useFBO() {
-		return use_fbo && GLContext.getCapabilities().GL_EXT_framebuffer_object && !GLUtils.isIntelGMA950();
+		return use_fbo && GL.getCapabilities().GL_EXT_framebuffer_object && !GLUtils.isIntelGMA950();
 	}
 	
 	public final boolean usePbuffer() {
-		return use_pbuffer && ((Pbuffer.getCapabilities() & Pbuffer.PBUFFER_SUPPORTED) != 0);
+		return false;
 	}
 	
 	public final boolean useTextureCompression() {
-		return use_texture_compression && (GLContext.getCapabilities().GL_ARB_texture_compression || GLContext.getCapabilities().OpenGL13);
+		return use_texture_compression && (GL.getCapabilities().GL_ARB_texture_compression || GL.getCapabilities().OpenGL13);
 	}
 
 	public final boolean useVBO() {
-		return use_vbo && GLContext.getCapabilities().GL_ARB_vertex_buffer_object;
+		return use_vbo && GL.getCapabilities().GL_ARB_vertex_buffer_object;
 	}
 
 	public final boolean inDeveloperMode() {

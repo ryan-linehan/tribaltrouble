@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.ResourceBundle;
 import java.util.Set;
 
-import org.lwjgl.input.Keyboard;
+import com.oddlabs.tt.input.Keyboard;
 import org.lwjgl.opengl.GL11;
 
 import com.oddlabs.tt.net.DistributableTable;

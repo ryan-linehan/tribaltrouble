@@ -8,7 +8,7 @@
 	<property name="build" value="build"/>
 	<property name="lib" value="../common/lib/java"/>
 	<property name="tools" value="../tools"/>
-	<property name="nativelib" value="../common/lib/native"/>
+    <property name="nativelib" value="../common/lib/java"/>
 	<property name="commonstatic" value="../common/static"/>
 	<property name="java_source_version" value="1.8"/>
 

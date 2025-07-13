@@ -1,6 +1,6 @@
 package com.oddlabs.tt.gui;
 
-import org.lwjgl.input.Keyboard;
+import com.oddlabs.tt.input.Keyboard;
 
 public final strictfp class ScrollButton extends GUIObject {
 	public ScrollButton() {

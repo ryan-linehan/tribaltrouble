@@ -21,7 +21,7 @@ public final strictfp class GLIntImage extends GLImage {
 
 	public final IntBuffer createCursorPixels() {
 		IntBuffer cursor_pixels = BufferUtils.createIntBuffer(pixels.capacity());
-		boolean true_alpha_supported = (org.lwjgl.input.Cursor.getCapabilities() & org.lwjgl.input.Cursor.CURSOR_8_BIT_ALPHA) != 0;
+		boolean true_alpha_supported = false;
 		while (pixels.hasRemaining()) {
 			int rgba_pixel = pixels.get();
 			int r = (rgba_pixel >> 24) & 0xff;

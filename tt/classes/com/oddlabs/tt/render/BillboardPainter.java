@@ -5,9 +5,9 @@ import java.nio.FloatBuffer;
 
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL11;
-import org.lwjgl.util.vector.Matrix4f;
-import org.lwjgl.util.vector.Vector2f;
-import org.lwjgl.util.vector.Vector3f;
+import com.oddlabs.util.Matrix4f;
+import com.oddlabs.util.Vector2f;
+import com.oddlabs.util.Vector3f;
 
 public abstract strictfp class BillboardPainter {
 	private final static FloatBuffer matrix_buf = BufferUtils.createFloatBuffer(16);
@@ -133,6 +133,6 @@ public abstract strictfp class BillboardPainter {
 		initClipPlane(GL11.GL_CLIP_PLANE1, face_index, 1, 2, indices, face_tex_coords, handedness);
 		initClipPlane(GL11.GL_CLIP_PLANE2, face_index, 2, 0, indices, face_tex_coords, handedness);
 		matrix_buf.rewind();
-		GL11.glLoadMatrix(matrix_buf);
+		GL11.glLoadMatrixf(matrix_buf);
 	}
 }

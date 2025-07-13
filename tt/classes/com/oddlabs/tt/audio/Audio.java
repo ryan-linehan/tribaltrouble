@@ -10,12 +10,14 @@ import org.lwjgl.openal.AL10;
 import com.oddlabs.tt.resource.NativeResource;
 import com.oddlabs.util.ByteBufferOutputStream;
 
+import com.oddlabs.tt.render.Display;
+
 public final strictfp class Audio extends NativeResource {
 	private final IntBuffer al_buffers;
 
 	public Audio(URL file) {
 		this(1);
-		if (!AL.isCreated())
+		if (!Display.isALCreated())
 			return;
 		Wave wave;
 		try {
@@ -30,7 +32,7 @@ public final strictfp class Audio extends NativeResource {
 	public Audio(int num_buffers) {
 		al_buffers = BufferUtils.createIntBuffer(num_buffers);
 
-		if (!AL.isCreated())
+		if (!Display.isALCreated())
 			return;
 		AL10.alGenBuffers(al_buffers);
 	}
@@ -60,7 +62,7 @@ public final strictfp class Audio extends NativeResource {
 	}
 
 	protected final void doDelete() {
-		if (AL.isCreated()) {
+		if (Display.isALCreated()) {
 			al_buffers.clear();
 			AL10.alDeleteBuffers(al_buffers);
 		}

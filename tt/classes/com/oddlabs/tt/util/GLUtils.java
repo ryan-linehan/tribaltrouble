@@ -16,8 +16,7 @@ import java.nio.ShortBuffer;
 
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL11;
-import org.lwjgl.opengl.OpenGLException;
-import org.lwjgl.opengl.ARBBufferObject;
+import org.lwjgl.opengl.GL15;
 
 import com.oddlabs.tt.resource.GLIntImage;
 import com.oddlabs.tt.resource.GLImage;
@@ -44,12 +43,12 @@ public final strictfp class GLUtils {
 	}
 
 	public final static boolean getGLBoolean(int gl_enum) {
-		GL11.glGetBoolean(gl_enum, byte_buf);
+		GL11.glGetBooleanv(gl_enum, byte_buf);
 		return byte_buf.get(0) == (byte)1;
 	}
 
 	public final static int getGLInteger(int gl_enum) {
-		GL11.glGetInteger(gl_enum, int_buf);
+		GL11.glGetIntegerv(gl_enum, int_buf);
 		return int_buf.get(0);
 	}
 
@@ -58,12 +57,12 @@ public final strictfp class GLUtils {
 		plane.put(1, 0f);
 		plane.put(2, 0f);
 		plane.put(3, offset_x*scale_x);
-		GL11.glTexGen(GL11.GL_S, GL11.GL_OBJECT_PLANE, plane);
+		GL11.glTexGenfv(GL11.GL_S, GL11.GL_OBJECT_PLANE, plane);
 		plane.put(0, 0f);
 		plane.put(1, scale_y);
 		plane.put(2, 0f);
 		plane.put(3, offset_y*scale_y);
-		GL11.glTexGen(GL11.GL_T, GL11.GL_OBJECT_PLANE, plane);
+		GL11.glTexGenfv(GL11.GL_T, GL11.GL_OBJECT_PLANE, plane);
 	}
 
 	public final static String takeScreenshot(String filename) {
@@ -78,7 +77,7 @@ public final strictfp class GLUtils {
 				i++;
 			} while (file.exists());
 		}
-		GL11.glGetInteger(GL11.GL_VIEWPORT, int_buf);
+		GL11.glGetIntegerv(GL11.GL_VIEWPORT, int_buf);
 		GL11.glReadBuffer(GL11.GL_FRONT);
 		int width = int_buf.get(2) - int_buf.get(0);
 		int height = int_buf.get(3) - int_buf.get(1);
@@ -105,9 +104,9 @@ public final strictfp class GLUtils {
 	}
 	*/
 	public static void saveTexture(int mipmap_level, String filename) {
-		GL11.glGetTexLevelParameter(GL11.GL_TEXTURE_2D, mipmap_level, GL11.GL_TEXTURE_WIDTH, int_buf);
+		GL11.glGetTexLevelParameteriv(GL11.GL_TEXTURE_2D, mipmap_level, GL11.GL_TEXTURE_WIDTH, int_buf);
 		int width = int_buf.get(0);
-		GL11.glGetTexLevelParameter(GL11.GL_TEXTURE_2D, mipmap_level, GL11.GL_TEXTURE_HEIGHT, int_buf);
+		GL11.glGetTexLevelParameteriv(GL11.GL_TEXTURE_2D, mipmap_level, GL11.GL_TEXTURE_HEIGHT, int_buf);
 		int height = int_buf.get(0);
 		GLImage pixel_data = new GLIntImage(width, height, GL11.GL_RGBA);
 		GL11.glGetTexImage(GL11.GL_TEXTURE_2D, mipmap_level, pixel_data.getGLFormat(), pixel_data.getGLType(), pixel_data.getPixels());

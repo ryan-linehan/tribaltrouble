@@ -4,7 +4,7 @@ import java.nio.FloatBuffer;
 import java.util.List;
 
 import org.lwjgl.BufferUtils;
-import org.lwjgl.input.Keyboard;
+import com.oddlabs.tt.input.Keyboard;
 import org.lwjgl.opengl.GL11;
 
 import com.oddlabs.tt.camera.GameCamera;

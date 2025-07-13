@@ -15,6 +15,8 @@ import com.oddlabs.tt.resource.Resources;
 import com.oddlabs.tt.audio.AudioFile;
 import com.oddlabs.tt.util.StrictVector3f;
 
+import com.oddlabs.tt.render.Display;
+
 import java.nio.FloatBuffer;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.openal.AL;
@@ -63,7 +65,7 @@ public final strictfp class AmbientAudio {
 	}
 */
 	public final void updateSoundListener(CameraState camera, HeightMap heightmap) {
-		if (AL.isCreated() && Settings.getSettings().play_sfx) {
+		if (Display.isALCreated() && Settings.getSettings().play_sfx) {
 			AL10.alListener3f(AL10.AL_POSITION, camera.getCurrentX(), camera.getCurrentY(), camera.getCurrentZ());
 			camera.updateDirectionAndNormal(f, u, s);
 			orientation_buffer.put(0, f.x);
@@ -72,7 +74,7 @@ public final strictfp class AmbientAudio {
 			orientation_buffer.put(3, u.x);
 			orientation_buffer.put(4, u.y);
 			orientation_buffer.put(5, u.z);
-			AL10.alListener(AL10.AL_ORIENTATION, orientation_buffer);
+			AL10.alListenerfv(AL10.AL_ORIENTATION, orientation_buffer);
 
 			int meters_per_world = heightmap.getMetersPerWorld();
 			float dx = StrictMath.abs(camera.getCurrentX() - meters_per_world/2);

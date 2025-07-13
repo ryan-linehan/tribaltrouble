@@ -29,7 +29,7 @@ public final strictfp class GLStateStack {
 	private final void doPushState() {
 		try {
 			state_stack.add((GLState)getCurrentState().clone());
-			GL11.glPushClientAttrib(GL11.GL_ALL_CLIENT_ATTRIB_BITS);
+			GL11.glPushClientAttrib(0xffffffff);
 		} catch (CloneNotSupportedException e) {
 			throw new RuntimeException(e);
 		}

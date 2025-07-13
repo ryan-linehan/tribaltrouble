@@ -1,7 +1,7 @@
 package com.oddlabs.tt.delegate;
 
-import org.lwjgl.input.Keyboard;
-import org.lwjgl.input.Mouse;
+import com.oddlabs.tt.input.Keyboard;
+import com.oddlabs.tt.input.Mouse;
 
 import com.oddlabs.tt.camera.FirstPersonCamera;
 import com.oddlabs.tt.camera.CameraState;

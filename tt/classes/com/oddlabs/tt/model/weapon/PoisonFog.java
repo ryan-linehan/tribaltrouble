@@ -3,8 +3,8 @@ package com.oddlabs.tt.model.weapon;
 import java.util.List;
 
 import org.lwjgl.opengl.GL11;
-import org.lwjgl.util.vector.Vector3f;
-import org.lwjgl.util.vector.Vector4f;
+import com.oddlabs.util.Vector3f;
+import com.oddlabs.util.Vector4f;
 
 import com.oddlabs.tt.audio.AudioPlayer;
 import com.oddlabs.tt.audio.AbstractAudioPlayer;

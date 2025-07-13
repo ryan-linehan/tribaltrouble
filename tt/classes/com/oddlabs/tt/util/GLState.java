@@ -2,9 +2,8 @@ package com.oddlabs.tt.util;
 
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL13;
-import org.lwjgl.opengl.GLContext;
-import org.lwjgl.opengl.ARBMultitexture;
-import org.lwjgl.opengl.ARBTextureCompression;
+import org.lwjgl.opengl.GL15;
+import org.lwjgl.opengl.GL;
 
 import java.nio.ByteBuffer;
 
@@ -34,24 +33,24 @@ public final strictfp class GLState implements Cloneable {
 	}
 	
 	public final static void activeTexture(int texture) {
-		if (GLContext.getCapabilities().OpenGL13)
+		if (GL.getCapabilities().OpenGL13)
 			GL13.glActiveTexture(texture);
 		else
-			ARBMultitexture.glActiveTextureARB(texture);
+			GL15.glActiveTexture(texture);
 	}
 
 	public final static void glCompressedTexImage2D(int target, int level, int internalformat, int width, int height, int border, ByteBuffer pData) {
-		if (GLContext.getCapabilities().OpenGL13)
+		if (GL.getCapabilities().OpenGL13)
 			GL13.glCompressedTexImage2D(target, level, internalformat, width, height, border, pData);
 		else
-			ARBTextureCompression.glCompressedTexImage2DARB(target, level, internalformat, width, height, border, pData);
+			GL15.glCompressedTexImage2D(target, level, internalformat, width, height, border, pData);
 	}
 
 	public final static void clientActiveTexture(int texture) {
-		if (GLContext.getCapabilities().OpenGL13)
+		if (GL.getCapabilities().OpenGL13)
 			GL13.glClientActiveTexture(texture);
 		else
-			ARBMultitexture.glClientActiveTextureARB(texture);
+			GL15.glClientActiveTexture(texture);
 	}
 
 	public final void switchState(int client_flags) {

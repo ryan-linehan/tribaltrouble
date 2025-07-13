@@ -9,7 +9,7 @@ import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL12;
 import org.lwjgl.opengl.GL13;
-import org.lwjgl.opengl.GLContext;
+import org.lwjgl.opengl.GL;
 
 import com.oddlabs.tt.global.Globals;
 import com.oddlabs.tt.global.Settings;
@@ -45,7 +45,7 @@ public final strictfp class Texture extends NativeResource {
 	}
 
 	private final static int bestWrap(int wrap) {
-		if (wrap == GL12.GL_CLAMP_TO_EDGE && !GLContext.getCapabilities().OpenGL12) {
+		if (wrap == GL12.GL_CLAMP_TO_EDGE && !GL.getCapabilities().OpenGL12) {
 			return GL11.GL_CLAMP;
 		} else
 			return wrap;
@@ -62,10 +62,10 @@ public final strictfp class Texture extends NativeResource {
 		GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_T, wrap_t);
 		GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, min_filter);
 		GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, mag_filter);
-		if (GLContext.getCapabilities().OpenGL12)
+		if (GL.getCapabilities().OpenGL12)
 			GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL12.GL_TEXTURE_MAX_LEVEL, max_mipmap_level);
 		border_color_buffer.put(0, 0f).put(1, 0f).put(2, 0f).put(3, 0f);
-		GL11.glTexParameter(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_BORDER_COLOR, border_color_buffer);
+		GL11.glTexParameterfv(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_BORDER_COLOR, border_color_buffer);
 //		GL11.glTexParameterf(GL11.GL_TEXTURE_2D, org.lwjgl.opengl.EXTTextureFilterAnisotropic.GL_TEXTURE_MAX_ANISOTROPY_EXT, 10f);
 		return tex_handle;
 	}
@@ -135,7 +135,7 @@ public final strictfp class Texture extends NativeResource {
 		for (int i = 0; i < max_index; i++) {
 			int mipmap_level = i + detail_shift;
 			dxt_image.position(mipmap_level);
-			if (GLContext.getCapabilities().GL_EXT_texture_compression_s3tc) {
+			if (GL.getCapabilities().GL_EXT_texture_compression_s3tc) {
 				total_size += dxt_image.getMipMap().remaining();
 				GLState.glCompressedTexImage2D(GL11.GL_TEXTURE_2D, i, dxt_image.getInternalFormat(), dxt_image.getWidth(mipmap_level), dxt_image.getHeight(mipmap_level), 0, dxt_image.getMipMap());
 			} else {
@@ -179,11 +179,11 @@ GLUtils.saveTexture(i, new java.io.File(texture_file.getURL().getFile() + dxt_im
 	private static int determineMipMapSize(int mipmap, int internal_format, int width, int height) {
 		boolean compressed = false;
 		if (Settings.getSettings().useTextureCompression()) {
-			GL11.glGetTexLevelParameter(GL11.GL_TEXTURE_2D, mipmap, GL13.GL_TEXTURE_COMPRESSED, size_buffer);
+			GL11.glGetTexLevelParameteriv(GL11.GL_TEXTURE_2D, mipmap, GL13.GL_TEXTURE_COMPRESSED, size_buffer);
 			compressed = size_buffer.get(0) == GL11.GL_TRUE;
 		}
 		if (compressed) {
-			GL11.glGetTexLevelParameter(GL11.GL_TEXTURE_2D, mipmap, GL13.GL_TEXTURE_COMPRESSED_IMAGE_SIZE, size_buffer);
+			GL11.glGetTexLevelParameteriv(GL11.GL_TEXTURE_2D, mipmap, GL13.GL_TEXTURE_COMPRESSED_IMAGE_SIZE, size_buffer);
 			return size_buffer.get(0);
 		} else {
 			switch (internal_format) {

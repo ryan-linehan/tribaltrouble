@@ -1,6 +1,6 @@
 package com.oddlabs.tt.delegate;
 
-import org.lwjgl.input.Keyboard;
+import com.oddlabs.tt.input.Keyboard;
 
 import com.oddlabs.tt.camera.GameCamera;
 import com.oddlabs.tt.net.PeerHub;

@@ -165,7 +165,7 @@ public final strictfp class DefaultRenderer implements UIRenderer {
 			GL11.glPolygonMode(GL11.GL_BACK, GL11.GL_LINE);
 		}
 
-		GL11.glLight(GL11.GL_LIGHT0, GL11.GL_POSITION, light_array);
+		GL11.glLightfv(GL11.GL_LIGHT0, GL11.GL_POSITION, light_array);
 		if (Globals.draw_sky) {
 			sky.render();
 		}

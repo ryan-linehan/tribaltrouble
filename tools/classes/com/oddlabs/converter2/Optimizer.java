@@ -3,8 +3,8 @@ package com.oddlabs.converter2;
 import com.oddlabs.util.IndexListOptimizer;
 import com.oddlabs.geometry.*;
 
-import org.lwjgl.util.vector.Matrix4f;
-import org.lwjgl.util.vector.Vector4f;
+import com.oddlabs.util.Matrix4f;
+import com.oddlabs.util.Vector4f;
 import java.util.Map;
 import java.nio.ShortBuffer;
 import java.nio.FloatBuffer;

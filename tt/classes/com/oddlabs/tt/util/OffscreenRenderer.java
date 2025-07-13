@@ -1,8 +1,6 @@
 package com.oddlabs.tt.util;
 
-import org.lwjgl.LWJGLException;
 import org.lwjgl.opengl.GL11;
-import org.lwjgl.opengl.PixelFormat;
 
 import com.oddlabs.tt.render.Renderer;
 import com.oddlabs.tt.render.Texture;

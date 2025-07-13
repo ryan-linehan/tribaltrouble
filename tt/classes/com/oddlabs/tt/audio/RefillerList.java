@@ -7,6 +7,8 @@ import java.util.List;
 
 import org.lwjgl.openal.AL;
 
+import com.oddlabs.tt.render.Display;
+
 public final strictfp class RefillerList {
 	private final static int THREAD_SLEEP_MILLIS = 50;
 
@@ -50,7 +52,7 @@ public final strictfp class RefillerList {
 			try {
 				while (!finished) {
 					synchronized (RefillerList.this) {
-						if (AL.isCreated()) {
+						if (Display.isALCreated()) {
 							for (int i = 0; i < players.size(); i++) {
 								((QueuedAudioPlayer)players.get(i)).refill();
 							}

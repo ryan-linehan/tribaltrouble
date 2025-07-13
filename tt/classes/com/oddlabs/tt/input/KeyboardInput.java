@@ -1,7 +1,7 @@
 package com.oddlabs.tt.input;
 
-import org.lwjgl.input.Keyboard;
-import org.lwjgl.opengl.Display;
+import com.oddlabs.tt.input.Keyboard;
+import com.oddlabs.tt.render.Display;
 
 import com.oddlabs.tt.animation.AnimationManager;
 import com.oddlabs.event.Deterministic;

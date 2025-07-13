@@ -3,7 +3,7 @@ package com.oddlabs.tt.form;
 import java.util.Locale;
 import java.util.ResourceBundle;
 
-import org.lwjgl.input.Cursor;
+import com.oddlabs.tt.render.Cursor;
 
 import com.oddlabs.matchmaking.Game;
 import com.oddlabs.tt.global.Globals;
@@ -41,7 +41,6 @@ import com.oddlabs.tt.guievent.ValueListener;
 import com.oddlabs.tt.landscape.World;
 import com.oddlabs.tt.net.PeerHub;
 import com.oddlabs.tt.render.Renderer;
-import com.oddlabs.tt.render.SerializableDisplayMode;
 import com.oddlabs.tt.util.ServerMessageBundler;
 import com.oddlabs.tt.util.Utils;
 import com.oddlabs.tt.global.Settings;
@@ -54,7 +53,6 @@ public abstract strictfp class AbstractOptionsMenu extends Form {
 	private final static int SLIDER_WIDTH = 270;
 
 	private final static boolean TEMPORARILY_DISABLE_MUSIC_CONTROLS = false;
-	private final CheckBox cb_fullscreen;
 	
 	private final Slider slider_music;
 	private final Slider slider_sound;
@@ -73,7 +71,6 @@ public abstract strictfp class AbstractOptionsMenu extends Form {
 		addChild(label_headline);
 		
 		Panel general = new Panel(Utils.getBundleString(bundle, "general_settings_caption"));
-		Panel display = new Panel(Utils.getBundleString(bundle, "graphics_caption"));
 		Panel sound = new Panel(Utils.getBundleString(bundle, "sound_caption"));
 		Panel language = new Panel(Utils.getBundleString(bundle, "language_caption"));
 		Panel report_bug = new Panel(Utils.getBundleString(bundle, "report_bug_caption"));
@@ -132,25 +129,6 @@ public abstract strictfp class AbstractOptionsMenu extends Form {
 		group_sound.compileCanvas();
 		group_sound.setDisabled(!LocalInput.alIsCreated());
 
-		// Fullscreen
-		Group group_fullscreen = new Group();
-		display.addChild(group_fullscreen);
-		cb_fullscreen = new CheckBox(LocalInput.inFullscreen(), Utils.getBundleString(bundle, "fullscreen"), Utils.getBundleString(bundle, "fullscreen_tip"));
-		cb_fullscreen.addCheckBoxListener(new CBFullscreen());
-		group_fullscreen.addChild(cb_fullscreen);
-		cb_fullscreen.place();
-		group_fullscreen.compileCanvas();
-
-		// Hardware cursor
-		Group group_hardware_cursor = new Group();
-		display.addChild(group_hardware_cursor);
-		CheckBox cb_hardware_cursor = new CheckBox(Settings.getSettings().use_native_cursor, Utils.getBundleString(bundle, "hardware_cursor"), Utils.getBundleString(bundle, "hardware_cursor_tip", new Object[]{"Ctrl-H"}));
-		cb_hardware_cursor.addCheckBoxListener(new CBHardwareCursor());
-		group_hardware_cursor.addChild(cb_hardware_cursor);
-		cb_hardware_cursor.place();
-		group_hardware_cursor.compileCanvas();
-		group_hardware_cursor.setDisabled((LocalInput.getNativeCursorCaps() & Cursor.CURSOR_ONE_BIT_TRANSPARENCY) == 0);
-
 		// Invert camera
 		Group group_invert_camera = new Group();
 		general.addChild(group_invert_camera);
@@ -171,7 +149,6 @@ public abstract strictfp class AbstractOptionsMenu extends Form {
 		
 		// gfx detail
 		Group group_detail = new Group();
-		display.addChild(group_detail);
 		
 		Label label_detail = new Label(Utils.getBundleString(bundle, "graphical_detail"), Skin.getSkin().getEditFont());
 		group_detail.addChild(label_detail);
@@ -189,46 +166,6 @@ public abstract strictfp class AbstractOptionsMenu extends Form {
 		pb_detail.place(label_detail, BOTTOM_LEFT);
 		group_detail.compileCanvas();
 
-		// Display mode
-		Group mode_group = new Group();
-		display.addChild(mode_group);
-
-		Label mode_label = new Label(Utils.getBundleString(bundle, "display_mode"), Skin.getSkin().getEditFont());
-		mode_group.addChild(mode_label);
-
-		ColumnInfo[] mode_infos = new ColumnInfo[]{new ColumnInfo("", 150)};
-		MultiColumnComboBox mode_list_box = new MultiColumnComboBox(gui_root, mode_infos, 200, false);
-		addChild(mode_list_box);
-
-		SerializableDisplayMode[] modes = LocalInput.getAvailableModes();
-		SerializableDisplayMode current_mode = LocalInput.getCurrentMode();
-//		PulldownMenu mode_menu = new PulldownMenu();
-		Row current_row = null;
-		int index = 0;
-		for (int i = 0; i < modes.length; i++) {
-			if (modes[i].getBitsPerPixel() == current_mode.getBitsPerPixel()) {
-				String mode_string = Utils.getBundleString(bundle, "mode", new Object[]{
-					Integer.toString(modes[i].getWidth()), Integer.toString(modes[i].getHeight()), Integer.toString(modes[i].getFrequency())});
-//				mode_menu.addItem(new PulldownItem(mode_string, modes[i]));
-				Label label = new SortedLabel(mode_string, i, Skin.getSkin().getMultiColumnComboBoxData().getFont());
-				Row row = new Row(new GUIObject[]{label}, modes[i]);
-				mode_list_box.addRow(row);
-				if (modes[i].equals(current_mode))
-					current_row = row;
-				index++;
-			}
-		}
-		if (current_row != null)
-			mode_list_box.selectRow(current_row);
-//		PulldownButton mode_pulldown = new PulldownButton(mode_menu, current_index, 180);
-//		mode_menu.addItemChosenListener(new DisplayModeListener());
-		mode_list_box.addRowListener(new DisplayModeListener());
-
-		mode_group.addChild(mode_list_box);
-		mode_label.place();
-		mode_list_box.place(mode_label, BOTTOM_LEFT);
-		mode_group.compileCanvas();
-		
 		// Mapmode delay
 		Group group_mapmode = new Group();
 		general.addChild(group_mapmode);
@@ -294,7 +231,7 @@ public abstract strictfp class AbstractOptionsMenu extends Form {
 //		addChild(language_list_box);
 
 		checkLanguage();
-		current_row = null;
+		Row current_row = null;
 		IconLabel label = new IconLabel(Skin.getSkin().getFlagDefault(), new Label(Utils.getBundleString(bundle, "system_default"), Skin.getSkin().getMultiColumnComboBoxData().getFont()));
 		Row row = new Row(new GUIObject[]{label}, Renderer.getRenderer().getDefaultLocale());
 		language_list_box.addRow(row);
@@ -344,12 +281,9 @@ public abstract strictfp class AbstractOptionsMenu extends Form {
 		group_aggressive_units.place(group_invert_camera, BOTTOM_LEFT);
 		general.compileCanvas();
 		
-		// display
-		mode_group.place();
+		Group mode_group = new Group();
+        mode_group.place();
 		group_detail.place(mode_group, RIGHT_TOP);
-		group_fullscreen.place(group_detail, BOTTOM_LEFT);
-		group_hardware_cursor.place(group_fullscreen, BOTTOM_LEFT);
-		display.compileCanvas();
 		
 		group_music.place();
 		group_sound.place(group_music, BOTTOM_LEFT);
@@ -366,9 +300,9 @@ public abstract strictfp class AbstractOptionsMenu extends Form {
 		
 		Panel[] panels;
 		if (Settings.getSettings().hide_bugreporter)
-			panels = new Panel[]{general, display, sound, language};
+			panels = new Panel[]{general, sound, language};
 		else
-			panels = new Panel[]{general, display, sound, language, report_bug};
+			panels = new Panel[]{general, sound, language, report_bug};
 
 		PanelGroup panel_group = new PanelGroup(panels, 0);
 		addChild(panel_group);
@@ -456,24 +390,6 @@ public abstract strictfp class AbstractOptionsMenu extends Form {
 		}
 	}
 
-	private final strictfp class CBFullscreen implements CheckBoxListener, DoNowListener {
-		public final void doChange(boolean switch_now) {
-			SerializableDisplayMode.setFullscreen(cb_fullscreen.isMarked(), switch_now);
-		}
-
-		public final void checked(boolean marked) {
-			DisplayChangeForm display_change_form = new DisplayChangeForm(this);
-			gui_root.addModalForm(display_change_form);
-		}
-	}
-
-
-	private final strictfp class CBHardwareCursor implements CheckBoxListener {
-		public final void checked(boolean marked) {
-			Settings.getSettings().use_native_cursor = marked;
-		}
-	}
-
 	private final strictfp class OptionsCloseListener implements CloseListener {
 		public final void closed() {
 			checkDetailChange();
@@ -491,24 +407,6 @@ public abstract strictfp class AbstractOptionsMenu extends Form {
 			Settings.getSettings().invert_camera_pitch = marked;
 		}
 	}
-
-	private final strictfp class DisplayModeListener implements RowListener, DoNowListener {
-		private SerializableDisplayMode mode;
-		
-		public final void doChange(boolean switch_now) {
-			LocalInput.getLocalInput().switchMode(mode, switch_now);
-			gui_root.displayChanged();
-		}
-
-		public final void rowChosen(Object o) {
-			mode = (SerializableDisplayMode)o;
-			DisplayChangeForm display_change_form = new DisplayChangeForm(this);
-			gui_root.addModalForm(display_change_form);
-		}
-		
-		public final void rowDoubleClicked(Object o) {
-		}
-	}  
 
 	private final strictfp class LanguageListener implements RowListener {
 		public final void rowChosen(Object o) {

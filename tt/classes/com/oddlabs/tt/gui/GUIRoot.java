@@ -7,10 +7,10 @@ import java.util.ResourceBundle;
 import java.util.Set;
 
 import org.lwjgl.BufferUtils;
-import org.lwjgl.input.Keyboard;
+import com.oddlabs.tt.input.Keyboard;
 import org.lwjgl.opengl.GL11;
-import org.lwjgl.util.vector.Matrix4f;
-import org.lwjgl.util.vector.Vector3f;
+import com.oddlabs.util.Matrix4f;
+import com.oddlabs.util.Vector3f;
 
 import com.oddlabs.tt.animation.TimerAnimation;
 import com.oddlabs.tt.animation.Updatable;
@@ -260,16 +260,6 @@ public final strictfp class GUIRoot extends GUIObject implements Updatable {
 				}
 				break;
 				
-			case Keyboard.KEY_H:
-				if (event.isControlDown() && (LocalInput.getNativeCursorCaps() & org.lwjgl.input.Cursor.CURSOR_ONE_BIT_TRANSPARENCY) != 0) {
-					Settings.getSettings().use_native_cursor = !Settings.getSettings().use_native_cursor;
-					if (Settings.getSettings().use_native_cursor)
-						info_printer.print(com.oddlabs.tt.util.Utils.getBundleString(bundle, "hardware_cursor_on"));
-					else
-						info_printer.print(com.oddlabs.tt.util.Utils.getBundleString(bundle, "hardware_cursor_off"));
-				}
-				break;
-				
 			case Keyboard.KEY_A:
 				if (event.isControlDown()) {
 					Settings.getSettings().aggressive_units = !Settings.getSettings().aggressive_units;
@@ -365,7 +355,7 @@ System.out.println("Globals.run_ai = " + Globals.run_ai);
 				}
 				break;*/
 			case Keyboard.KEY_J:
-				org.lwjgl.input.Mouse.setCursorPosition(10, 10);
+				com.oddlabs.tt.input.Mouse.setCursorPosition(10, 10);
 				break;
 			case Keyboard.KEY_S:
 				if (!event.isControlDown()) {
@@ -468,9 +458,6 @@ System.out.println("*********************************************************");
 				LocalEventQueue.getQueue().debugPrintAnimations();
 System.out.println("Texture.global_size = " + Texture.global_size);
 				break;
-			case Keyboard.KEY_F11:
-				LocalInput.toggleFullscreen();
-				break;
 			case Keyboard.KEY_F12:
 System.out.println("GC Forced");
 				System.gc();
@@ -521,7 +508,7 @@ System.out.println("GC Forced");
 		GL11.glMatrixMode(GL11.GL_PROJECTION);
 		GL11.glLoadIdentity();
 		myGLUPerspective(Globals.FOV, LocalInput.getViewAspect(), Globals.VIEW_MIN, Globals.VIEW_MAX);
-		GL11.glMultMatrix(matrix_buf);
+		GL11.glMultMatrixf(matrix_buf);
 		GL11.glMatrixMode(GL11.GL_MODELVIEW);
 		GL11.glLoadIdentity();
 		GL11.glEnable(GL11.GL_BLEND);

@@ -2,7 +2,7 @@ package com.oddlabs.tt.form;
 
 import java.util.ResourceBundle;
 
-import org.lwjgl.input.Keyboard;
+import com.oddlabs.tt.input.Keyboard;
 
 import com.oddlabs.registration.RegistrationKey;
 import com.oddlabs.tt.event.LocalEventQueue;
@@ -24,10 +24,9 @@ import com.oddlabs.tt.gui.Skin;
 import com.oddlabs.tt.guievent.EnterListener;
 import com.oddlabs.tt.guievent.MouseClickListener;
 import com.oddlabs.tt.render.Renderer;
+import com.oddlabs.tt.render.Display;
 import com.oddlabs.tt.util.Utils;
 import com.oddlabs.tt.delegate.MainMenu;
-
-import org.lwjgl.Sys;
 
 public final strictfp class RegistrationForm extends Form implements RegisterProgressFormListener {
 	private final static int BUTTON_WIDTH = 100;
@@ -161,7 +160,7 @@ public final strictfp class RegistrationForm extends Form implements RegisterPro
 
 	private final strictfp class PasteListener implements MouseClickListener {
 		public final void mouseClicked(int button, int x, int y, int clicks) {
-			String clipboard = (String)LocalEventQueue.getQueue().getDeterministic().log(Sys.getClipboard());
+			String clipboard = (String)LocalEventQueue.getQueue().getDeterministic().log(Display.getClipboard());
 			if (clipboard != null)
 				pasteClipboard(clipboard);
 		}

@@ -1,7 +1,7 @@
 package com.oddlabs.tt.util;
 
-import org.lwjgl.util.vector.Matrix4f;
-import org.lwjgl.util.vector.Vector4f;
+import com.oddlabs.util.Matrix4f;
+import com.oddlabs.util.Vector4f;
 
 import com.oddlabs.tt.global.Globals;
 import com.oddlabs.tt.landscape.World;

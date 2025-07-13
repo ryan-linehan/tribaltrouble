@@ -4,7 +4,7 @@ import java.nio.FloatBuffer;
 import java.util.List;
 
 import org.lwjgl.BufferUtils;
-import org.lwjgl.opengl.ARBBufferObject;
+import org.lwjgl.opengl.GL15;
 import org.lwjgl.opengl.GL11;
 
 import com.oddlabs.tt.landscape.World;
@@ -68,9 +68,9 @@ public final strictfp class TreeLowDetail {
 			vertex_count += num_trees[i]*low_details[i].getVertices().length/3;
 			index_count += num_trees[i]*low_details[i].getIndices().length;
 		}
-		vertices = new FloatVBO(ARBBufferObject.GL_DYNAMIC_DRAW_ARB, vertex_count*3);
-		texcoords = new FloatVBO(ARBBufferObject.GL_STATIC_DRAW_ARB, vertex_count*2);
-		tree_indices = new ShortVBO(ARBBufferObject.GL_STATIC_DRAW_ARB, index_count);
+		vertices = new FloatVBO(GL15.GL_DYNAMIC_DRAW, vertex_count*3);
+		texcoords = new FloatVBO(GL15.GL_STATIC_DRAW, vertex_count*2);
+		tree_indices = new ShortVBO(GL15.GL_STATIC_DRAW, index_count);
 	}
 
 	final Tree[] getTrees() {
@@ -100,7 +100,7 @@ public final strictfp class TreeLowDetail {
 		update_buffer.clear();
 		matrix.store(update_buffer);
 		update_buffer.flip();
-		GL11.glMultMatrix(update_buffer);
+		GL11.glMultMatrixf(update_buffer);
 	}
 
 	private final int putCoordinate(int index, float x, float y, float z, float u, float v, float[] vertice_array, float[] texcoord_array) {

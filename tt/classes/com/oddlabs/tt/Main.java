@@ -6,8 +6,11 @@ import com.oddlabs.tt.util.Utils;
 
 import java.util.ResourceBundle;
 
-import org.lwjgl.Sys;
-import org.lwjgl.opengl.Display;
+import com.oddlabs.tt.render.Display;
+
+import org.lwjgl.glfw.GLFW;
+import org.lwjgl.opengl.GL;
+import static org.lwjgl.opengl.GL11.*;
 
 public final strictfp class Main {
 	public final static void fail(Throwable t) {
@@ -20,7 +23,7 @@ public final strictfp class Main {
 			ResourceBundle bundle = ResourceBundle.getBundle(Main.class.getName());
 			String error = Utils.getBundleString(bundle, "error");
 			String error_msg = Utils.getBundleString(bundle, "error_message", new Object[]{t.toString(), Globals.SUPPORT_ADDRESS});
-			Sys.alert(error, error_msg);
+			System.out.println(error + " : " + error_msg);
 		} finally {
 			shutdown();
 		}
@@ -34,9 +37,15 @@ public final strictfp class Main {
 		try {
 			System.out.println("Starting game....");
 			System.out.flush();
-			System.setProperty("org.lwjgl.util.Debug", "true");
-/*System.out.println("System.getProperty(\"java.library.path\") = " + System.getProperty("java.library.path"));*/
 			Main.class.getClassLoader().setDefaultAssertionStatus(true);
+            Display.create();
+
+            /*while (!GLFW.glfwWindowShouldClose(Display.window())) {
+                glClear(GL_COLOR_BUFFER_BIT);
+                GLFW.glfwSwapBuffers(Display.window());
+                GLFW.glfwPollEvents();
+            }*/
+
 			Renderer.runGame(args);
 		} catch (Throwable t) {
 			fail(t);

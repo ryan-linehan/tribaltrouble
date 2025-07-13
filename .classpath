@@ -4,7 +4,6 @@
 	<classpathentry kind="src" path="common/classes"/>
 	<classpathentry kind="src" path="loader/classes"/>
 	<classpathentry kind="src" path="server/classes"/>
-	<classpathentry kind="src" path="servlet/classes"/>
 	<classpathentry kind="src" path="tools/classes"/>
 	<classpathentry kind="src" path="truetype/classes"/>
 	<classpathentry kind="src" path="tt/classes"/>
@@ -25,7 +24,6 @@
 	<classpathentry kind="lib" path="common/lib/java/mysql.jar"/>
 	<classpathentry kind="lib" path="common/lib/java/png.jar"/>
 	<classpathentry kind="lib" path="common/lib/java/samskivert.jar"/>
-	<classpathentry kind="lib" path="common/lib/java/servlet-api.jar"/>
 	<classpathentry kind="lib" path="tools/svn/ganymed.jar"/>
 	<classpathentry kind="lib" path="tools/svn/svnkit.jar"/>
 	<classpathentry kind="lib" path="tools/svn/svnkit-cli.jar"/>

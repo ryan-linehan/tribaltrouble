@@ -5,11 +5,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.lwjgl.BufferUtils;
-import org.lwjgl.opengl.ARBBufferObject;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL13;
-import org.lwjgl.util.vector.Matrix4f;
-import org.lwjgl.util.vector.Vector4f;
+import org.lwjgl.opengl.GL15;
+import com.oddlabs.util.Matrix4f;
+import com.oddlabs.util.Vector4f;
 
 import com.oddlabs.geometry.AnimationInfo;
 import com.oddlabs.geometry.SpriteInfo;
@@ -81,10 +81,10 @@ final strictfp class Sprite {
 
 		clear_color = sprite_info.getClearColor();
 
-		indices = new ShortVBO(ARBBufferObject.GL_STATIC_DRAW_ARB, tmp_indices.length);
+		indices = new ShortVBO(GL15.GL_STATIC_DRAW, tmp_indices.length);
 		indices.put(tmp_indices);
 		
-		texcoords = new FloatVBO(ARBBufferObject.GL_STATIC_DRAW_ARB, tmp_texcoords.length);
+		texcoords = new FloatVBO(GL15.GL_STATIC_DRAW, tmp_texcoords.length);
 		texcoords.put(tmp_texcoords);
 		
 		int vert_and_normal_buffer_size = 0;
@@ -105,7 +105,7 @@ final strictfp class Sprite {
 				temp_vertices_and_normals.put(tmp_normals[j][i]);
 			}
 		}
-		vertices_and_normals = new FloatVBO(ARBBufferObject.GL_STATIC_DRAW_ARB, vert_and_normal_buffer_size);
+		vertices_and_normals = new FloatVBO(GL15.GL_STATIC_DRAW, vert_and_normal_buffer_size);
 		temp_vertices_and_normals.rewind();
 		vertices_and_normals.put(temp_vertices_and_normals);
 
@@ -138,7 +138,7 @@ final strictfp class Sprite {
 
 	static void setupDecalColor(float[] color) {
 		decal_color.put(color).rewind();
-		GL11.glTexEnv(GL11.GL_TEXTURE_ENV, GL11.GL_TEXTURE_ENV_COLOR, decal_color);
+		GL11.glTexEnvfv(GL11.GL_TEXTURE_ENV, GL11.GL_TEXTURE_ENV_COLOR, decal_color);
 	}
 
 	private void transformAndColor(ModelState model, boolean respond) {
@@ -290,7 +290,7 @@ final strictfp class Sprite {
 			gl_flags = gl_flags | GLState.NORMAL_ARRAY;
 			GL11.glTexEnvf(GL11.GL_TEXTURE_ENV, GL11.GL_TEXTURE_ENV_MODE, GL11.GL_MODULATE);
 			GL11.glEnable(GL11.GL_LIGHTING);
-			GL11.glMaterial(GL11.GL_FRONT, GL11.GL_DIFFUSE, color);
+			GL11.glMaterialfv(GL11.GL_FRONT, GL11.GL_DIFFUSE, color);
 		}
 		GL11.glColor4f(color.get(0), color.get(1), color.get(2), color.get(3));
 		if (!modulate_color && (hasTeamDecal() || respond)) {

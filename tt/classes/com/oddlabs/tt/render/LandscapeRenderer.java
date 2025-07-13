@@ -7,7 +7,7 @@ import java.util.Set;
 
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL13;
-import org.lwjgl.opengl.ARBBufferObject;
+import org.lwjgl.opengl.GL15;
 import org.lwjgl.BufferUtils;
 
 import com.oddlabs.tt.global.Globals;
@@ -55,7 +55,7 @@ public final strictfp class LandscapeRenderer implements Animated {
 
 	public LandscapeRenderer(World world, WorldInfo world_info, GUIRoot gui_root, AnimationManager manager) {
 		ShortBuffer indices = world.getLandscapeIndices().getIndices();
-		this.indices_vbo = new ShortVBO(ARBBufferObject.GL_STATIC_DRAW_ARB, indices.remaining());
+		this.indices_vbo = new ShortVBO(GL15.GL_STATIC_DRAW, indices.remaining());
 		this.indices_vbo.put(indices);
 
 		this.landscape_vertices = new LandscapeTileVertices(world.getHeightMap(), HeightMap.GRID_UNITS_PER_PATCH_EXP, world.getHeightMap().getPatchesPerWorld());

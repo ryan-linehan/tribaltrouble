@@ -6,9 +6,9 @@ import java.util.List;
 import java.util.ArrayList;
 
 import org.lwjgl.BufferUtils;
-import org.lwjgl.opengl.ARBBufferObject;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL13;
+import org.lwjgl.opengl.GL15;
 
 import com.oddlabs.tt.event.LocalEventQueue;
 import com.oddlabs.tt.global.Globals;
@@ -76,7 +76,7 @@ public final strictfp class Sky {
 		float inner_dy = SKYDOME_SPEED_INNER[1] * time*speed_scale;
 		GL11.glBindTexture(GL11.GL_TEXTURE_2D, clouds[GeneratorClouds.INNER].getHandle());
 		GL11.glTexEnvf(GL11.GL_TEXTURE_ENV, GL11.GL_TEXTURE_ENV_MODE, GL11.GL_BLEND);
-		GL11.glTexEnv(GL11.GL_TEXTURE_ENV, GL11.GL_TEXTURE_ENV_COLOR, color);
+		GL11.glTexEnvfv(GL11.GL_TEXTURE_ENV, GL11.GL_TEXTURE_ENV_COLOR, color);
 		GL11.glMatrixMode(GL11.GL_TEXTURE);
 		GL11.glTranslatef(outer_dx, outer_dy, 0);
 		GLState.activeTexture(GL13.GL_TEXTURE1);
@@ -84,7 +84,7 @@ public final strictfp class Sky {
 		GL11.glEnable(GL11.GL_TEXTURE_2D);
 		GL11.glTranslatef(inner_dx, inner_dy, 0);
 		GL11.glTexEnvf(GL11.GL_TEXTURE_ENV, GL11.GL_TEXTURE_ENV_MODE, GL11.GL_BLEND);
-		GL11.glTexEnv(GL11.GL_TEXTURE_ENV, GL11.GL_TEXTURE_ENV_COLOR, color);
+		GL11.glTexEnvfv(GL11.GL_TEXTURE_ENV, GL11.GL_TEXTURE_ENV_COLOR, color);
 		
 
 		GLStateStack.switchState(GLState.VERTEX_ARRAY | GLState.COLOR_ARRAY | GLState.TEXCOORD0_ARRAY | GLState.TEXCOORD1_ARRAY);
@@ -196,7 +196,7 @@ public final strictfp class Sky {
 		}
 		assert !all_indices.hasRemaining();
 		all_indices.flip();
-		water_indices = new ShortVBO(ARBBufferObject.GL_STATIC_DRAW_ARB, all_indices);
+		water_indices = new ShortVBO(GL15.GL_STATIC_DRAW, all_indices);
 		water_vertices = toVBO(all_vertices, landscape_renderer.getHeightMap().getSeaLevelMeters());
 		bottom_vertices = toVBO(all_vertices, 0);
 	}
@@ -214,7 +214,7 @@ public final strictfp class Sky {
 		}
 		assert !vertex_buffer.hasRemaining();
 		vertex_buffer.flip();
-		return new FloatVBO(ARBBufferObject.GL_STATIC_DRAW_ARB, vertex_buffer);
+		return new FloatVBO(GL15.GL_STATIC_DRAW, vertex_buffer);
 	}
 
 	public final FloatVBO getWaterVertices() {
@@ -293,10 +293,10 @@ public final strictfp class Sky {
 		putArray(new float[]{0.5f, 0.5f}, last_index, tex1);
 
 		
-		sky_vertices = new FloatVBO(ARBBufferObject.GL_STATIC_DRAW_ARB, vertices);
-		sky_tex0 = new FloatVBO(ARBBufferObject.GL_STATIC_DRAW_ARB, tex0);
-		sky_tex1 = new FloatVBO(ARBBufferObject.GL_STATIC_DRAW_ARB, tex1);
-		sky_colors = new FloatVBO(ARBBufferObject.GL_STATIC_DRAW_ARB, colors);
+		sky_vertices = new FloatVBO(GL15.GL_STATIC_DRAW, vertices);
+		sky_tex0 = new FloatVBO(GL15.GL_STATIC_DRAW, tex0);
+		sky_tex1 = new FloatVBO(GL15.GL_STATIC_DRAW, tex1);
+		sky_colors = new FloatVBO(GL15.GL_STATIC_DRAW, colors);
 	}
 
 	private final void putArray(float[] src, int offset, float[] dest) {
@@ -315,7 +315,7 @@ public final strictfp class Sky {
 			}
 			temp.put(subdiv_axis*2, (short)(i*subdiv_axis));
 			temp.put(subdiv_axis*2 + 1, (short)((i + 1)*subdiv_axis));
-			strip_indices[i] = new ShortVBO(ARBBufferObject.GL_STATIC_DRAW_ARB, size);
+			strip_indices[i] = new ShortVBO(GL15.GL_STATIC_DRAW, size);
 			temp.rewind();
 			strip_indices[i].put(temp);
 		}
@@ -331,7 +331,7 @@ public final strictfp class Sky {
 		}
 		temp.put(subdiv_axis + 1, (short)((subdiv_height - 1)*subdiv_axis - 1));
 		
-		ShortVBO fan_indices = new ShortVBO(ARBBufferObject.GL_STATIC_DRAW_ARB, size);
+		ShortVBO fan_indices = new ShortVBO(GL15.GL_STATIC_DRAW, size);
 		temp.rewind();
 		fan_indices.put(temp);
 		return fan_indices;

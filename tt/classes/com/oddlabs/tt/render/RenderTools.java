@@ -69,7 +69,7 @@ final strictfp class RenderTools {
 		transform_matrix.put(12, x);
 		transform_matrix.put(13, y);
 		transform_matrix.put(14, z);
-		GL11.glMultMatrix(transform_matrix);
+		GL11.glMultMatrixf(transform_matrix);
 	}
 
 	static int inFrustum(BoundingBox box, float[][] frustum) {

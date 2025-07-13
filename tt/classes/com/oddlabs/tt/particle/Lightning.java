@@ -5,8 +5,8 @@ import java.util.List;
 import java.util.Random;
 
 import org.lwjgl.opengl.GL11;
-import org.lwjgl.util.vector.Vector3f;
-import org.lwjgl.util.vector.Vector4f;
+import com.oddlabs.util.Vector3f;
+import com.oddlabs.util.Vector4f;
 
 import com.oddlabs.tt.animation.Animated;
 import com.oddlabs.tt.animation.AnimationManager;

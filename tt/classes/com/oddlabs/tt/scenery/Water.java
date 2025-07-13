@@ -102,7 +102,7 @@ public final strictfp class Water {
 			}
 		assert !temp.hasRemaining();
 		temp.flip();
-		FloatVBO vertices = new FloatVBO(ARBBufferObject.GL_STATIC_DRAW_ARB, temp.remaining());
+		FloatVBO vertices = new FloatVBO(GL15.GL_STATIC_DRAW, temp.remaining());
 		vertices.put(temp);
 		return vertices;
 	}

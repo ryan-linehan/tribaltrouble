@@ -24,7 +24,7 @@ public final strictfp class FogInfo {
 	}
 
 	public final void enableFog(float camera_z) {
-		GL11.glFog(GL11.GL_FOG_COLOR, fog_color);
+		GL11.glFogfv(GL11.GL_FOG_COLOR, fog_color);
 		GL11.glFogf(GL11.GL_FOG_MODE, fog_mode);
 		GL11.glFogf(GL11.GL_FOG_START, computeFogOffset(camera_z) + fog_start);
 		GL11.glFogf(GL11.GL_FOG_END, computeFogOffset(camera_z) + fog_end);

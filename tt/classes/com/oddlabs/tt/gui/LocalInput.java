@@ -8,12 +8,9 @@ import java.util.SortedSet;
 import java.util.List;
 import java.util.ArrayList;
 
-import org.lwjgl.LWJGLException;
-import org.lwjgl.Sys;
 import org.lwjgl.openal.AL;
-import org.lwjgl.input.Cursor;
-import org.lwjgl.opengl.Display;
-import org.lwjgl.opengl.DisplayMode;
+import com.oddlabs.tt.render.Cursor;
+import com.oddlabs.tt.render.Display;
 
 import com.oddlabs.event.Deterministic;
 import com.oddlabs.tt.render.Renderer;
@@ -25,10 +22,9 @@ import com.oddlabs.tt.form.QuitForm;
 import com.oddlabs.tt.global.Globals;
 import com.oddlabs.tt.global.Settings;
 import com.oddlabs.tt.input.KeyboardInput;
+import com.oddlabs.tt.input.Keyboard;
 import com.oddlabs.tt.input.PointerInput;
 import com.oddlabs.tt.render.Renderer;
-import com.oddlabs.tt.render.SerializableDisplayMode;
-import com.oddlabs.tt.render.SerializableDisplayModeComparator;
 import com.oddlabs.updater.UpdateInfo;
 import com.oddlabs.util.Utils;
 
@@ -144,8 +140,8 @@ public final strictfp class LocalInput {
 	}
 
 	public final static boolean alIsCreated() {
-		return LocalEventQueue.getQueue().getDeterministic().log(AL.isCreated());
-	}
+		return LocalEventQueue.getQueue().getDeterministic().log(Display.isALCreated());
+    }
 
 	public final static File getGameDir() {
 		return game_dir;
@@ -180,40 +176,6 @@ public final strictfp class LocalInput {
 		return instance;
 	}
 
-	public final static SerializableDisplayMode[] getAvailableModes() {
-		try {
-			DisplayMode[] lwjgl_modes = Display.getAvailableDisplayModes();
-			List modes = new ArrayList();
-			for (int i = 0; i < lwjgl_modes.length; i++) {
-				assert lwjgl_modes[i] != null;
-				if (SerializableDisplayMode.isModeValid(lwjgl_modes[i])) {
-					SerializableDisplayMode mode = new SerializableDisplayMode(lwjgl_modes[i]);
-					modes.add(mode);
-				}
-			}
-			modes = (List)LocalEventQueue.getQueue().getDeterministic().log(modes);
-
-			SerializableDisplayMode target_mode = new SerializableDisplayMode(0, 0, 0, 0);
-			SortedSet set = new TreeSet(new SerializableDisplayModeComparator(target_mode));
-			for (int i = 0; i < modes.size(); i++) {
-				set.add(modes.get(i));
-			}
-			SerializableDisplayMode[] available_modes = new SerializableDisplayMode[set.size()];
-			set.toArray(available_modes);
-			return available_modes;
-		} catch (LWJGLException e) {
-			throw new RuntimeException(e);
-		}
-	}
-
-	public final static SerializableDisplayMode getCurrentMode() {
-		return (SerializableDisplayMode)LocalEventQueue.getQueue().getDeterministic().log(new SerializableDisplayMode(Display.getDisplayMode()));
-	}
-
-	public final static int getNativeCursorCaps() {
-		return LocalEventQueue.getQueue().getDeterministic().log(Cursor.getCapabilities());
-	}
-	
 	public final static void settings(UpdateInfo update_info, File game_dir, File event_log_dir, Settings settings) {
 		int revision;
 		try {
@@ -221,6 +183,8 @@ public final strictfp class LocalInput {
 			String revision_string = in.readLine();
 			in.close();
 			revision = (new Integer(revision_string)).intValue();
+            view_width = Display.getWidth();
+            view_height = Display.getHeight();
 		} catch (Exception e) {
 			revision = -1;
 		}
@@ -244,62 +208,8 @@ public final strictfp class LocalInput {
 
 	public final static void init() {
 		Deterministic deterministic = LocalEventQueue.getQueue().getDeterministic();
-		mouse_x = deterministic.log(org.lwjgl.input.Mouse.getX());
-		mouse_y = deterministic.log(org.lwjgl.input.Mouse.getY());
-	}
-
-	private void modeSwitchedLater(SerializableDisplayMode new_mode) {
-		Settings.getSettings().fullscreen = fullscreen;
-		Settings.getSettings().new_view_width = new_mode.getWidth();
-		Settings.getSettings().new_view_height = new_mode.getHeight();
-		Settings.getSettings().new_view_freq = new_mode.getFrequency();
-	}
-
-	private void modeSwitchedNow(SerializableDisplayMode new_mode) {
-		modeSwitchedLater(new_mode);
-		modeSwitched();
-	}
-
-	private void modeSwitched() {
-		SerializableDisplayMode new_mode = (SerializableDisplayMode)LocalEventQueue.getQueue().getDeterministic().log(new SerializableDisplayMode(Display.getDisplayMode()));
-		view_width = new_mode.getWidth();
-		view_height = new_mode.getHeight();
-		System.out.println("Switched mode to " + new_mode);
-		Settings.getSettings().view_width = new_mode.getWidth();
-		Settings.getSettings().view_height = new_mode.getHeight();
-		Settings.getSettings().view_freq = new_mode.getFrequency();
-	}
-
-	public final void fullscreenToggled(boolean fullscreen, boolean switch_now) {
-		Settings.getSettings().fullscreen = fullscreen;
-		if (switch_now && LocalInput.fullscreen != fullscreen) {
-			toggleFullscreen();
-			System.out.println("Fullscreen toggled");
-		}
-	}
-
-	public static final void toggleFullscreen() {
-		fullscreen = !fullscreen;
-		try {
-			Display.setFullscreen(fullscreen && !LocalEventQueue.getQueue().getDeterministic().isPlayback());
-			Renderer.resetInput();
-		} catch (LWJGLException e) {
-			System.out.println("Mode switching failed with exception: " + e);
-			throw new RuntimeException("Mode switching failed");
-		}
-	}
-
-	public void switchMode(SerializableDisplayMode mode, boolean switch_now) {
-		if (switch_now) {
-			SerializableDisplayMode.switchMode(mode);
-			modeSwitchedNow(mode);
-		} else
-			modeSwitchedLater(mode);
-	}
-
-	public void setModeToNearest(SerializableDisplayMode mode) throws LWJGLException {
-		SerializableDisplayMode.setModeToNearest(mode);
-		modeSwitchedNow(mode);
+		mouse_x = deterministic.log(com.oddlabs.tt.input.Mouse.getX());
+		mouse_y = deterministic.log(com.oddlabs.tt.input.Mouse.getY());
 	}
 
 	public static final float getViewAspect() {

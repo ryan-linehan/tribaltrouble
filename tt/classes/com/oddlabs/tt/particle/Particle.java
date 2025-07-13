@@ -1,8 +1,8 @@
 package com.oddlabs.tt.particle;
 
-import org.lwjgl.util.vector.Matrix4f;
-import org.lwjgl.util.vector.Vector4f;
-import org.lwjgl.util.vector.Vector3f;
+import com.oddlabs.util.Matrix4f;
+import com.oddlabs.util.Vector4f;
+import com.oddlabs.util.Vector3f;
 
 public strictfp class Particle {
 	private final float u1;

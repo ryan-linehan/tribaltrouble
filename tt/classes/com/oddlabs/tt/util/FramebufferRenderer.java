@@ -1,11 +1,8 @@
 package com.oddlabs.tt.util;
 
-import org.lwjgl.LWJGLException;
 import org.lwjgl.BufferUtils;
-import org.lwjgl.opengl.Display;
+import com.oddlabs.tt.render.Display;
 import org.lwjgl.opengl.GL11;
-import org.lwjgl.opengl.Pbuffer;
-import org.lwjgl.opengl.PixelFormat;
 import org.lwjgl.opengl.EXTFramebufferObject;
 
 import java.nio.IntBuffer;

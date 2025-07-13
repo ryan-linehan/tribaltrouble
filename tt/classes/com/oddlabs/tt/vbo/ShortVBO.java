@@ -13,7 +13,7 @@ public final strictfp class ShortVBO extends VBO {
 //	private ShortBuffer mapped_buffer = null;
 
 	public ShortVBO(int usage, int size) {
-		super(ARBVertexBufferObject.GL_ELEMENT_ARRAY_BUFFER_ARB, usage, size<<1);
+		super(GL15.GL_ELEMENT_ARRAY_BUFFER, usage, size<<1);
 		ByteBuffer buffer = getSavedBuffer();
 		if (buffer != null)
 			saved_buffer = buffer.asShortBuffer();
@@ -73,14 +73,14 @@ public final strictfp class ShortVBO extends VBO {
 		if (!use_vbo) {
 			saved_buffer.position(index);
 			saved_buffer.limit(index + count);
-			if (GLContext.getCapabilities().OpenGL12)
+			if (GL.getCapabilities().OpenGL12)
 				GL12.glDrawRangeElements(mode, start, end, saved_buffer);
 			else
 				GL11.glDrawElements(mode, saved_buffer);
 			saved_buffer.clear();
 		} else {
 			makeCurrent();
-			if (Settings.getSettings().use_vbo_draw_range_elements && GLContext.getCapabilities().OpenGL12)
+			if (Settings.getSettings().use_vbo_draw_range_elements && GL.getCapabilities().OpenGL12)
 				GL12.glDrawRangeElements(mode, start, end, count, GL11.GL_UNSIGNED_SHORT, index<<1);
 			else
 				GL11.glDrawElements(mode, count, GL11.GL_UNSIGNED_SHORT, index<<1);
@@ -93,11 +93,11 @@ public final strictfp class ShortVBO extends VBO {
 			saved_buffer.put(buffer);
 		} else {
 			makeCurrent();
-			ARBBufferObject.glBufferSubDataARB(getTarget(), 0, buffer);
+			GL15.glBufferSubData(getTarget(), 0, buffer);
 			buffer.position(buffer.limit());
 		}
 //		do {
-//			map(ARBBufferObject.GL_WRITE_ONLY_ARB);
+//			map(GL15.GL_WRITE_ONLY);
 //			buffer().put(buffer);
 //			buffer.clear();
 //		} while (!unmap());
@@ -106,7 +106,7 @@ public final strictfp class ShortVBO extends VBO {
 	public final void put(short[] buffer) {
 		put(Utils.toBuffer(buffer));
 //		do {
-//			map(ARBBufferObject.GL_WRITE_ONLY_ARB);
+//			map(GL15.GL_WRITE_ONLY);
 //			buffer().put(buffer);
 //		} while (!unmap());
 	}

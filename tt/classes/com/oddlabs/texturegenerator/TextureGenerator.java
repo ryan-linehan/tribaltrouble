@@ -10,6 +10,8 @@ import com.oddlabs.tt.render.SpriteList;
 import com.oddlabs.tt.global.Globals;
 import com.oddlabs.tt.global.Settings;
 import com.oddlabs.tt.render.BillboardPainter;
+import com.oddlabs.tt.render.Display;
+import com.oddlabs.tt.render.PixelFormat;
 import com.oddlabs.tt.resource.Resources;
 import com.oddlabs.tt.resource.SpriteFile;
 import com.oddlabs.tt.util.OffscreenRenderer;
@@ -25,12 +27,12 @@ public final strictfp class TextureGenerator {
 	private SpriteList[] crowns;
 	private SpriteList[] trunks;
 	
-	public static void main(String[] args) throws LWJGLException {
+	public static void main(String[] args) {
 		assert args.length == 1;
 		new TextureGenerator(args[0]);
 	}
 
-	public TextureGenerator(String dest) throws LWJGLException {
+	public TextureGenerator(String dest) {
 		Settings.setSettings(new Settings());
 		File path = new File(dest);
 		path.mkdirs();
@@ -38,10 +40,9 @@ public final strictfp class TextureGenerator {
 		GLStateStack display_state_stack = new GLStateStack();
 		GLStateStack.setCurrent(display_state_stack);
 
-		Display.setDisplayMode(new DisplayMode(LOW_DETAIL_TEX_SIZE, LOW_DETAIL_TEX_SIZE));
-		Display.create(new PixelFormat(Globals.VIEW_BIT_DEPTH, 1, 16, 0, 0));
+		Display.create();
 		OffscreenRendererFactory factory = new OffscreenRendererFactory();
-		OffscreenRenderer buffer = factory.createRenderer(LOW_DETAIL_TEX_SIZE, LOW_DETAIL_TEX_SIZE, new PixelFormat(Globals.VIEW_BIT_DEPTH, 1, 16, 0, 0), false, false, true);
+		OffscreenRenderer buffer = factory.createRenderer(LOW_DETAIL_TEX_SIZE, LOW_DETAIL_TEX_SIZE, new PixelFormat(Globals.VIEW_BIT_DEPTH, 1, 16, 0, 0), false);
 		SpriteList jungle_crown = (SpriteList)Resources.findResource(new SpriteFile("/geometry/misc/jungle_tree_crown.binsprite", CROWN_MIPMAP_CUTOFF, false, false, true, false));
 		SpriteList jungle_trunk = (SpriteList)Resources.findResource(new SpriteFile("/geometry/misc/jungle_tree_trunk.binsprite", CROWN_MIPMAP_CUTOFF, true, true, false, false));
 		SpriteList palm_crown = (SpriteList)Resources.findResource(new SpriteFile("/geometry/misc/palm_crown.binsprite", CROWN_MIPMAP_CUTOFF, false, false, true, false));
@@ -52,7 +53,7 @@ public final strictfp class TextureGenerator {
 		LowDetailModel palm_lowdetail = (LowDetailModel)Utils.loadObject(Utils.makeURL("/geometry/misc/palm_low.binlowdetail"));
 		generateLowDetailTexture(buffer, new LowDetailModel[]{jungle_lowdetail, palm_lowdetail}, dest + "/lowdetail_tree");
 		
-		OffscreenRenderer viking_buffer = factory.createRenderer(LOW_DETAIL_TEX_SIZE, LOW_DETAIL_TEX_SIZE, new PixelFormat(Globals.VIEW_BIT_DEPTH, 1, 16, 0, 0), false, false, true);
+		OffscreenRenderer viking_buffer = factory.createRenderer(LOW_DETAIL_TEX_SIZE, LOW_DETAIL_TEX_SIZE, new PixelFormat(Globals.VIEW_BIT_DEPTH, 1, 16, 0, 0), false);
 		SpriteList oak_crown = (SpriteList)Resources.findResource(new SpriteFile("/geometry/misc/oak_tree_crown.binsprite", CROWN_MIPMAP_CUTOFF, false, false, true, false));
 		SpriteList oak_trunk = (SpriteList)Resources.findResource(new SpriteFile("/geometry/misc/oak_tree_trunk.binsprite", CROWN_MIPMAP_CUTOFF, true, true, false, false));
 		SpriteList pine_crown = (SpriteList)Resources.findResource(new SpriteFile("/geometry/misc/pine_tree_crown.binsprite", CROWN_MIPMAP_CUTOFF, false, false, true, false));

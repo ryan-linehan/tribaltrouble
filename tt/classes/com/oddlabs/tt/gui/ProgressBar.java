@@ -2,7 +2,7 @@ package com.oddlabs.tt.gui;
 
 import java.util.ResourceBundle;
 
-import org.lwjgl.opengl.Display;
+import com.oddlabs.tt.render.Display;
 
 import com.oddlabs.net.NetworkSelector;
 import com.oddlabs.tt.font.TextLineRenderer;

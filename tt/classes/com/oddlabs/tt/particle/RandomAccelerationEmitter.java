@@ -8,8 +8,8 @@ import com.oddlabs.tt.render.SpriteKey;
 
 import java.util.*;
 
-import org.lwjgl.util.vector.Vector3f;
-import org.lwjgl.util.vector.Vector4f;
+import com.oddlabs.util.Vector3f;
+import com.oddlabs.util.Vector4f;
 
 public final strictfp class RandomAccelerationEmitter extends LinearEmitter {
 	private final Random random;

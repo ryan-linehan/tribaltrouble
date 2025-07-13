@@ -17,7 +17,7 @@ import java.net.HttpURLConnection;
 import javax.swing.ProgressMonitor;
 import java.util.regex.Pattern;
 
-import org.lwjgl.opengl.Display;
+import com.oddlabs.tt.render.Display;
 
 final strictfp class Uploader {
 	private final static String STD_OUT_PATTERN = "std\\.out";
@@ -57,8 +57,6 @@ final strictfp class Uploader {
 		out.writeField("revision", revision);
 		out.writeField("email", email);
 		out.writeField("comment", comment);
-		out.writeField("adapter", Display.getAdapter());
-		out.writeField("version", Display.getVersion());
 		out.writeField("javaversion", System.getProperty("java.version"));
 		out.writeField("javavendor", System.getProperty("java.vender"));
 		out.writeField("osname", System.getProperty("os.name"));

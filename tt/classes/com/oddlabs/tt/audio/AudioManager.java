@@ -7,12 +7,13 @@ import java.util.List;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.openal.AL;
 import org.lwjgl.openal.AL10;
-import org.lwjgl.openal.OpenALException;
 
 import com.oddlabs.tt.camera.CameraState;
 import com.oddlabs.tt.global.Settings;
 import com.oddlabs.tt.gui.GUIRoot;
 import com.oddlabs.tt.landscape.AudioImplementation;
+
+import com.oddlabs.tt.render.Display;
 
 public final strictfp class AudioManager implements AudioImplementation {
 	private final static int MAX_NUM_SOURCES = 32;
@@ -43,7 +44,7 @@ public final strictfp class AudioManager implements AudioImplementation {
 			try {
 				AudioSource source = new AudioSource();
 				list.add(source);
-			} catch (OpenALException e) {
+			} catch (Exception e) {
 				break;
 			}
 		}
@@ -135,7 +136,7 @@ public final strictfp class AudioManager implements AudioImplementation {
 	}
 
 	private AudioSource getSource(AudioParameters params) {
-		if (!AL.isCreated())
+		if (!Display.isALCreated())
 			return null;
 		AudioSource best_source = findSource(params);
 		stopSource(best_source);
@@ -143,7 +144,7 @@ public final strictfp class AudioManager implements AudioImplementation {
 	}
 
 	private AudioSource getSource(CameraState camera_state, AudioParameters params) {
-		if (!AL.isCreated())
+		if (!Display.isALCreated())
 			return null;
 		float this_dist_squared;
 		if (params.relative)
@@ -164,7 +165,7 @@ public final strictfp class AudioManager implements AudioImplementation {
 				AudioSource source = (AudioSource)sources[i];
 				if (source.getRank() == params.rank) {
 					int source_index = source.getSource();
-					AL10.alGetSource(source_index, AL10.AL_POSITION, position);
+					AL10.alGetSourcefv(source_index, AL10.AL_POSITION, position);
 
 					float dist_squared = getCamDistSquared(camera_state, position.get(0), position.get(1), position.get(2));
 					if (dist_squared > max_dist_squared) {

@@ -7,6 +7,7 @@ import org.lwjgl.openal.AL;
 import org.lwjgl.openal.AL10;
 
 import com.oddlabs.tt.resource.NativeResource;
+import com.oddlabs.tt.render.Display;
 
 public final strictfp class AudioSource extends NativeResource {
 	private final IntBuffer source;
@@ -14,7 +15,7 @@ public final strictfp class AudioSource extends NativeResource {
 
 	public AudioSource() {
 		IntBuffer source_buffer = BufferUtils.createIntBuffer(1);
-		if (AL.isCreated())
+		if (Display.isALCreated())
 			AL10.alGenSources(source_buffer);
 		// if alGenSources fails, the source object will be null (default value)
 		source = source_buffer;
@@ -41,7 +42,7 @@ public final strictfp class AudioSource extends NativeResource {
 	}
 
 	protected final void doDelete() {
-		if (source != null && AL.isCreated()) {
+		if (source != null && Display.isALCreated()) {
 			assert AL10.alGetSourcei(getSource(), AL10.AL_SOURCE_STATE) != AL10.AL_PLAYING;
 			AL10.alDeleteSources(source);
 		}

@@ -3,8 +3,6 @@ package com.oddlabs.tt.camera;
 import java.nio.FloatBuffer;
 
 import org.lwjgl.BufferUtils;
-import org.lwjgl.openal.AL;
-import org.lwjgl.openal.AL10;
 
 import com.oddlabs.tt.animation.Animated;
 import com.oddlabs.tt.audio.Audio;

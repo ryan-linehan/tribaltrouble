@@ -2,7 +2,7 @@
 	<import file="../common/common.xml"/>
 	<property name="jre" value="jre1.8.0_381"/>
 	<property name="main_class" value="com.oddlabs.tt.Main"/>
-	<property name="classpath" value="../common/build/classes:${lib}/javasvn.jar:${lib}/lwjgl.jar:${lib}/lwjgl_util.jar:${lib}/jorbis.jar:${lib}/jsquish.jar"/>
+    <property name="classpath" value="../common/build/classes:${lib}/javasvn.jar:${lib}/lwjgl.jar:${lib}/lwjgl-natives-linux.jar:${lib}/lwjgl-glfw.jar:${lib}/lwjgl-glfw-natives-linux.jar:${lib}/lwjgl-opengl.jar:${lib}/lwjgl-opengl-natives-linux.jar:${lib}/lwjgl-openal.jar:${lib}/lwjgl-openal-natives-linux.jar:${lib}/lwjgl-jawt.jar:${lib}/jorbis.jar:${lib}/jsquish.jar"/>
 	<property name="res_classpath" value="${build}:static:i18n:${commonstatic}"/>
 
 	<property name="revision_number_file" location="${build}/revision_number"/>
@@ -30,6 +30,25 @@
 
 	<target name="rundeps" depends="textures, geometry, revision">
 	</target>
+
+    <!-- Classpath -->
+    <path id="lwjgl.classpath">
+        <fileset dir="${lib}">
+            <include name="lwjgl*.jar"/>
+        </fileset>
+    </path>
+
+    <condition property="lwjgl.natives" value="natives-windows">
+        <os family="Windows"/>
+    </condition>
+
+    <condition property="lwjgl.natives" value="natives-linux">
+        <os name="Linux"/>
+    </condition>
+
+    <condition property="lwjgl.natives" value="natives-macos">
+        <os name="Mac OS X"/>
+    </condition>
 
 	<target name="geometry">
 		<ant inheritAll="false" dir="../tools" target="geometry">
@@ -155,7 +174,7 @@
 	</target>
 
 	<target name="generatetextures" depends="compile">
-		<java failonerror="true" fork="yes" classpath="${lib}/lwjgl.jar:${lib}/lwjgl_util.jar:${build}:${build}/classes:../common/build/classes" classname="com.oddlabs.texturegenerator.TextureGenerator">
+        <java failonerror="true" fork="yes" classpath="${lib}/lwjgl.jar:${lib}/lwjgl-natives-linux.jar:${lib}/lwjgl-glfw.jar:${lib}/lwjgl-glfw-natives-linux.jar:${lib}/lwjgl-opengl.jar:${lib}/lwjgl-opengl-natives-linux.jar:${lib}/lwjgl-openal.jar:${lib}/lwjgl-openal-natives-linux.jar:${lib}/lwjgl-jawt.jar:${build}:${build}/classes:../common/build/classes" classname="com.oddlabs.texturegenerator.TextureGenerator">
 			<jvmarg value="-ea"/>
 			<jvmarg value="-Djava.library.path=${nativelib}"/>
 			<arg value="${srcdirtextures}"/>
@@ -242,24 +261,16 @@
 			</fileset>
 			<fileset dir="${lib}">
 				<include name="lwjgl.jar"/>
-				<include name="lwjgl_util.jar"/>
+				<include name="lwjgl-natives-linux.jar"/>
+				<include name="lwjgl-glfw.jar"/>
+				<include name="lwjgl-glfw-natives-linux.jar"/>
+				<include name="lwjgl-opengl.jar"/>
+				<include name="lwjgl-opengl-natives-linux.jar"/>
+				<include name="lwjgl-openal.jar"/>
+				<include name="lwjgl-openal-natives-linux.jar"/>
+				<include name="lwjgl-jawt.jar"/>
 				<include name="jorbis.jar"/>
 				<include name="jsquish.jar"/>
-			</fileset>
-		</copy>
-		<copy todir="${dist}/macosx-ppc">
-			<fileset dir="${nativelib}">
-				<include name="liblwjgl.jnilib"/>
-				<include name="liblwjgl-legacy.jnilib"/>
-				<include name="openal.dylib"/>
-			</fileset>
-		</copy>
-		<copy todir="${dist}/linux-x86">
-			<fileset dir="${nativelib}">
-				<include name="liblwjgl.so"/>
-				<include name="liblwjgl64.so"/>
-				<include name="libopenal.so"/>
-				<include name="libopenal64.so"/>
 			</fileset>
 		</copy>
 		
@@ -295,14 +306,5 @@
 			<arg value="tribaltrouble.ico"/>
 		</exec>
 
-		<!-- Add lwjgl dependencies to build bin -->
-		<copy todir="${dist}/windows/TribalTrouble/runtime/bin">
-			<fileset dir="${nativelib}">
-				<include name="lwjgl.dll"/>
-				<include name="lwjgl64.dll"/>
-				<include name="OpenAL32.dll"/>
-				<include name="OpenAL64.dll"/>
-			</fileset>
-		</copy>
 	</target>
 </project>

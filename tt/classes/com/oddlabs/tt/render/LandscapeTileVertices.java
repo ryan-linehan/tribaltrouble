@@ -3,7 +3,7 @@ package com.oddlabs.tt.render;
 import java.nio.FloatBuffer;
 
 import org.lwjgl.BufferUtils;
-import org.lwjgl.opengl.ARBBufferObject;
+import org.lwjgl.opengl.GL15;
 
 import com.oddlabs.tt.vbo.FloatVBO;
 import com.oddlabs.tt.landscape.LandscapeTileIndices;
@@ -32,7 +32,7 @@ final strictfp class LandscapeTileVertices {
 		}
 		assert !vertices.hasRemaining();
 		vertices.rewind();
-		patch_vertex_buffer = new FloatVBO(ARBBufferObject.GL_DYNAMIC_DRAW_ARB, vertices.remaining());
+		patch_vertex_buffer = new FloatVBO(GL15.GL_DYNAMIC_DRAW, vertices.remaining());
 		patch_vertex_buffer.put(vertices);
 	}
 

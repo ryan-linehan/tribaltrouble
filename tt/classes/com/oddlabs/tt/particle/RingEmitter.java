@@ -1,7 +1,7 @@
 package com.oddlabs.tt.particle;
 
-import org.lwjgl.util.vector.Vector3f;
-import org.lwjgl.util.vector.Vector4f;
+import com.oddlabs.util.Vector3f;
+import com.oddlabs.util.Vector4f;
 
 import com.oddlabs.tt.animation.AnimationManager;
 import com.oddlabs.tt.render.TextureKey;

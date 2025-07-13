@@ -7,7 +7,7 @@ import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL12;
 import org.lwjgl.opengl.GL13;
-import org.lwjgl.opengl.PixelFormat;
+import com.oddlabs.tt.render.PixelFormat;
 
 import com.oddlabs.tt.form.ProgressForm;
 import com.oddlabs.tt.global.Globals;
@@ -114,9 +114,7 @@ System.out.println("Landscape created in = " + (time_after-time_before));
 	}
 
 	private final static Texture[][] blendTextures(OffscreenRendererFactory factory, int chunks_per_colormap, BlendInfo[] blend_infos, int alpha_size, int structure_size, int scale) {
-		boolean use_pbuffer = Settings.getSettings().usePbuffer();
-		boolean use_fbo = Settings.getSettings().useFBO();
-		OffscreenRenderer offscreen = factory.createRenderer(TEXELS_PER_CHUNK, TEXELS_PER_CHUNK, new PixelFormat(Globals.VIEW_BIT_DEPTH, 0, 0, 0, 0), Settings.getSettings().use_copyteximage, use_pbuffer, use_fbo);
+		OffscreenRenderer offscreen = factory.createRenderer(TEXELS_PER_CHUNK, TEXELS_PER_CHUNK, new PixelFormat(Globals.VIEW_BIT_DEPTH, 0, 0, 0, 0), Settings.getSettings().use_copyteximage);
 		GL11.glColor4f(1f, 1f, 1f, 1f);
 		GL11.glDisable(GL11.GL_DEPTH_TEST);
 		GL11.glMatrixMode(GL11.GL_PROJECTION);
@@ -156,10 +154,10 @@ System.out.println("Landscape created in = " + (time_after-time_before));
 		FloatBuffer structure_tex_coords = BufferUtils.createFloatBuffer(4*2);
 		FloatBuffer alpha_tex_coords = BufferUtils.createFloatBuffer(4*2);
 		GLStateStack.switchState(GLState.VERTEX_ARRAY | GLState.TEXCOORD0_ARRAY | GLState.TEXCOORD1_ARRAY);
-		GL11.glVertexPointer(3, 0, coordinates);
-		GL11.glTexCoordPointer(2, 0, structure_tex_coords);
+		GL11.glVertexPointer(3, GL11.GL_FLOAT, 0, coordinates);
+		GL11.glTexCoordPointer(2, GL11.GL_FLOAT, 0, structure_tex_coords);
 		GLState.clientActiveTexture(GL13.GL_TEXTURE1);
-		GL11.glTexCoordPointer(2, 0, alpha_tex_coords);
+		GL11.glTexCoordPointer(2, GL11.GL_FLOAT, 0, alpha_tex_coords);
 		GLState.clientActiveTexture(GL13.GL_TEXTURE0);
 		for (int y = 0; y < chunk_maps.length; y++) {
 			for (int x = 0; x < chunk_maps[y].length; x++) {

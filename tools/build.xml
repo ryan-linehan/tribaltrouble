@@ -1,6 +1,6 @@
 <project name="tools" basedir="." default="compile">
 	<import file="../common/common.xml"/>
-	<property name="classpath" value="../common/build/classes:svn/svnkit.jar:${lib}/lwjgl_util.jar:${lib}/lwjgl.jar:${lib}/jsquish.jar:${lib}/png.jar"/>
+	<property name="classpath" value="../common/build/classes:svn/svnkit.jar:${lib}/lwjgl.jar:${lib}/jsquish.jar:${lib}/lwjgl-natives-linux.jar:${lib}/lwjgl-glfw.jar:${lib}/lwjgl-glfw-natives-linux.jar:${lib}/lwjgl-opengl.jar:${lib}/lwjgl-opengl-natives-linux.jar:${lib}/lwjgl-openal.jar:${lib}/lwjgl-openal-natives-linux.jar:${lib}/lwjgl-jawt.jar:${lib}/png.jar"/>
 
 	<target name="compiledeps" depends="compile-common"/>
 

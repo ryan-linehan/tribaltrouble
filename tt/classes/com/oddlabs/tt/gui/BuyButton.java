@@ -2,8 +2,6 @@ package com.oddlabs.tt.gui;
 
 import java.util.ResourceBundle;
 
-import org.lwjgl.Sys;
-
 import com.oddlabs.tt.form.QuestionForm;
 import com.oddlabs.tt.global.Settings;
 import com.oddlabs.tt.guievent.MouseClickListener;
@@ -44,7 +42,6 @@ public final strictfp class BuyButton extends HorizButton {
 	private final static strictfp class ActionBuyListener implements MouseClickListener {
 		public final void mouseClicked(int button, int x, int y, int clicks) {
 			Renderer.shutdown();
-			Sys.openURL(Settings.getSettings().buy_url);
 		}
 	}
 }

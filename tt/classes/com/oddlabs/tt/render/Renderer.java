@@ -14,6 +14,7 @@ import java.io.PrintStream;
 import java.net.URL;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
+import java.nio.ByteBuffer;
 import java.util.Locale;
 import java.util.ResourceBundle;
 import java.util.prefs.Preferences;
@@ -24,18 +25,25 @@ import java.rmi.server.UID;
 import java.net.URLEncoder;
 import java.io.UnsupportedEncodingException;
 
+import org.lwjgl.system.Platform;
 import org.lwjgl.BufferUtils;
-import org.lwjgl.LWJGLException;
-import org.lwjgl.LWJGLUtil;
 import org.lwjgl.openal.AL;
 import org.lwjgl.openal.AL10;
 import org.lwjgl.opengl.ARBMultisample;
-import org.lwjgl.opengl.Display;
+import com.oddlabs.tt.render.Display;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL13;
-import org.lwjgl.opengl.GLContext;
-import org.lwjgl.input.Keyboard;
-import org.lwjgl.Sys;
+import org.lwjgl.opengl.GL;
+import com.oddlabs.tt.input.Keyboard;
+
+import static org.lwjgl.openal.ALC10.*;
+import static org.lwjgl.openal.AL10.*;
+import static org.lwjgl.openal.ALC.*;
+import static org.lwjgl.system.MemoryUtil.*;
+import org.lwjgl.openal.AL;
+import org.lwjgl.openal.ALC;
+import org.lwjgl.openal.ALCapabilities;
+import org.lwjgl.openal.ALCCapabilities;
 
 import com.oddlabs.net.NetworkSelector;
 import com.oddlabs.regclient.RegistrationClient;
@@ -178,7 +186,7 @@ public final strictfp class Renderer {
 		try {
 			Display.makeCurrent();
 			GLStateStack.setCurrent(display_state_stack);
-		} catch (LWJGLException e) {
+		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
 	}
@@ -207,11 +215,11 @@ public final strictfp class Renderer {
 		GL11.glMatrixMode(GL11.GL_PROJECTION);
 		proj.store(matrix_buf);
 		matrix_buf.rewind();
-		GL11.glLoadMatrix(matrix_buf);
+		GL11.glLoadMatrixf(matrix_buf);
 		GL11.glMatrixMode(GL11.GL_MODELVIEW);
 		camera.getModelView().store(matrix_buf);
 		matrix_buf.rewind();
-		GL11.glLoadMatrix(matrix_buf);
+		GL11.glLoadMatrixf(matrix_buf);
 	}
 
 	public static void multProjection(StrictMatrix4f matrix) {
@@ -281,17 +289,12 @@ public final strictfp class Renderer {
 		System.out.flush();
 		UpdateInfo update_info = null;
 		String platform_dir;
-		switch (LWJGLUtil.getPlatform()) {
-			case LWJGLUtil.PLATFORM_MACOSX:
-				platform_dir = "Library/Application Support" + File.separator;
-				break;
-			case LWJGLUtil.PLATFORM_LINUX:
-				platform_dir = ".";
-				break;
-			case LWJGLUtil.PLATFORM_WINDOWS:
-			default:
-				platform_dir = "";
-				break;
+		if (Platform.get() == Platform.MACOSX) {
+			platform_dir = "Library/Application Support" + File.separator;
+		} else if (Platform.get() == Platform.LINUX) {
+			platform_dir = ".";
+		} else {
+			platform_dir = "";
 		}
 		String game_dir_path = System.getProperty("user.home") + File.separator + platform_dir + Globals.GAME_NAME;
 		File game_dir = new File(game_dir_path);
@@ -340,7 +343,6 @@ System.out.println("last_event_log_path = " + last_event_log_path);
 //			ChecksumLogger.initLogging();
 			LocalEventQueue.getQueue().loadEvents(new File(last_event_log_path), zipped);
 		}
-
 	
 		File event_logs_dir = new File(game_dir, "logs");
 		File event_log_dir = new File(event_logs_dir, Long.toString(System.currentTimeMillis()));
@@ -425,8 +427,9 @@ System.out.println("last_event_log_path = " + last_event_log_path);
 		LocalInput.settings(update_info, game_dir, event_log_dir, settings);
 		try {
 			initNative(crashed, network);
-		} catch (LWJGLException e) {
+		} catch (Exception e) {
 			// Let it propagate
+			System.out.println("Got exception: " + e);
 			throw new RuntimeException(e);
 		}
 		TaskThread task_thread = network.getTaskThread();
@@ -476,7 +479,7 @@ e.printStackTrace();
 		try {
 			while (!finished) {
 				runGameLoop(network, gui);
-				if (AL.isCreated())
+				if (Display.isALCreated())
 					AL10.alListenerf(AL10.AL_GAIN, 1f);
 				if (reset_keyboard) {
 					reset_keyboard = false;
@@ -518,7 +521,7 @@ e.printStackTrace();
 		return default_locale;
 	}
 
-	private final static void failedOpenGL(LWJGLException e) {
+	private final static void failedOpenGL(Exception e) {
 		e.printStackTrace();
 		try {
 			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
@@ -540,8 +543,6 @@ e.printStackTrace();
 			String java_version = System.getProperty("java.version");
 			String java_vendor = System.getProperty("java.vendor");
 			long total_mem = Runtime.getRuntime().maxMemory();
-			String adapter_name = Display.getAdapter();
-			String adapter_version = Display.getVersion();
 
 			try {
 				String url = "http://" + Globals.DOMAIN_NAME +"/driversupport.php?"
@@ -552,11 +553,7 @@ e.printStackTrace();
 					+ "&java_version=" + URLEncoder.encode(java_version, "UTF-8")
 					+ "&java_vendor=" + URLEncoder.encode(java_vendor, "UTF-8")
 					+ "&total_mem=" + URLEncoder.encode("" + total_mem, "UTF-8");
-				if (adapter_name != null)
-					url += "&adapter_name=" + URLEncoder.encode(adapter_name, "UTF-8");
-				if (adapter_version != null)
-					url += "&adapter_version=" + URLEncoder.encode(adapter_version, "UTF-8");
-				Sys.openURL(url);
+				// Sys.openURL(url);
 			} catch (java.io.UnsupportedEncodingException uee) {
 				uee.printStackTrace();
 			}
@@ -651,11 +648,11 @@ e.printStackTrace();
 					main_menu.setMenuCentered(new WelcomeForm(gui_root, main_menu));
 				}
 			}
-		}
+		}/*
 		if (first_progress && Settings.getSettings().warning_no_sound && !LocalInput.alIsCreated()) {
 			ResourceBundle bundle = ResourceBundle.getBundle(Renderer.class.getName());
 			gui_root.addModalForm(new WarningForm(Utils.getBundleString(bundle, "sound_not_available_caption"), Utils.getBundleString(bundle, "sound_not_available_message")));
-		}
+		}*/
 		if (!initNetwork(network)) {
 //		if (true) {
 			ResourceBundle bundle = ResourceBundle.getBundle(Renderer.class.getName());
@@ -708,7 +705,7 @@ e.printStackTrace();
 	}
 
 	private final static void destroyNative() {
-		destroyAL();
+		//destroyAL();
 		Display.destroy();
 	}
 
@@ -721,14 +718,14 @@ e.printStackTrace();
 		int stencil = GLUtils.getGLInteger(GL11.GL_STENCIL_BITS);
 		int sample_buffers = 0;
 		int samples = 0;
-		if (GLContext.getCapabilities().GL_ARB_multisample) {
+		if (GL.getCapabilities().GL_ARB_multisample) {
 			sample_buffers = GLUtils.getGLInteger(ARBMultisample.GL_SAMPLE_BUFFERS_ARB);
 			samples = GLUtils.getGLInteger(ARBMultisample.GL_SAMPLES_ARB);
 		}
 		System.out.println("r = " + r + " | g = " + g + " | b = " + b + " | a = " + a + " | depth = " + depth + " | stencil = " + stencil + " | sample_buffers = " + sample_buffers + " | samples = " + samples);
 	}
 
-	private final void initNative(boolean crashed, NetworkSelector network) throws LWJGLException {
+	private final void initNative(boolean crashed, NetworkSelector network) throws Exception {
 		String os_name = System.getProperty("os.name");
 		System.out.println("os_name = '" + os_name + "'");
 		String os_arch = System.getProperty("os.arch");
@@ -743,31 +740,13 @@ e.printStackTrace();
 		System.out.println("total_mem = '" + total_mem + "'");
 
 		try {
-			AL.create(null, -1, -1, false);
+			//AL.create(null, -1, -1, false);
 			initAL();
-		} catch (LWJGLException e) {
+		} catch (Exception e) {
 			System.err.println("Could not create sound system: " + e);
 		}
 
-		try {
-			int bpp = Display.getDisplayMode().getBitsPerPixel();
-			Keyboard.enableRepeatEvents(true);
-			Display.setTitle("Tribal Trouble");
-			Display.setFullscreen(Settings.getSettings().fullscreen && (!LocalEventQueue.getQueue().getDeterministic().isPlayback() || grab_frames));
-			SerializableDisplayMode target_mode;
-			if (!crashed) {
-				target_mode = new SerializableDisplayMode(Settings.getSettings().new_view_width, Settings.getSettings().new_view_height, bpp, Settings.getSettings().new_view_freq);
-			} else {
-				target_mode = new SerializableDisplayMode(Settings.getSettings().view_width, Settings.getSettings().view_height, bpp, Settings.getSettings().view_freq);
-			}
-			LocalInput.getLocalInput().setModeToNearest(target_mode);
-//if (System.currentTimeMillis() > 0)
-//throw new LWJGLException("Det fejlede fordi du bad den om det");
-		} catch (LWJGLException e) {
-			destroyAL();
-			failedOpenGL(e);
-			throw e;
-		}
+		makeCurrent();
 		String version = GL11.glGetString(GL11.GL_VERSION);
 		System.out.println("GL version: '" + version + "'");
 		String vendor = GL11.glGetString(GL11.GL_VENDOR);
@@ -783,22 +762,24 @@ e.printStackTrace();
 		
 		dumpWindowInfo();
 		try {
-			if (!GLContext.getCapabilities().OpenGL13) {
-				if (!GLContext.getCapabilities().GL_ARB_multitexture)
-					throw new LWJGLException("Neither OpenGL 1.3 nor GL_ARB_multitexture is supported, one of which is required for the game to run. Please upgrade your video drivers and/or video card.");
+			if (!GL.getCapabilities().OpenGL13) {
+				if (!GL.getCapabilities().GL_ARB_multitexture)
+					throw new Exception("Neither OpenGL 1.3 nor GL_ARB_multitexture is supported, one of which is required for the game to run. Please upgrade your video drivers and/or video card.");
 				System.out.println("OpenGL 1.3 is not supported, using GL_ARB_multitexture and GL_ARB_texture_compression instead");
 			} else
 				System.out.println("OpenGL 1.3 is supported");
-			int num_tex_units = GLUtils.getGLInteger(GL13.GL_MAX_TEXTURE_UNITS);
-			if (num_tex_units < 2)
-				throw new LWJGLException("Number of texture units " + num_tex_units + " < 2");
-		} catch (LWJGLException e) {
-			destroyAL();
+//			int num_tex_units = GLUtils.getGLInteger(GL13.GL_MAX_TEXTURE_UNITS);
+//			if (num_tex_units < 2)
+//				throw new Exception("Number of texture units " + num_tex_units + " < 2");
+		} catch (Exception e) {
+			//destroyAL();
+			e.printStackTrace();
+			System.out.println("Got exception: " + e);
 			Display.destroy();
 			failedOpenGL(e);
 			throw e;
 		}
-		if (!GLContext.getCapabilities().OpenGL12)
+		if (!GL.getCapabilities().OpenGL12)
 			System.out.println("OpenGL 1.2 is not supported");
 		display_state_stack = new GLStateStack();
 		GLStateStack.setCurrent(display_state_stack);
@@ -808,19 +789,26 @@ System.out.println("vbo = " + Settings.getSettings().useVBO());
 System.out.println("pbuffer = " + Settings.getSettings().usePbuffer());
 System.out.println("fbo = " + Settings.getSettings().useFBO());
 System.out.println("use_texture_compression = " + Settings.getSettings().useTextureCompression());
-		if (Settings.getSettings().vsync)
-			Display.setVSyncEnabled(true);
+		/*if (Settings.getSettings().vsync)
+			Display.setVSyncEnabled(true);*/
 		initGL();
 		initVisibleGL();
 	}
 
-	private final void initAL() {
-		if (AL.isCreated()) {
-			AL10.alDistanceModel(AL10.AL_INVERSE_DISTANCE);
-//			resetMusicPath();
-//			if (Settings.getSettings().play_music)
-//				initMusicPlayer();
-		}
+	private final void initAL() throws IllegalStateException {
+		long device = alcOpenDevice((ByteBuffer) null);
+		if (device == NULL)
+			throw new IllegalStateException("Failed to open default audio device");
+
+		long context = alcCreateContext(device, (IntBuffer) null);
+		if (context == NULL)
+			throw new IllegalStateException("Failed to create OpenAL context");
+
+		alcMakeContextCurrent(context);
+		ALCCapabilities alcCaps = createCapabilities(device);
+		ALCapabilities alCaps = AL.createCapabilities(alcCaps);
+		
+		AL10.alDistanceModel(AL10.AL_INVERSE_DISTANCE);
 	}
 
 	public final void toggleSound() {
@@ -845,7 +833,7 @@ System.out.println("use_texture_compression = " + Settings.getSettings().useText
 	}
 
 	public final static void setMusicPath(String music_path, float delay) {
-		if (AL.isCreated()) {
+		if (Display.isALCreated()) {
 			if (music != null && Settings.getSettings().play_music) {
 				music.stop(2.5f, Settings.getSettings().music_gain);
 			}
@@ -875,9 +863,9 @@ System.out.println("use_texture_compression = " + Settings.getSettings().useText
 	}
 
 	private final static void destroyAL() {
-		if (AL.isCreated()) {
+		if (Display.isALCreated()) {
 			AudioManager.getManager().destroy();
-			AL.destroy();
+			// AL.destroy();
 		}
 	}
 
@@ -892,18 +880,18 @@ System.out.println("use_texture_compression = " + Settings.getSettings().useText
 		float[] light_diff_color = {1.0f, 1.0f, 1.0f, 1.0f};
 		float_array.put(light_diff_color);
 		float_array.rewind();
-		GL11.glLight(GL11.GL_LIGHT0, GL11.GL_DIFFUSE, float_array);
+		GL11.glLightfv(GL11.GL_LIGHT0, GL11.GL_DIFFUSE, float_array);
 		GL11.glLightModeli(GL11.GL_LIGHT_MODEL_LOCAL_VIEWER, 1);
 
 		float[] global_ambient = {0.65f, 0.65f, 0.65f, 1.0f};
 		float_array.put(global_ambient);
 		float_array.rewind();
-		GL11.glLightModel(GL11.GL_LIGHT_MODEL_AMBIENT, float_array);
+		GL11.glLightModelfv(GL11.GL_LIGHT_MODEL_AMBIENT, float_array);
 		float[] material_color = {1.0f, 1.0f, 1.0f, 1.0f};
 		float_array.put(material_color);
 		float_array.rewind();
-		GL11.glMaterial(GL11.GL_FRONT_AND_BACK, GL11.GL_AMBIENT_AND_DIFFUSE, float_array);
-		Display.update();
+		GL11.glMaterialfv(GL11.GL_FRONT_AND_BACK, GL11.GL_AMBIENT_AND_DIFFUSE, float_array);
+	//	Display.update();
 	}
 
 	public final static void initGL() {
