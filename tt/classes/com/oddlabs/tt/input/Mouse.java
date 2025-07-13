@@ -76,7 +76,7 @@ public final strictfp class Mouse {
         GLFW.glfwSetScrollCallback(window, new GLFWScrollCallback() {
             @Override
             public void invoke(long win, double xoffset, double yoffset) {
-                dWheel = (int)yoffset;
+                dWheel = (int)(yoffset * 100);
                 eventQueue.offer(new MouseEvent(mouseX, mouseY, 0, 0, dWheel, -1, false, EventType.SCROLL));
             }
         });
