@@ -846,4 +846,32 @@ public class Matrix4f extends Matrix implements Serializable {
 
 		return dest;
 	}
+
+    /*
+     * Create an ortho matrix
+     */
+    public void ortho(float left, float right, float bottom, float top, float near, float far) {
+        m00 = 2.0f / (right - left);
+        m11 = 2.0f / (top - bottom);
+        m22 = -2.0f / (far - near);
+        m30 = -(right + left) / (right - left);
+        m31 = -(top + bottom) / (top - bottom);
+        m32 = -(far + near) / (far - near);
+        m33 = 1.0f;
+        m01 = m02 = m03 = m10 = m12 = m13 = m20 = m21 = m23 = 0.0f;
+    }
+
+    /*
+     * Create a perspective matrix
+     */
+    public void perspective(float fovY, float aspect, float near, float far) {
+        float f = (float)(1.0 / Math.tan(Math.toRadians(fovY) / 2.0));
+        m00 = f / aspect;
+        m11 = f;
+        m22 = (far + near) / (near - far);
+        m23 = -1.0f;
+        m32 = (2f * far * near) / (near - far);
+        m33 = 0.0f;
+        m01 = m02 = m03 = m10 = m12 = m13 = m20 = m21 = m30 = m31 = 0.0f;
+    }
 }

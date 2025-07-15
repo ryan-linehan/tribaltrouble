@@ -5,7 +5,6 @@ import java.util.List;
 
 import org.lwjgl.BufferUtils;
 import com.oddlabs.tt.input.Keyboard;
-import org.lwjgl.opengl.GL11;
 
 import com.oddlabs.tt.camera.GameCamera;
 import com.oddlabs.tt.camera.CameraState;
@@ -23,6 +22,7 @@ import com.oddlabs.tt.player.BuildingSiteScanFilter;
 import com.oddlabs.tt.render.BuildingSiteRenderer;
 import com.oddlabs.tt.render.LandscapeLocation;
 import com.oddlabs.tt.render.Picker;
+import com.oddlabs.tt.render.GW;
 import com.oddlabs.tt.viewer.WorldViewer;
 import com.oddlabs.tt.gui.*;
 
@@ -62,13 +62,6 @@ public final strictfp class PlacingDelegate extends ControllableCameraDelegate {
 		}
 	}
 
-	/*private final void glGridVertex(int grid_x, int grid_y, int meters_per_grid_unit) {
-		float x = grid_x*meters_per_grid_unit;
-		float y = grid_y*meters_per_grid_unit;
-		float z = getViewer().getWorld().getHeightMap().getVisuallyCorrectHeight(x, y);
-		GL11.glVertex3f(x, y, z);
-	}
-	*/
 	public final void keyPressed(KeyboardEvent event) {
 		getCamera().keyPressed(event);
 		switch (event.getKeyCode()) {
@@ -116,25 +109,17 @@ public final strictfp class PlacingDelegate extends ControllableCameraDelegate {
 		List target_list = filter.getResult();
 		site_renderer.renderSites(renderer, target_list, center_x, center_y, 2*GRID_RADIUS);
 		
-
-		
-	//	GL11.glEnable(GL11.GL_BLEND);
-		//renderPlaceGrid(placing_grid_x, placing_grid_y, getTemplate().getPlacingSize()*2 - 1);
-	//	GL11.glTexEnvf(GL11.GL_TEXTURE_ENV, GL11.GL_TEXTURE_ENV_MODE, GL11.GL_MODULATE);
 		SpriteRenderer built_renderer = queues.getRenderer(getTemplate().getBuiltRenderer());
 		built_renderer.setupWithColor(0, color, false, true);
 		if (Building.isPlacingLegal(unit_grid, getTemplate(), placing_center_grid_x, placing_center_grid_y))
-			GL11.glColor4f(1f, 1f, 1f, .8f);
+			GW.glColor4f(1f, 1f, 1f, .8f);
 		else 
-			GL11.glColor4f(1f, 0f, 0f, .8f);
+			GW.glColor4f(1f, 0f, 0f, .8f);
 		float z = getViewer().getWorld().getHeightMap().getNearestHeight(center_x, center_y);
-		GL11.glPushMatrix();
-		GL11.glTranslatef(center_x, center_y, z);
-		//Model.setupDecalColor(getViewer().getLocalPlayer().getColor());
+		GW.glPushMatrix();
+		GW.translate(center_x, center_y, z);
 		built_renderer.getSpriteList().render(0, 0, 0);
 		built_renderer.getSpriteList().reset(0, false, true);
-		GL11.glPopMatrix();
-	//	GL11.glTexEnvf(GL11.GL_TEXTURE_ENV, GL11.GL_TEXTURE_ENV_MODE, GL11.GL_REPLACE);
-	//	GL11.glDisable(GL11.GL_BLEND);
+		GW.glPopMatrix();
 	}
 }

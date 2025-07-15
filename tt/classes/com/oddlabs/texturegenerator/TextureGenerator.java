@@ -2,9 +2,6 @@ package com.oddlabs.texturegenerator;
 
 import java.io.File;
 
-import org.lwjgl.opengl.*;
-import org.lwjgl.*;
-
 import com.oddlabs.geometry.LowDetailModel;
 import com.oddlabs.tt.render.SpriteList;
 import com.oddlabs.tt.global.Globals;
@@ -12,6 +9,7 @@ import com.oddlabs.tt.global.Settings;
 import com.oddlabs.tt.render.BillboardPainter;
 import com.oddlabs.tt.render.Display;
 import com.oddlabs.tt.render.PixelFormat;
+import com.oddlabs.tt.render.GW;
 import com.oddlabs.tt.resource.Resources;
 import com.oddlabs.tt.resource.SpriteFile;
 import com.oddlabs.tt.util.OffscreenRenderer;
@@ -79,16 +77,14 @@ public final strictfp class TextureGenerator {
 	}
 
 	private final static void generateBillboardMip(LowDetailModel lowdetail, TextureGenerator renderer, int mode, float ortho_size, int tex_index) {
-		GL11.glMatrixMode(GL11.GL_PROJECTION);
-		GL11.glLoadIdentity();
-		GL11.glOrtho(0.0f, ortho_size, 0.0f, ortho_size, -50.0f, 50.0f);
-		GL11.glMatrixMode(GL11.GL_MODELVIEW);
+		GW.glMatrixMode(GW.GL_PROJECTION);
+		GW.glLoadIdentity();
+		GW.ortho(0.0f, ortho_size, 0.0f, ortho_size, -50.0f, 50.0f);
+		GW.glMatrixMode(GW.GL_MODELVIEW);
 		BillboardPainter.init();
 		for (int i = 0; i < lowdetail.getIndices().length/3; i++) {
 			BillboardPainter.loadFaceMatrixAndClipPlanes(i, lowdetail.getIndices(), lowdetail.getVertices(), lowdetail.getTexCoords());
 			renderer.renderModel(mode, tex_index);
-//buffer.dumpToFile("test_bill" + i + ".image");
-//GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
 		}
 		BillboardPainter.finish();
 	}
@@ -96,9 +92,9 @@ public final strictfp class TextureGenerator {
 	private final static void drawBillboardsToBuffer(LowDetailModel[] lowdetails, TextureGenerator renderer, int[] modes, OffscreenRenderer buffer, int format, int mipmap_cutoff, int tex_index) {
 		int ortho_size = 1;
 		float[] clear_color = renderer.getModelClearColor();
-		GL11.glClearColor(clear_color[0], clear_color[1], clear_color[2], 0f);
-		GL11.glEnable(GL11.GL_ALPHA_TEST);
-		GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
+		GW.glClearColor(clear_color[0], clear_color[1], clear_color[2], 0f);
+		GW.glEnable(GW.GL_ALPHA_TEST);
+		GW.glClear(GW.GL_COLOR_BUFFER_BIT | GW.GL_DEPTH_BUFFER_BIT);
 		for (int i = 0; i < lowdetails.length; i++)
 			generateBillboardMip(lowdetails[i], renderer, modes[i], ortho_size, tex_index);
 	}

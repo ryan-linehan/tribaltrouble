@@ -7,7 +7,6 @@ import java.util.ResourceBundle;
 import java.util.Set;
 
 import com.oddlabs.tt.input.Keyboard;
-import org.lwjgl.opengl.GL11;
 
 import com.oddlabs.tt.net.DistributableTable;
 import com.oddlabs.tt.camera.GameCamera;
@@ -26,6 +25,7 @@ import com.oddlabs.tt.global.Globals;
 import com.oddlabs.tt.viewer.WorldViewer;
 import com.oddlabs.tt.landscape.World;
 import com.oddlabs.tt.render.Picker;
+import com.oddlabs.tt.render.GW;
 import com.oddlabs.matchmaking.Game;
 import com.oddlabs.tt.util.Target;
 import com.oddlabs.tt.util.Utils;
@@ -418,21 +418,7 @@ public final strictfp class SelectionDelegate extends ControllableCameraDelegate
 
 	public final void render2D() {
 		if (selection) {
-			GL11.glColor3f(.3f, 1f, 0f);
-			GL11.glPolygonMode(GL11.GL_FRONT, GL11.GL_LINE);
-			GL11.glPolygonMode(GL11.GL_BACK, GL11.GL_LINE);
-			GL11.glDisable(GL11.GL_CULL_FACE);
-			GL11.glDisable(GL11.GL_TEXTURE_2D);
-			GL11.glBegin(GL11.GL_QUADS);
-				GL11.glVertex3f(selection_x1, selection_y1, 0f);
-				GL11.glVertex3f(selection_x2, selection_y1, 0f);
-				GL11.glVertex3f(selection_x2, selection_y2, 0f);
-				GL11.glVertex3f(selection_x1, selection_y2, 0f);
-			GL11.glEnd();
-			GL11.glEnable(GL11.GL_TEXTURE_2D);
-			GL11.glEnable(GL11.GL_CULL_FACE);
-			GL11.glPolygonMode(GL11.GL_FRONT, GL11.GL_FILL);
-			GL11.glPolygonMode(GL11.GL_BACK, GL11.GL_FILL);
+            GW.renderRect(selection_x1, selection_x2, selection_y1, selection_y2, 0f, .3f, 1f, 0f, 1f);
 		}
 	}
 
