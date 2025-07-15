@@ -8,10 +8,6 @@ import java.util.ResourceBundle;
 
 import com.oddlabs.tt.render.Display;
 
-import org.lwjgl.glfw.GLFW;
-import org.lwjgl.opengl.GL;
-import static org.lwjgl.opengl.GL11.*;
-
 public final strictfp class Main {
 	public final static void fail(Throwable t) {
 		try {
@@ -39,13 +35,6 @@ public final strictfp class Main {
 			System.out.flush();
 			Main.class.getClassLoader().setDefaultAssertionStatus(true);
             Display.create();
-
-            /*while (!GLFW.glfwWindowShouldClose(Display.window())) {
-                glClear(GL_COLOR_BUFFER_BIT);
-                GLFW.glfwSwapBuffers(Display.window());
-                GLFW.glfwPollEvents();
-            }*/
-
 			Renderer.runGame(args);
 		} catch (Throwable t) {
 			fail(t);
