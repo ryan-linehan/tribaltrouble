@@ -41,12 +41,11 @@ public final strictfp class Display {
        /* GLFW.glfwWindowHint(GLFW.GLFW_CONTEXT_VERSION_MAJOR, 3);
         GLFW.glfwWindowHint(GLFW.GLFW_CONTEXT_VERSION_MINOR, 3);
         GLFW.glfwWindowHint(GLFW.GLFW_OPENGL_PROFILE, GLFW.GLFW_OPENGL_CORE_PROFILE);*/
+        
+        GLFWVidMode videoMode = GLFW.glfwGetVideoMode(monitor);
 
-        // TODO: Consider using different resolutions when OpenGL is rewritten.
-        // The game only works with a specific resolution for now.
-        // We can't just use the current one from the system.
-        // width = videoMode.width();
-        // height = videoMode.height();
+        width = videoMode.width();
+        height = videoMode.height();
 
         window = GLFW.glfwCreateWindow(width, height, title, monitor, 0);
 
