@@ -2,7 +2,7 @@
 	<import file="../common/common.xml"/>
 	<property name="jre" value="jre1.8.0_381"/>
 	<property name="main_class" value="com.oddlabs.tt.Main"/>
-    <property name="classpath" value="../common/build/classes:${lib}/javasvn.jar:${lib}/lwjgl.jar:${lib}/lwjgl-natives-linux.jar:${lib}/lwjgl-glfw.jar:${lib}/lwjgl-glfw-natives-linux.jar:${lib}/lwjgl-opengl.jar:${lib}/lwjgl-opengl-natives-linux.jar:${lib}/lwjgl-openal.jar:${lib}/lwjgl-openal-natives-linux.jar:${lib}/lwjgl-jawt.jar:${lib}/jorbis.jar:${lib}/jsquish.jar"/>
+    <property name="classpath" value="../common/build/classes:${lib}/javasvn.jar:${lib}/lwjgl.jar:${lib}/lwjgl-natives-linux.jar:${lib}/lwjgl-glfw.jar:${lib}/lwjgl-glfw-natives-linux.jar:${lib}/lwjgl-opengl.jar:${lib}/lwjgl-opengl-natives-linux.jar:${lib}/lwjgl-openal.jar:${lib}/lwjgl-openal-natives-linux.jar:${lib}/lwjgl-jawt.jar:${lib}/jorbis.jar:${lib}/jsquish.jar:${lib}/lwjgl-natives-windows.jar:${lib}/lwjgl-glfw-natives-windows.jar:${lib}/lwjgl-opengl-natives-windows.jar:${lib}/lwjgl-openal-natives-windows.jar"/>
 	<property name="res_classpath" value="${build}:static:i18n:${commonstatic}"/>
 
 	<property name="revision_number_file" location="${build}/revision_number"/>
