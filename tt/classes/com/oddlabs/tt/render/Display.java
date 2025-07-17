@@ -111,6 +111,10 @@ public final strictfp class Display {
         return true;
     }
 
+    public static String getClipboard() {
+        return "";//glfwGetClipboardString(window);
+    }
+
     public static boolean isALCreated() {
         return true;
     }
