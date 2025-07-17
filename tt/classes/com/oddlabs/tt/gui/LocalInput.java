@@ -40,8 +40,6 @@ public final strictfp class LocalInput {
 	private static boolean global_shift_state = false;
 	private final static boolean[] keys = new boolean[256];
 
-	private static int view_width;
-	private static int view_height;
 	private static boolean fullscreen;
 	private static File game_dir;
 	private static int revision;
@@ -161,11 +159,11 @@ public final strictfp class LocalInput {
 	}
 
 	public final static int getViewWidth() {
-		return view_width;
+		return Display.getWidth();
 	}
 
 	public final static int getViewHeight() {
-		return view_height;
+		return Display.getHeight();
 	}
 
 	public final static boolean inFullscreen() {
@@ -183,8 +181,6 @@ public final strictfp class LocalInput {
 			String revision_string = in.readLine();
 			in.close();
 			revision = (new Integer(revision_string)).intValue();
-            view_width = Display.getWidth();
-            view_height = Display.getHeight();
 		} catch (Exception e) {
 			revision = -1;
 		}
@@ -213,11 +209,11 @@ public final strictfp class LocalInput {
 	}
 
 	public static final float getViewAspect() {
-		return (float)view_width/view_height;
+		return (float)getViewWidth()/getViewHeight();
 	}
 
 	private static final float getUnitsPerPixel() {
-		return (float)(Globals.VIEW_MIN*StrictMath.tan(Globals.FOV*(StrictMath.PI/180.0f)*0.5d)/(view_height*0.5d));
+		return (float)(Globals.VIEW_MIN*StrictMath.tan(Globals.FOV*(StrictMath.PI/180.0f)*0.5d)/(getViewHeight()*0.5d));
 	}
 
 	public static final float getErrorConstant() {
