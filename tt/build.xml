@@ -306,5 +306,23 @@
 			<arg value="tribaltrouble.ico"/>
 		</exec>
 
+		<copy todir="${dist}/windows/TribalTrouble/app">
+			<fileset dir="${lib}">
+				<include name="lwjgl-natives-windows.jar"/>
+				<include name="lwjgl-glfw-natives-windows.jar"/>
+				<include name="lwjgl-opengl-natives-windows.jar"/>
+				<include name="lwjgl-openal-natives-windows.jar"/>
+			</fileset>
+		</copy>
+
+		<!-- Delete Linux libraries (Remove once linux libraries moved from dist/common/ ) -->
+		<delete>
+			<fileset dir="${dist}/windows/TribalTrouble/app">
+				<include name="lwjgl-natives-linux.jar"/>
+				<include name="lwjgl-glfw-natives-linux.jar"/>
+				<include name="lwjgl-opengl-natives-linux.jar"/>
+				<include name="lwjgl-openal-natives-linux.jar"/>
+			</fileset>
+		</delete>
 	</target>
 </project>
