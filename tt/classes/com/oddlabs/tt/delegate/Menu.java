@@ -133,6 +133,7 @@ public abstract strictfp class Menu extends CameraDelegate {
 	}
 
 	public void displayChangedNotify(int width, int height) {
+		getGUIRoot().displayChanged(width, height);
 		setDim(width, height);
 
 		int y = height - (int)(190f*height/overlay_image_height);

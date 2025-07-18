@@ -45,8 +45,8 @@ public final strictfp class Display {
         // TODO: Consider using different resolutions when OpenGL is rewritten.
         // The game only works with a specific resolution for now.
         // We can't just use the current one from the system.
-        // width = videoMode.width();
-        // height = videoMode.height();
+        width = videoMode.width();
+        height = videoMode.height();
 
         window = GLFW.glfwCreateWindow(width, height, title, monitor, 0);
 

@@ -45,6 +45,7 @@ import com.oddlabs.tt.util.Utils;
 import com.oddlabs.tt.util.ServerMessageBundler;
 import com.oddlabs.router.SessionID;
 import com.oddlabs.net.NetworkSelector;
+import com.oddlabs.tt.gui.LocalInput;
 
 import java.util.ResourceBundle;
 
@@ -145,6 +146,7 @@ public final strictfp class WorldViewer implements Animated {
 		this.picker = new Picker(animation_manager_local, local_player, render_queues, landscape_renderer, selection);
 		this.renderer = new DefaultRenderer(cheat, local_player, render_queues, generator.getTerrainType(), world_info, landscape_renderer, picker, selection, generator);
 		this.gui_root = gui_root;
+		getGUIRoot().displayChanged(LocalInput.getViewWidth(), LocalInput.getViewHeight());
 		this.peerhub = new PeerHub(animation_manager_local, ingame_info.isMultiplayer(), ingame_info.isRated(), local_player, player_slots, network, gui_root, notification_manager, distributable_table, session_id, new ViewerStallHandler(this));
 		this.camera = new GameCamera(this, camera_state);
 		this.panel = new ActionButtonPanel(this, camera);
