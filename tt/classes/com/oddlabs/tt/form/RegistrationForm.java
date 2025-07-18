@@ -160,9 +160,9 @@ public final strictfp class RegistrationForm extends Form implements RegisterPro
 
 	private final strictfp class PasteListener implements MouseClickListener {
 		public final void mouseClicked(int button, int x, int y, int clicks) {
-			String clipboard = (String)LocalEventQueue.getQueue().getDeterministic().log(Display.getClipboard());
-			if (clipboard != null)
-				pasteClipboard(clipboard);
+			// String clipboard = (String)LocalEventQueue.getQueue().getDeterministic().log(Display.getClipboard());
+			// if (clipboard != null)
+			// 	pasteClipboard(clipboard);
 		}
 	}
 
