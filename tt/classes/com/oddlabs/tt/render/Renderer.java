@@ -462,8 +462,23 @@ System.out.println("affiliate_id equals trymedia");
 		GlobalsInit.init();
 		LocalInput.init();
 
-long startup_timei = System.currentTimeMillis() - start_time;
-System.out.println("Init done after " + startup_timei);
+		// Load in player colors
+		// TODO: Do we need to validate these colors and set to defaults if invalid?
+		java.awt.Color player_1_color = java.awt.Color.decode(Settings.getSettings().player_color_1);
+		Player.COLORS[0] = new float[]{player_1_color.getRed() / 255f, player_1_color.getGreen() / 255f, player_1_color.getBlue() / 255f, player_1_color.getAlpha() / 255f};
+		java.awt.Color player_2_color = java.awt.Color.decode(Settings.getSettings().player_color_2);
+		Player.COLORS[1] = new float[]{player_2_color.getRed() / 255f, player_2_color.getGreen() / 255f, player_2_color.getBlue() / 255f, player_2_color.getAlpha() / 255f};
+		java.awt.Color player_3_color = java.awt.Color.decode(Settings.getSettings().player_color_3);
+		Player.COLORS[2] = new float[]{player_3_color.getRed() / 255f, player_3_color.getGreen() / 255f, player_3_color.getBlue() / 255f, player_3_color.getAlpha() / 255f};
+		java.awt.Color player_4_color = java.awt.Color.decode(Settings.getSettings().player_color_4);
+		Player.COLORS[3] = new float[]{player_4_color.getRed() / 255f, player_4_color.getGreen() / 255f, player_4_color.getBlue() / 255f, player_4_color.getAlpha() / 255f};
+		java.awt.Color player_5_color = java.awt.Color.decode(Settings.getSettings().player_color_5);
+		Player.COLORS[4] = new float[]{player_5_color.getRed() / 255f, player_5_color.getGreen() / 255f, player_5_color.getBlue() / 255f, player_5_color.getAlpha() / 255f};
+		java.awt.Color player_6_color = java.awt.Color.decode(Settings.getSettings().player_color_6);
+		Player.COLORS[5] = new float[]{player_6_color.getRed() / 255f, player_6_color.getGreen() / 255f, player_6_color.getBlue() / 255f, player_6_color.getAlpha() / 255f};
+
+		long startup_timei = System.currentTimeMillis() - start_time;
+		System.out.println("Init done after " + startup_timei);
 		ambient = new AmbientAudio(AudioManager.getManager());
 
 		setupMainMenu(network, gui, true);

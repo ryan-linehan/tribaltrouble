@@ -105,6 +105,13 @@ public final strictfp class Settings implements Serializable {
 
 	public int frame_grab_milliseconds_per_frame = 40;
 
+	public String player_color_1 = "#FFBF00";
+	public String player_color_2 = "#0080FF";
+	public String player_color_3 = "#FF0040";
+	public String player_color_4 = "#00FFBF";
+	public String player_color_5 = "#BF00FF";
+	public String player_color_6 = "#BFFF00";
+
 	public final static void setSettings(Settings new_settings) {
 		settings = new_settings;
 	}
