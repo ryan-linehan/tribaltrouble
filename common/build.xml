@@ -1,5 +1,11 @@
 <project name="common" basedir="." default="compile">
 	<import file="common.xml"/>
+    <property name="linux-classpath" value="${lib}/lwjgl-natives-linux.jar:${lib}/lwjgl-glfw-natives-linux.jar:${lib}/lwjgl-opengl-natives-linux.jar:${lib}/lwjgl-openal-natives-linux.jar"/>
+    <property name="macos-arm64-classpath" value="${lib}/lwjgl-natives-macos-arm64.jar:${lib}/lwjgl-glfw-natives-macos-arm64.jar:${lib}/lwjgl-opengl-natives-macos-arm64.jar:${lib}/lwjgl-openal-natives-macos-arm64.jar"/>
+    <property name="macos-x86-classpath" value="${lib}/lwjgl-natives-macos.jar:${lib}/lwjgl-glfw-natives-macos.jar:${lib}/lwjgl-opengl-natives-macos.jar:${lib}/lwjgl-openal-natives-macos.jar"/>
+    <property name="windows-classpath" value="${lib}/lwjgl-natives-windows.jar:${lib}/lwjgl-glfw-natives-windows.jar:${lib}/lwjgl-opengl-natives-windows.jar:${lib}/lwjgl-openal-natives-windows.jar"/>
 
-    <property name="classpath" value="../common/build/classes:${lib}/lwjgl-natives-linux.jar:${lib}/lwjgl-glfw.jar:${lib}/lwjgl-glfw-natives-linux.jar:${lib}/lwjgl-opengl.jar:${lib}/lwjgl-opengl-natives-linux.jar:${lib}/lwjgl-openal.jar:${lib}/lwjgl-openal-natives-linux.jar:${lib}/lwjgl-jawt.jar:${lib}/jsquish.jar:${lib}/javasvn.jar:${lib}/lwjgl.jar:${lib}/jorbis.jar:${lib}/commons-pool-1.2.jar:${lib}/commons-dbcp-1.2.1.jar:${lib}/commons-collections-3.1.jar:${lib}/lwjgl-natives-macos-arm64.jar:${lib}/lwjgl-glfw-natives-macos-arm64.jar:${lib}/lwjgl-glfw-natives-macos-arm64.jar:${lib}/lwjgl-openal-natives-macos-arm64.jar"/>
+    <property name="platform-classpaths" value="${linux-classpath}:${macos-arm64-classpath}:${windows-classpath}:${macos-x86-classpath}"/>
+
+    <property name="classpath" value="../common/build/classes:{lib}/lwjgl-glfw.jar:${lib}/lwjgl-opengl.jar{lib}/lwjgl-openal.jar:${lib}/lwjgl-jawt.jar:${lib}/jsquish.jar:${lib}/javasvn.jar:${lib}/lwjgl.jar:${lib}/jorbis.jar:${lib}/commons-pool-1.2.jar:${lib}/commons-dbcp-1.2.1.jar:${lib}/commons-collections-3.1.jar:${platform-classpaths}"/>
 </project>
