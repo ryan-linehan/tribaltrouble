@@ -287,13 +287,23 @@ public strictfp class EditLine extends TextField {
 
     private void pasteClipboard() {
         String clipboard = (String) LocalEventQueue.getQueue().getDeterministic().log(Sys.getClipboard());
-        if (clipboard != null) {
+        if (clipboard != null) {            
+            for (char item : clipboard.toCharArray()) {
+                if (!isAllowed(item)) {
+                    return;
+                }
+            }
+
             if (selectionStart != -1 && selectionEnd != -1 && selectionStart != selectionEnd) {
                 // delete the selected text first
                 String beforeReplace = getContents().substring(0, selectionStart);
                 String afterReplace = getContents().substring(beforeReplace.length() + (selectionEnd - selectionStart), getContents().length());
-                set(beforeReplace + clipboard + afterReplace);
-                // Set cursor after the pasted content                
+                String newContent = beforeReplace + clipboard + afterReplace;
+                if(newContent.length() > max_chars) {
+                    return;
+                }
+                set(newContent);
+                // Set cursor after the pasted content
                 setIndex(beforeReplace.length() + clipboard.length());
                 // Clear selection
                 selectionStart = -1;
@@ -301,7 +311,11 @@ public strictfp class EditLine extends TextField {
             } else {
                 String beforeCursorString = getContents().substring(0, getIndex());
                 String afterCursorString = getContents().substring(getIndex());
-                set(beforeCursorString + clipboard + afterCursorString);
+                String newContent = beforeCursorString + clipboard + afterCursorString;
+                if(newContent.length() > max_chars) {
+                    return;
+                }
+                set(newContent);
                 setIndex(beforeCursorString.length() + clipboard.length());
             }
         }
@@ -368,8 +382,6 @@ public strictfp class EditLine extends TextField {
                 && (event.getKeyChar() != '\0'
                 || event.getKeyCode() == Keyboard.KEY_DELETE
                 || event.getKeyCode() == Keyboard.KEY_BACK)) {
-            System.out.println("Key Pressed: " + event.getKeyChar());
-            // Everything up to the selection
             String beforeReplace;
             if (event.getKeyCode() != Keyboard.KEY_BACK && event.getKeyCode() != Keyboard.KEY_DELETE) {
                 beforeReplace = getContents().substring(0, selectionStart) + event.getKeyChar();
