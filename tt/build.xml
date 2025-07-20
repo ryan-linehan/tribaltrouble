@@ -287,6 +287,7 @@
 		</copy>
 		
 		<copy todir="${dist}/common" file="../binaries/registration"/>
+		<copy todir="${dist}/common" file="config.properties"/>
 	</target>
 
 	<!-- ant dist MUST be ran first. -->
@@ -326,6 +327,7 @@
 				<include name="lwjgl-openal-natives-windows.jar"/>
 			</fileset>
 		</copy>
+		<copy todir="${dist}/windows/TribalTrouble" file="config.properties"/>
 
 		<!-- Delete Linux libraries (Remove once linux libraries moved from dist/common/ ) -->
 		<delete>
