@@ -1,5 +1,6 @@
-package com.oddlabs.tt.gui;
 
+package com.oddlabs.tt.gui;
+import org.lwjgl.opengl.GL11;
 import com.oddlabs.util.Quad;
 
 public final strictfp class Box {
@@ -83,5 +84,23 @@ public final strictfp class Box {
 
 	public final int getTopOffset() {
 		return top_offset;
+	}
+
+		/**
+	 * Renders a solid color rectangle for highlights (e.g., text selection).
+	 * @param x left position
+	 * @param y top position
+	 * @param width rectangle width
+	 * @param height rectangle height
+	 * @param r red (0-1)
+	 * @param g green (0-1)
+	 * @param b blue (0-1)
+	 * @param a alpha (0-1)
+	 */
+	public void renderHighlight(float x, float y, int width, int height) {
+		// Use the center quad for highlight rendering, set alpha if supported
+		if (center != null && center.length > 0 && center[Skin.NORMAL] != null) {
+			center[Skin.NORMAL].render(x, y, width, height);
+		}
 	}
 }
