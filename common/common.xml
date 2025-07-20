@@ -116,6 +116,8 @@
 			<jvmarg value="-Dorg.lwjgl.util.Debug=true"/>
 			<jvmarg value="-Xmx80000000"/>
 			<jvmarg value="-Djdk.crypto.KeyAgreement.legacyKDF=true"/>
+			<!-- TODO: Should this be platform specific? Neccessary for macos -->
+			<jvmarg value="-XstartOnFirstThread"/>
 			<!--<jvmarg value="-Djavax.net.debug=ssl,handshake,trustmanager"/>-->
 			<!--	<jvmarg value="-Dorg.lwjgl.opengl.Window.undecorated=true"/>-->
 		</java>
