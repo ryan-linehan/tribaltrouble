@@ -3,7 +3,9 @@ package com.oddlabs.tt.gui;
 import com.oddlabs.tt.event.LocalEventQueue;
 import java.util.ArrayList;
 import java.util.List;
-
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.StringSelection;
+import java.awt.Toolkit;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.Sys;
 import com.oddlabs.tt.font.Index;
@@ -70,8 +72,11 @@ public strictfp class EditLine extends TextField {
     }
 
     /**
-     * Renders the text highlight for the selected text by using the selectionStart and selectionEnd values.
-     * @param text_renderer The text line renderer - to calculate the highlight positions.
+     * Renders the text highlight for the selected text by using the
+     * selectionStart and selectionEnd values.
+     *
+     * @param text_renderer The text line renderer - to calculate the highlight
+     * positions.
      * @param x The x position.
      * @param y The y position.
      * @param offset_x The x offset for highlight to start in the box
@@ -266,14 +271,23 @@ public strictfp class EditLine extends TextField {
         if (LocalInput.isControlDownCurrently() && event.getKeyCode() == Keyboard.KEY_V) {
             pasteClipboard();
             return true;
-        } // Highlight text
+        } else if (LocalInput.isControlDownCurrently() && event.getKeyCode() == Keyboard.KEY_C) {
+            copySelectionToClipboard();
+            return true;
+        } else if (LocalInput.isControlDownCurrently() && event.getKeyCode() == Keyboard.KEY_A) {            
+            selectionStart = 0;
+            selectionEnd = getContents().length();
+            setIndex(selectionEnd);
+            correctOffsetX();
+            return true;
+        }
         return false;
     }
 
     private void pasteClipboard() {
         String clipboard = (String) LocalEventQueue.getQueue().getDeterministic().log(Sys.getClipboard());
         if (clipboard != null) {
-            if(selectionStart != -1 && selectionEnd != -1 && selectionStart != selectionEnd) {
+            if (selectionStart != -1 && selectionEnd != -1 && selectionStart != selectionEnd) {
                 // delete the selected text first
                 String beforeReplace = getContents().substring(0, selectionStart);
                 String afterReplace = getContents().substring(beforeReplace.length() + (selectionEnd - selectionStart), getContents().length());
@@ -283,13 +297,22 @@ public strictfp class EditLine extends TextField {
                 // Clear selection
                 selectionStart = -1;
                 selectionEnd = -1;
-            }
-            else {
+            } else {
                 String beforeCursorString = getContents().substring(0, getIndex());
                 String afterCursorString = getContents().substring(getIndex());
                 set(beforeCursorString + clipboard + afterCursorString);
                 setIndex(beforeCursorString.length() + clipboard.length());
             }
+        }
+    }
+
+    private void copySelectionToClipboard() {
+        if (selectionStart != -1 && selectionEnd != -1 && selectionStart != selectionEnd) {
+            String selectedText = getContents().substring(selectionStart, selectionEnd);
+
+            Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+            StringSelection selection = new StringSelection(selectedText);
+            clipboard.setContents(selection, null);
         }
     }
 
@@ -347,7 +370,7 @@ public strictfp class EditLine extends TextField {
             System.out.println("Key Pressed: " + event.getKeyChar());
             // Everything up to the selection
             String beforeReplace;
-            if (event.getKeyCode() != Keyboard.KEY_BACK && event.getKeyCode() != Keyboard.KEY_DELETE) {                
+            if (event.getKeyCode() != Keyboard.KEY_BACK && event.getKeyCode() != Keyboard.KEY_DELETE) {
                 beforeReplace = getContents().substring(0, selectionStart) + event.getKeyChar();
             } else {
                 beforeReplace = getContents().substring(0, selectionStart);
@@ -359,7 +382,6 @@ public strictfp class EditLine extends TextField {
             // System.out.println("afterReplace: '" + afterReplace + "'");
             // System.out.println("newContent: '" + newContent + "'");
             // resets the cursor index to 0
-            
             set(newContent);
 
             // indexing needs to be adjusted based on if a new key is typed or backspace/delete is hit
@@ -383,17 +405,16 @@ public strictfp class EditLine extends TextField {
             selectionStart = -1;
             selectionEnd = -1;
         } // unhighlight if the cursor moves without shift
-        else if (!LocalInput.isShiftDownCurrently() && (event.getKeyCode() == Keyboard.KEY_LEFT || event.getKeyCode() == Keyboard.KEY_RIGHT) 
-                        && (selectionStart != -1 || selectionEnd != -1)) {
+        else if (!LocalInput.isShiftDownCurrently() && (event.getKeyCode() == Keyboard.KEY_LEFT || event.getKeyCode() == Keyboard.KEY_RIGHT)
+                && (selectionStart != -1 || selectionEnd != -1)) {
             // Clear selection if shift is not down and the key pressed is not left/right
-            if(event.getKeyCode() == Keyboard.KEY_LEFT) {
-                setIndex(selectionStart);   
-            }
-            else if(event.getKeyCode() == Keyboard.KEY_RIGHT) {
+            if (event.getKeyCode() == Keyboard.KEY_LEFT) {
+                setIndex(selectionStart);
+            } else if (event.getKeyCode() == Keyboard.KEY_RIGHT) {
                 setIndex(selectionEnd);
             }
             selectionStart = -1;
-            selectionEnd = -1;            
+            selectionEnd = -1;
         }
 
         return false;
