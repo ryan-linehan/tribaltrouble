@@ -264,16 +264,33 @@ public strictfp class EditLine extends TextField {
 
     private boolean doControlModifier(KeyboardEvent event) {
         if (LocalInput.isControlDownCurrently() && event.getKeyCode() == Keyboard.KEY_V) {
-            String clipboard = (String) LocalEventQueue.getQueue().getDeterministic().log(Sys.getClipboard());
-            if (clipboard != null) {
+            pasteClipboard();
+            return true;
+        } // Highlight text
+        return false;
+    }
+
+    private void pasteClipboard() {
+        String clipboard = (String) LocalEventQueue.getQueue().getDeterministic().log(Sys.getClipboard());
+        if (clipboard != null) {
+            if(selectionStart != -1 && selectionEnd != -1 && selectionStart != selectionEnd) {
+                // delete the selected text first
+                String beforeReplace = getContents().substring(0, selectionStart);
+                String afterReplace = getContents().substring(beforeReplace.length() + (selectionEnd - selectionStart), getContents().length());
+                set(beforeReplace + clipboard + afterReplace);
+                // Set cursor after the pasted content                
+                setIndex(beforeReplace.length() + clipboard.length());
+                // Clear selection
+                selectionStart = -1;
+                selectionEnd = -1;
+            }
+            else {
                 String beforeCursorString = getContents().substring(0, getIndex());
                 String afterCursorString = getContents().substring(getIndex());
                 set(beforeCursorString + clipboard + afterCursorString);
                 setIndex(beforeCursorString.length() + clipboard.length());
-                return true;
             }
-        } // Highlight text
-        return false;
+        }
     }
 
     private boolean doShiftModifier(KeyboardEvent event) {
@@ -381,21 +398,4 @@ public strictfp class EditLine extends TextField {
 
         return false;
     }
-    /** TODO: Can we move this to a static function in Utils? It has basically the same logic used in two places now */
-    private final void pasteClipboard(String contents) {
-        contents = contents.trim();
-        clear();
-
-        StringBuffer append_buffer = new StringBuffer();
-        for (int i = 0; i < contents.length(); i++) {
-            char c = contents.charAt(i);
-            if (this.isAllowed(c)) {
-                append_buffer.append(c);
-            }
-        }
-        this.append(append_buffer);
-        // Sets the cursor
-        setIndex(getContents().length());
-    }
-
 }
