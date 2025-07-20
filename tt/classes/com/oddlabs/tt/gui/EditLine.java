@@ -66,9 +66,8 @@ public strictfp class EditLine extends TextField {
     protected void renderText(TextLineRenderer text_renderer, int x, int y, int offset_x, float clip_left, float clip_right, float clip_bottom, float clip_top, int render_index) {
         clip_left = StrictMath.max(clip_left, x);
         clip_right = StrictMath.min(clip_right, x + max_text_width);
-        text_renderer.render(x, y, offset_x, clip_left, clip_right, clip_bottom, clip_top, getText(), render_index);
-
-        renderHighlight(text_renderer, x, y, offset_x);
+        text_renderer.render(x, y, offset_x, clip_left, clip_right, clip_bottom, clip_top, getText(), render_index);        
+        renderHighlight(text_renderer, x, y, offset_x, clip_left, clip_right, clip_bottom, clip_top);   
     }
 
     /**
@@ -81,13 +80,13 @@ public strictfp class EditLine extends TextField {
      * @param y The y position.
      * @param offset_x The x offset for highlight to start in the box
      */
-    private void renderHighlight(TextLineRenderer text_renderer, int x, int y, int offset_x) {
+    private void renderHighlight(TextLineRenderer text_renderer, int x, int y, int offset_x, float clip_left, float clip_right, float clip_bottom, float clip_top) {
         if (selectionStart != -1 && selectionEnd != -1 && selectionStart != selectionEnd) {
             int selStartX = text_renderer.getIndexRenderX(x, y, offset_x, getText(), selectionStart);
             int selEndX = text_renderer.getIndexRenderX(x, y, offset_x, getText(), selectionEnd);
             int highlightLeft = Math.min(selStartX, selEndX);
-            int highlightRight = Math.max(selStartX, selEndX);
-            Skin.getSkin().getEditBox().renderHighlight(highlightLeft, y, highlightRight - highlightLeft, getFont().getHeight());
+            int highlightRight = Math.max(selStartX, selEndX);            
+            Skin.getSkin().getEditBox().renderHighlight(highlightLeft, y, highlightRight - highlightLeft, getFont().getHeight(), clip_left, clip_right, clip_bottom, clip_top);
         }
     }
 
@@ -162,9 +161,11 @@ public strictfp class EditLine extends TextField {
                 break;
         }
         if (doControlModifier(event)) {
+            correctOffsetX();
             return;
         } // Highlight text
         else if (doShiftModifier(event)) {
+            correctOffsetX();
             return;
         }
         correctOffsetX();
