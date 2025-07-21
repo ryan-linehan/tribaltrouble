@@ -152,6 +152,10 @@ public strictfp class EditLine extends TextField {
             case Keyboard.KEY_RETURN:
                 super.keyRepeat(event);
                 break;
+            case Keyboard.KEY_ESCAPE:
+                selectionStart = -1;
+                selectionEnd = -1;
+                break;
             default:
                 char key = event.getKeyChar();
                 if (isAllowed(key)) {
@@ -247,6 +251,11 @@ public strictfp class EditLine extends TextField {
 
     protected final void mousePressed(int button, int x, int y) {
         if (button == LocalInput.LEFT_BUTTON) {
+            if(this.selectionStart != -1 && this.selectionEnd != -1) {
+                this.selectionStart = -1;
+                this.selectionEnd = -1;
+            }
+            
             Box edit_box = Skin.getSkin().getEditBox();
             index = text_renderer.jumpDirect(edit_box.getLeftOffset() + offset_x,
                     edit_box.getBottomOffset(),
