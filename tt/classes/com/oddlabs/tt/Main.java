@@ -80,8 +80,8 @@ public final strictfp class Main {
 
 		// fetch initial settings
 		settings.load(game_dir);
-		Settings.setSettings(settings);					
-		return settings;		
+		Settings.setSettings(settings);
+		return settings;
 	}
 
 

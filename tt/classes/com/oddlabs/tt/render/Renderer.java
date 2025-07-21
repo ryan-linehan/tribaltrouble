@@ -364,7 +364,7 @@ public final strictfp class Renderer {
 			System.out.println("Event log dir: " + last_event_log_dir);
 			try {
 				// For some reason the bug client window will never pop up and the game won't launch do to this
-				// URL url = new URL("https://" + settings.bugreport_address + "/reportbug.php");
+				// URL url = new URL("https://" + settings.getBugreportAddress() + "/reportbug.php");
 				// BugClientWindow.showReporter(url, settings.last_revision, last_event_log_dir);
 				System.out.println("Bug reporter completed");
 			} catch (Exception e) {
@@ -474,7 +474,7 @@ e.printStackTrace();
 		Map parameters = new HashMap();
 		parameters.put("current_affiliate_id", Settings.getSettings().affiliate_id);
 		parameters.put("affiliate_id", affiliate_id);
-		return new HttpRequestParameters("https://" + Settings.getSettings().registration_address + "/oddlabs/registration", parameters);
+		return new HttpRequestParameters("https://" + Settings.getSettings().getRegistrationAddress() + "/oddlabs/registration", parameters);
 	} 
 
 	public final Locale getDefaultLocale() {
@@ -505,7 +505,7 @@ e.printStackTrace();
 			long total_mem = Runtime.getRuntime().maxMemory();
 
 			try {
-				String url = "http://" + Settings.getSettings().domain_name +"/driversupport.php?"
+				String url = "http://" + Settings.getSettings().getDomainName() +"/driversupport.php?"
 					+ "uid=" + URLEncoder.encode(uid, "UTF-8")
 					+ "&raw_os=" + URLEncoder.encode(os_name, "UTF-8")
 					+ "&os_version=" + URLEncoder.encode(os_version, "UTF-8")
