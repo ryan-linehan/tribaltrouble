@@ -1,6 +1,10 @@
 <project name="tt-classpaths" basedir=".">
 	<!-- Provide lib variable to find classpaths -->
 
+	<target name="os-check">
+		<echo message="${os.name}" />
+        <echo message="${os.arch}" />
+	</target>
 
 	<!-- Platform conditions to select for platform.classpath -->
 	<condition property="platform-natives" value="windows.classpath">
@@ -40,19 +44,19 @@
 
 	<path id="macosx.classpath">
 		<fileset dir="${lib}">
-			<include name="lwjgl-natives-macosx.jar" />
-			<include name="lwjgl-opengl-natives-macosx.jar" />
-			<include name="lwjgl-jawt-natives-macosx.jar" />
-			<include name="lwjgl-glfw-natives-macosx.jar" />
+			<include name="lwjgl-natives-macos.jar" />
+			<include name="lwjgl-opengl-natives-macos.jar" />
+			<include name="lwjgl-jawt-natives-macos.jar" />
+			<include name="lwjgl-glfw-natives-macos.jar" />
 		</fileset>
 	</path>
 
 	<path id="macosx-arm64.classpath">
 		<fileset dir="${lib}">
-			<include name="lwjgl-natives-macosx-arm64.jar" />
-			<include name="lwjgl-opengl-natives-macosx-arm64.jar" />
-			<include name="lwjgl-jawt-natives-macosx-arm64.jar" />
-			<include name="lwjgl-glfw-natives-macosx-arm64.jar" />
+			<include name="lwjgl-natives-macos-arm64.jar" />
+			<include name="lwjgl-opengl-natives-macos-arm64.jar" />
+			<include name="lwjgl-jawt-natives-macos-arm64.jar" />
+			<include name="lwjgl-glfw-natives-macos-arm64.jar" />
 		</fileset>
 	</path>
 
