@@ -251,11 +251,11 @@ public strictfp class EditLine extends TextField {
 
     protected final void mousePressed(int button, int x, int y) {
         if (button == LocalInput.LEFT_BUTTON) {
-            if(this.selectionStart != -1 && this.selectionEnd != -1) {
+            if (this.selectionStart != -1 && this.selectionEnd != -1) {
                 this.selectionStart = -1;
                 this.selectionEnd = -1;
             }
-            
+
             Box edit_box = Skin.getSkin().getEditBox();
             index = text_renderer.jumpDirect(edit_box.getLeftOffset() + offset_x,
                     edit_box.getBottomOffset(),
@@ -347,7 +347,54 @@ public strictfp class EditLine extends TextField {
     }
 
     private boolean doShiftModifier(KeyboardEvent event) {
-        if (LocalInput.isShiftDownCurrently() && event.getKeyCode() == Keyboard.KEY_HOME) {
+        // TODO: Same but for ctrl
+        if (LocalInput.isShiftDownCurrently() && LocalInput.isControlDownCurrently() && event.getKeyCode() == Keyboard.KEY_LEFT) {
+            // WORD selection to the left
+            String contents = getContents();
+            if (getIndex() == 0) {
+                return true;
+            }
+            // cursor at start of selection / no selection
+            // select until a space is seen
+            // if a space is seen immediately select until the next space
+            // if start of line is then just keep cursor and selection
+            System.out.println("Selecting word to the left");
+            boolean isCursorAtStartOfSelection = getIndex() <= selectionStart || selectionStart == -1;
+            int startingIndex = getIndex();
+
+            if (!isCursorAtStartOfSelection) {
+                startingIndex = selectionStart;
+            }
+
+            boolean characterBehindCursorIsSpace = contents.charAt(getIndex()) == ' ';
+
+            if (characterBehindCursorIsSpace) {
+                while (startingIndex > 0 && contents.charAt(startingIndex) == ' ') {
+                    startingIndex--;
+                }
+            }
+
+            boolean didLoop = false;
+            while (startingIndex >= 0 && contents.charAt(startingIndex) != ' ') {
+                didLoop = true;
+                startingIndex--;
+            }
+            // set the cursor back one since we went past the space
+            if (didLoop) {
+                startingIndex++;
+            }
+
+            if (selectionStart == -1) {
+                selectionStart = startingIndex;
+                selectionEnd = getIndex() + 1;
+            } else {
+                selectionStart = startingIndex;
+            }
+            setIndex(startingIndex);
+        } else if (LocalInput.isShiftDownCurrently() && LocalInput.isControlDownCurrently() && event.getKeyCode() == Keyboard.KEY_RIGHT) {
+            //  TODO: right word selection
+
+        } else if (LocalInput.isShiftDownCurrently() && event.getKeyCode() == Keyboard.KEY_HOME) {
             // curosr is at the start of selection
             // && left arrow key is pressed
             //  -> highlight to the start of the line including what is already highlighted
@@ -355,7 +402,7 @@ public strictfp class EditLine extends TextField {
             // && left arrow key is pressed
             // -> unhighlight highlight to the start of the line clearing current highlight
             boolean isCursorAtStartOfSelection = getIndex() <= selectionStart;
-            if(selectionStart == -1) {
+            if (selectionStart == -1) {
                 selectionStart = getIndex();
                 selectionEnd = getIndex();
             }
@@ -374,7 +421,7 @@ public strictfp class EditLine extends TextField {
             // && right arrow key is pressed
             //  -> highlight to the end of the line including what is already highlighted
             boolean isCursorAtStartOfSelection = getIndex() <= selectionStart;
-            if(selectionStart == -1) {
+            if (selectionStart == -1) {
                 selectionStart = getIndex();
                 selectionEnd = getIndex();
             }
