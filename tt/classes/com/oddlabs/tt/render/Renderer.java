@@ -303,7 +303,7 @@ public final strictfp class Renderer {
 		
 
 		readOrSetPreference(Globals.AFFILIATE_ID_KEY, settings.affiliate_id); // setting affiliate id in preferences
-
+		// Refactor to 'setupLoadEvents'
 		if (eventload || grab_frames) {
 			String last_event_log_path = settings.last_event_log_dir + File.separator + "event.log";
 			if (zipped)
@@ -314,6 +314,7 @@ public final strictfp class Renderer {
 			LocalEventQueue.getQueue().loadEvents(new File(last_event_log_path), zipped);
 		}
 	
+		// Refactor to 'setupEventLogging'
 		File event_logs_dir = new File(game_dir, "logs");
 		File event_log_dir = new File(event_logs_dir, Long.toString(System.currentTimeMillis()));
 		if (LocalEventQueue.getQueue().getDeterministic() == null && settings.save_event_log) {
@@ -344,6 +345,7 @@ public final strictfp class Renderer {
 		game_dir = (File)deterministic.log(game_dir);
 		event_log_dir = (File)deterministic.log(event_log_dir);
 		settings = (Settings)deterministic.log(settings);
+		// Refactor to 'setupLanguages'
 		Languages languages = new Languages(settings.inBetaMode());
 		String default_language = (String)deterministic.log(Locale.getDefault().getLanguage());
 		String language = settings.language;
@@ -353,6 +355,8 @@ public final strictfp class Renderer {
 			language = "en";
 		Locale.setDefault(new Locale(language));
 		Settings.setSettings(settings);
+
+		// Refactor to 'setupBugReporter'
 		File last_event_log_dir = new File(settings.last_event_log_dir);
 		boolean crashed = settings.crashed;
 		if (crashed && !settings.hide_bugreporter && !deterministic.isPlayback()) {
@@ -367,6 +371,8 @@ public final strictfp class Renderer {
 				System.out.println("Failed to start bug reporter: " + e);
 			}
 		}
+
+		// Refactor to 'setupClientRegistration'
 		HttpRequestParameters request_parameters = createRegistrationParameters();
 		
 		//Checking original registration file location
@@ -404,27 +410,9 @@ public final strictfp class Renderer {
 			System.out.println("Got exception: " + e);
 			throw new RuntimeException(e);
 		}
-		TaskThread task_thread = network.getTaskThread();
-		if (Settings.getSettings().affiliate_id.equals("reflexive")) {
-System.out.println("affiliate_id equals reflexive");
-			registration_client = new ReflexiveRegistrationClient(task_thread, 526, "21658", "Tribal Trouble", "29.95");
-		} else if (Settings.getSettings().affiliate_id.equals("totalgaming")) {
-System.out.println("affiliate_id equals totalgaming");
-			registration_client = new TotalgamingRegistrationClient(task_thread, registration_file, request_parameters);
-		} else if (Settings.getSettings().affiliate_id.equals("garagegames")) {
-System.out.println("affiliate_id equals garagegames");
-			registration_client = new RegistrationClient(task_thread, registration_file, request_parameters, RegistrationClient.CLIENT_TYPE_FOREIGN);
-		} else if (Settings.getSettings().affiliate_id.equals("arcadetown") || !Settings.getSettings().online) {
-System.out.println("affiliate_id equals arcadetown");
-			registration_client = new RegistrationClient(task_thread, registration_file, request_parameters, RegistrationClient.CLIENT_TYPE_OFFLINE);
-			registration_client.setKey(Settings.getSettings().reg_key);
-		} else if (Settings.getSettings().affiliate_id.equals("trymedia")) {
-System.out.println("affiliate_id equals trymedia");
-			registration_client = new TrymediaRegistrationClient(task_thread, registration_file, request_parameters, RegistrationClient.CLIENT_TYPE_OFFLINE);
-			Settings.getSettings().reg_key = registration_client.getPotentialKey();
-		} else {
-			registration_client = new RegistrationClient(task_thread, registration_file, request_parameters, RegistrationClient.CLIENT_TYPE_ONLINE);
-		}
+	 	TaskThread task_thread = network.getTaskThread();
+		registration_client = new RegistrationClient(task_thread, registration_file, request_parameters, RegistrationClient.CLIENT_TYPE_ONLINE);
+		
 		if (!settings.inDeveloperMode() && !deterministic.isPlayback())
 			deleteOldLogs(last_event_log_dir, event_log_dir, event_logs_dir);
 		Skin.load();
@@ -517,7 +505,7 @@ e.printStackTrace();
 			long total_mem = Runtime.getRuntime().maxMemory();
 
 			try {
-				String url = "http://" + Settings.getSettings().domainName +"/driversupport.php?"
+				String url = "http://" + Settings.getSettings().domain_name +"/driversupport.php?"
 					+ "uid=" + URLEncoder.encode(uid, "UTF-8")
 					+ "&raw_os=" + URLEncoder.encode(os_name, "UTF-8")
 					+ "&os_version=" + URLEncoder.encode(os_version, "UTF-8")
@@ -909,5 +897,32 @@ System.out.println("use_texture_compression = " + Settings.getSettings().useText
 		GL11.glClearColor(0f, 0f, 0f, 0f);
 		GL11.glClear(GL11.GL_COLOR_BUFFER_BIT);
 		//GL11.glClearColor(1f, 0f, 1f, 0f);
+	}
+
+	// Old code that used to get registration client extracted out to a method
+	private final RegistrationClient getRegistrationClientByAffliliate() {
+// 		TaskThread task_thread = network.getTaskThread();
+// 		if (Settings.getSettings().affiliate_id.equals("reflexive")) {
+// System.out.println("affiliate_id equals reflexive");
+// 			registration_client = new ReflexiveRegistrationClient(task_thread, 526, "21658", "Tribal Trouble", "29.95");
+// 		} else if (Settings.getSettings().affiliate_id.equals("totalgaming")) {
+// System.out.println("affiliate_id equals totalgaming");
+// 			registration_client = new TotalgamingRegistrationClient(task_thread, registration_file, request_parameters);
+// 		} else if (Settings.getSettings().affiliate_id.equals("garagegames")) {
+// System.out.println("affiliate_id equals garagegames");
+// 			registration_client = new RegistrationClient(task_thread, registration_file, request_parameters, RegistrationClient.CLIENT_TYPE_FOREIGN);
+// 		} else if (Settings.getSettings().affiliate_id.equals("arcadetown") || !Settings.getSettings().online) {
+// System.out.println("affiliate_id equals arcadetown");
+// 			registration_client = new RegistrationClient(task_thread, registration_file, request_parameters, RegistrationClient.CLIENT_TYPE_OFFLINE);
+// 			registration_client.setKey(Settings.getSettings().reg_key);
+// 		} else if (Settings.getSettings().affiliate_id.equals("trymedia")) {
+// System.out.println("affiliate_id equals trymedia");
+// 			registration_client = new TrymediaRegistrationClient(task_thread, registration_file, request_parameters, RegistrationClient.CLIENT_TYPE_OFFLINE);
+// 			Settings.getSettings().reg_key = registration_client.getPotentialKey();
+// 		} else {			
+// 			registration_client = new RegistrationClient(task_thread, registration_file, request_parameters, RegistrationClient.CLIENT_TYPE_ONLINE);
+// 		}
+// 		return registration_client;
+		return null;
 	}
 }

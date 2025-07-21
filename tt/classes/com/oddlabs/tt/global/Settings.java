@@ -28,11 +28,13 @@ public final strictfp class Settings implements Serializable {
 	public boolean crashed = false;
 
 	// network
-	public String domainName = "tribaltrouble.org";
-	public String registration_address = "registration." + domainName;
-	public String matchmaking_address = "matchmaking." + domainName;
-	public String bugreport_address = "bugreport." + domainName;
-	public String router_address = "router." + domainName;
+	// TODO: Why is domain name stuck on tribaltrouble.org?
+	// when it is loaded from the settings file?
+	public String domain_name = "tribaltrouble.org";
+	public String registration_address = "registration." + domain_name;
+	public String matchmaking_address = "matchmaking." + domain_name;
+	public String bugreport_address = "bugreport." + domain_name;
+	public String router_address = "router." + domain_name;
 	public String username = "";
 	public String pw_digest = "";
 	public boolean remember_login = false;
