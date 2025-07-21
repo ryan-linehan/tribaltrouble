@@ -301,36 +301,8 @@ public final strictfp class Renderer {
 		boolean eventload = false;
 		boolean zipped = false;
 		boolean silent = false;
-		Settings settings = new Settings();
-		if (args != null) {
-			for (int i = 0; i < args.length; i++) {
-				if (args[i].equals("--grabframes")) {
-					grab_frames = true;
-				} else if (args[i].equals("--eventload")) {
-					eventload = true;
-					i++;
-					if (args[i].equals("zipped")) {
-						zipped = true;
-					} else if (args[i].equals("normal")) {
-					} else
-						throw new RuntimeException("Unknown event load mode: " + args[i]);
-				} else if (args[i].equals("--bootstrap")) {
-					String java_cmd = args[++i];
-					settings.load(Utils.getInstallDir());
-					String classpath = args[++i];
-					File data_dir = new File(args[++i]);
-					update_info = new UpdateInfo(java_cmd, classpath, data_dir);
-				} else if (args[i].equals("--silent")) {
-					silent = true;
-				} else {
-					throw new RuntimeException("Unknown command line flag: " + args[i]);
-				}
-			}
-		}
-		game_dir.mkdirs();
-
-		// fetch initial settings
-		settings.load(game_dir);
+		Settings settings = Settings.getSettings();
+		
 
 		readOrSetPreference(Globals.AFFILIATE_ID_KEY, settings.affiliate_id); // setting affiliate id in preferences
 
@@ -547,7 +519,7 @@ e.printStackTrace();
 			long total_mem = Runtime.getRuntime().maxMemory();
 
 			try {
-				String url = "http://" + Globals.DOMAIN_NAME +"/driversupport.php?"
+				String url = "http://" + Settings.getSettings().domainName +"/driversupport.php?"
 					+ "uid=" + URLEncoder.encode(uid, "UTF-8")
 					+ "&raw_os=" + URLEncoder.encode(os_name, "UTF-8")
 					+ "&os_version=" + URLEncoder.encode(os_version, "UTF-8")

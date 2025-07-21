@@ -28,10 +28,11 @@ public final strictfp class Settings implements Serializable {
 	public boolean crashed = false;
 
 	// network
-	public String registration_address = "registration." + Globals.DOMAIN_NAME;
-	public String matchmaking_address = "matchmaking." + Globals.DOMAIN_NAME;
-	public String bugreport_address = "bugreport." + Globals.DOMAIN_NAME;
-	public String router_address = "router." + Globals.DOMAIN_NAME;
+	public String domainName = "tribaltrouble.org";
+	public String registration_address = "registration." + domainName;
+	public String matchmaking_address = "matchmaking." + domainName;
+	public String bugreport_address = "bugreport." + domainName;
+	public String router_address = "router." + domainName;
 	public String username = "";
 	public String pw_digest = "";
 	public boolean remember_login = false;
@@ -185,6 +186,7 @@ public final strictfp class Settings implements Serializable {
 	}
 
 	public final void load(File game_dir) {
+		System.out.println("Loading settings from " + game_dir);
 		Field[] pref_fields = getClass().getDeclaredFields();
 		Properties props = new Properties();
 		File settings_file = new File(game_dir, Globals.SETTINGS_FILE_NAME);
@@ -211,14 +213,18 @@ public final strictfp class Settings implements Serializable {
 			try {
 				if (field_type.equals(boolean.class)) {
 					boolean field_value = (new Boolean(value)).booleanValue();
+					System.out.println("Setting " + field.getName() + " to " + field_value);
 					field.setBoolean(this, field_value);
 				} else if (field_type.equals(int.class)) {
 					int field_value = (new Integer(value)).intValue();
+					System.out.println("Setting " + field.getName() + " to " + field_value);
 					field.setInt(this, field_value);
 				} else if (field_type.equals(float.class)) {
 					float field_value = (new Float(value)).floatValue();
+					System.out.println("Setting " + field.getName() + " to " + field_value);
 					field.setFloat(this, field_value);
 				} else if (field_type.equals(String.class)) {
+					System.out.println("Setting " + field.getName() + " to " + value);
 					field.set(this, value);
 				} else
 					throw new RuntimeException("Unsupported Settings type " + field_type);

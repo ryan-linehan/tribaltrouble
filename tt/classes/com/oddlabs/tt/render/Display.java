@@ -10,7 +10,7 @@ import static org.lwjgl.opengl.GL11.*;
 
 import com.oddlabs.tt.input.Keyboard;
 import com.oddlabs.tt.input.Mouse;
-import com.oddlabs.tt.global.GlobalsConfig;
+import com.oddlabs.tt.global.Settings;
 
 public final strictfp class Display {
     private static long window;
@@ -34,12 +34,17 @@ public final strictfp class Display {
             System.out.println("Unable to initialize GLFW");
             return;
         }
+        System.out.println("Is settings null? " + (Settings.getSettings() == null));
+        width = Settings.getSettings().view_width;
+        height = Settings.getSettings().view_height;
+        fullscreen = Settings.getSettings().fullscreen;
+        refreshRate = Settings.getSettings().view_freq;
 
-        width = GlobalsConfig.getWindowWidth();
-        height = GlobalsConfig.getWindowHeight();
-        fullscreen = GlobalsConfig.isFullscreen();
-        refreshRate = GlobalsConfig.getRefreshRate();
-        
+        System.out.println("width: " + width);
+        System.out.println("height: " + height);
+        System.out.println("fullscreen: " + fullscreen);
+        System.out.println("refreshRate: " + refreshRate);
+
         long monitor = GLFW.glfwGetPrimaryMonitor();
         GLFWVidMode videoMode = GLFW.glfwGetVideoMode(monitor);
 
