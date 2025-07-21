@@ -41,9 +41,20 @@ public final strictfp class Main {
 			System.out.println("Starting game....");
 			System.out.flush();
 			Main.class.getClassLoader().setDefaultAssertionStatus(true);
-			initializeSettings(args);
-            Display.create();
-			Renderer.runGame(args);
+			// Parse command line arguments
+			boolean grab_frames = parseGrabFrames(args);
+			boolean eventload = parseEventLoad(args);
+			boolean zipped = parseZipped(args);
+			boolean silent = parseSilent(args);
+
+			// Initialize settings (so they can be used by display and renderer)
+			Settings settings = initializeSettings();
+			UpdateInfo update_info = parseBootstrapUpdateInfo(args, settings);
+
+
+			// Create display and run game
+			Display.create();
+			Renderer.runGame(grab_frames, eventload, zipped, silent, update_info);
 		} catch (Throwable t) {
 			fail(t);
 		} finally {
@@ -51,56 +62,82 @@ public final strictfp class Main {
 		}
 	}
 
-	private static final void initializeSettings(String[] args) {
+
+	private static final Settings initializeSettings() {
 		System.out.println("Initializing settings...");
-		if (args != null) {
-			UpdateInfo update_info = null;
-			String platform_dir;
-			// TODO: Have this get set properly and fed to Renderer.runGame again.
-			boolean grab_frames = false;
-			boolean eventload = false;
-			boolean zipped = false;
-			boolean silent = false;
-			if (Platform.get() == Platform.MACOSX) {
-				platform_dir = "Library/Application Support" + File.separator;
-			} else if (Platform.get() == Platform.LINUX) {
-				platform_dir = ".";
-			} else {
-				platform_dir = "";
+		String platform_dir;
+		if (Platform.get() == Platform.MACOSX) {
+			platform_dir = "Library/Application Support" + File.separator;
+		} else if (Platform.get() == Platform.LINUX) {
+			platform_dir = ".";
+		} else {
+			platform_dir = "";
+		}
+		String game_dir_path = System.getProperty("user.home") + File.separator + platform_dir + Globals.GAME_NAME;
+		File game_dir = new File(game_dir_path);
+		Settings settings = new Settings();
+		game_dir.mkdirs();
+
+		// fetch initial settings
+		settings.load(game_dir);
+		Settings.setSettings(settings);					
+		return settings;		
+	}
+
+
+	private static boolean parseGrabFrames(String[] args) {
+		for (int i = 0; i < args.length; i++) {
+			if (args[i].equals("--grabframes")) {
+				return true;
 			}
-			String game_dir_path = System.getProperty("user.home") + File.separator + platform_dir + Globals.GAME_NAME;
-			File game_dir = new File(game_dir_path);
-			Settings settings = new Settings();
-			for (int i = 0; i < args.length; i++) {
-				if (args[i].equals("--grabframes")) {
-					grab_frames = true;
-				} else if (args[i].equals("--eventload")) {
-					eventload = true;
-					i++;
-					if (args[i].equals("zipped")) {
-						zipped = true;
-					} else if (args[i].equals("normal")) {
-					} else
-						throw new RuntimeException("Unknown event load mode: " + args[i]);
-				} else if (args[i].equals("--bootstrap")) {
-					String java_cmd = args[++i];
-					settings.load(Utils.getInstallDir());
-					String classpath = args[++i];
-					File data_dir = new File(args[++i]);
-					update_info = new UpdateInfo(java_cmd, classpath, data_dir);
-				} else if (args[i].equals("--silent")) {
-					silent = true;
+		}
+		return false;
+	}
+
+	private static boolean parseEventLoad(String[] args) {
+		for (int i = 0; i < args.length; i++) {
+			if (args[i].equals("--eventload")) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	private static boolean parseZipped(String[] args) {
+		for (int i = 0; i < args.length; i++) {
+			if (args[i].equals("--eventload")) {
+				if (i + 1 < args.length && args[i + 1].equals("zipped")) {
+					return true;
+				}
+				else if( i + 1 < args.length && args[i + 1].equals("normal")) {
+					return false;
 				} else {
-					throw new RuntimeException("Unknown command line flag: " + args[i]);
+					throw new RuntimeException("Unknown argument for --eventload: " + args[i + 1]);
 				}
 			}
-			game_dir.mkdirs();
-
-			// fetch initial settings
-			Settings.setSettings(settings);
-			settings.load(game_dir);
-			
 		}
+		return false;
+	}
 
+	private static boolean parseSilent(String[] args) {
+		for (int i = 0; i < args.length; i++) {
+			if (args[i].equals("--silent")) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	private static UpdateInfo parseBootstrapUpdateInfo(String[] args, Settings settings) {
+		for (int i = 0; i < args.length; i++) {
+			if (args[i].equals("--bootstrap")) {
+				String java_cmd = args[++i];
+				settings.load(Utils.getInstallDir());
+				String classpath = args[++i];
+				File data_dir = new File(args[++i]);
+				return new UpdateInfo(java_cmd, classpath, data_dir);
+			}
+		}
+		return null;
 	}
 }

@@ -191,8 +191,8 @@ public final strictfp class Renderer {
 		}
 	}
 	
-	public final static void runGame(String[] args) {
-		renderer_instance.run(args);
+	public final static void runGame(boolean grab_frames, boolean eventload, boolean zipped, boolean silent, UpdateInfo update_info) {
+		renderer_instance.run(grab_frames, eventload, zipped, silent, update_info);
 	}
 
 	public final static Renderer getRenderer() {
@@ -282,12 +282,13 @@ public final strictfp class Renderer {
 		}
 	}
 	
-	private final void run(String[] args) {
+	private final void run(boolean grab_frames, boolean eventload, boolean zipped, boolean silent,
+	UpdateInfo update_info) {
+		this.grab_frames = grab_frames;
 		long start_time = System.currentTimeMillis();
 		boolean first_frame = true;
 		System.out.println("********** Running tt **********");
 		System.out.flush();
-		UpdateInfo update_info = null;
 		String platform_dir;
 		if (Platform.get() == Platform.MACOSX) {
 			platform_dir = "Library/Application Support" + File.separator;
@@ -298,9 +299,6 @@ public final strictfp class Renderer {
 		}
 		String game_dir_path = System.getProperty("user.home") + File.separator + platform_dir + Globals.GAME_NAME;
 		File game_dir = new File(game_dir_path);
-		boolean eventload = false;
-		boolean zipped = false;
-		boolean silent = false;
 		Settings settings = Settings.getSettings();
 		
 
@@ -310,7 +308,7 @@ public final strictfp class Renderer {
 			String last_event_log_path = settings.last_event_log_dir + File.separator + "event.log";
 			if (zipped)
 				last_event_log_path += ".gz";
-System.out.println("last_event_log_path = " + last_event_log_path);
+			System.out.println("last_event_log_path = " + last_event_log_path);
 			// Only use when anal debugging
 //			ChecksumLogger.initLogging();
 			LocalEventQueue.getQueue().loadEvents(new File(last_event_log_path), zipped);
