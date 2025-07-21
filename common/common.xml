@@ -11,6 +11,7 @@
     <property name="nativelib" value="../common/lib/java"/>
 	<property name="commonstatic" value="../common/static"/>
 	<property name="java_source_version" value="1.8"/>
+	<import file="../classpath.xml"/>
 
 	<target name="init">
 		<tstamp/>
@@ -34,9 +35,18 @@
 	<target name="compiledeps"/>
 
 	<target name="compile" depends="init,compiledeps">
-		<javac debug="yes" source="${java_source_version}" target="${java_source_version}" classpath="${classpath}" srcdir="classes" destdir="${build}/classes">
-			<!--			<compilerarg value="-Xmaxerrs"/>
-			<compilerarg value="50"/>-->
+		<javac debug="yes" source="${java_source_version}" target="${java_source_version}" srcdir="classes" destdir="${build}/classes">
+			<classpath refid="platform.classpath"/>
+			<classpath>
+				<pathelement path="${lib}/javasvn.jar"/>
+			</classpath>
+		</javac>
+	</target>
+
+	<target name="compile-tools" depends="init,compiledeps">
+		<javac debug="yes" source="${java_source_version}" target="${java_source_version}" srcdir="classes" destdir="${build}/classes">
+			<classpath refid="platform.classpath"/>
+			<classpath refid="tools.classpath"/>
 		</javac>
 	</target>
 
@@ -45,7 +55,12 @@
 	<target name="dorundeps" depends="compile,rundeps"/>
 
 	<target name="eventloadzipped" depends="dorundeps">
-		<java fork="yes" classpath="${classpath}:${res_classpath}:${build}/classes" classname="${main_class}">
+		<java fork="yes" classname="${main_class}">
+			<classpath refid="platform.classpath"/>
+			<classpath refid="build.classpath"/>
+			<classpath>
+				<pathelement path="${build}/classes"/>
+			</classpath>
 			<jvmarg value="-ea"/>
 			<jvmarg value="-Djava.library.path=${nativelib}"/>
 			<jvmarg value="-Dorg.lwjgl.util.Debug=true"/>
@@ -56,7 +71,12 @@
 	</target>
 
 	<target name="eventload" depends="dorundeps">
-		<java fork="yes" classpath="${classpath}:${res_classpath}:${build}/classes" classname="${main_class}">
+		<java fork="yes" classname="${main_class}">
+			<classpath refid="platform.classpath"/>
+			<classpath refid="build.classpath"/>
+			<classpath>
+				<pathelement path="${build}/classes"/>
+			</classpath>
 			<jvmarg value="-ea"/>
 			<jvmarg value="-Djava.library.path=${nativelib}"/>
 			<jvmarg value="-Dorg.lwjgl.util.Debug=true"/>
@@ -67,7 +87,12 @@
 	</target>
 
 	<target name="grabframes" depends="dorundeps">
-		<java fork="yes" classpath="${classpath}:${res_classpath}:${build}/classes" classname="${main_class}">
+		<java fork="yes" classname="${main_class}">
+			<classpath refid="platform.classpath"/>
+			<classpath refid="build.classpath"/>
+			<classpath>
+				<pathelement path="${build}/classes"/>
+			</classpath>
 			<jvmarg value="-ea"/>
 			<jvmarg value="-Djava.library.path=${nativelib}"/>
 			<jvmarg value="-Dgrabframes=true"/>
@@ -76,7 +101,12 @@
 	</target>
 
 	<target name="profile" depends="dorundeps">
-		<java fork="yes" classpath="${classpath}:${res_classpath}:${build}/classes" classname="${main_class}">
+		<java fork="yes" classname="${main_class}">
+			<classpath refid="platform.classpath"/>
+			<classpath refid="build.classpath"/>
+			<classpath>
+				<pathelement path="${build}/classes"/>
+			</classpath>
 			<jvmarg value="-ea"/>
 			<jvmarg value="-Xbootclasspath/a:/home/elias/snot/jprofiler4/bin/agent.jar"/>
 			<jvmarg value="-agentlib:jprofilerti"/>
@@ -85,7 +115,12 @@
 	</target>
 
 	<target name="cpuprofile" depends="dorundeps">
-		<java fork="yes" classpath="${classpath}:${res_classpath}:${build}/classes" classname="${main_class}">
+		<java fork="yes" classname="${main_class}">
+			<classpath refid="platform.classpath"/>
+			<classpath refid="build.classpath"/>
+			<classpath>
+				<pathelement path="${build}/classes"/>
+			</classpath>
 			<jvmarg value="-ea"/>
 			<jvmarg value="-Djava.library.path=${nativelib}"/>
 			<jvmarg value="-Xrunhprof:cpu=samples"/>
@@ -93,7 +128,12 @@
 	</target>
 
 	<target name="memprofile" depends="dorundeps">
-		<java fork="yes" classpath="${classpath}:${res_classpath}:${build}/classes" classname="${main_class}">
+		<java fork="yes" classname="${main_class}">
+			<classpath refid="platform.classpath"/>
+			<classpath refid="build.classpath"/>
+			<classpath>
+				<pathelement path="${build}/classes"/>
+			</classpath>
 			<jvmarg value="-ea"/>
 			<jvmarg value="-verbose:gc"/>
 			<jvmarg value="-Djava.library.path=${nativelib}"/>
@@ -102,7 +142,12 @@
 	</target>
 
 	<target name="gcprofile" depends="dorundeps">
-		<java fork="yes" classpath="${classpath}:${res_classpath}:${build}/classes" classname="${main_class}">
+		<java fork="yes" classname="${main_class}">
+			<classpath refid="platform.classpath"/>
+			<classpath refid="build.classpath"/>
+			<classpath>
+				<pathelement path="${build}/classes"/>
+			</classpath>
 			<jvmarg value="-ea"/>
 			<jvmarg value="-Djava.library.path=${nativelib}"/>
 			<jvmarg value="-verbose:gc"/>
@@ -110,7 +155,12 @@
 	</target>
 
 	<target name="run" depends="dorundeps">
-		<java fork="yes" classpath="${classpath}:${res_classpath}:${build}/classes" classname="${main_class}">
+		<java fork="yes" classname="${main_class}">
+			<classpath refid="platform.classpath"/>
+			<classpath refid="build.classpath"/>
+			<classpath>
+				<pathelement path="${build}/classes"/>
+			</classpath>
 			<jvmarg value="-ea"/>
 			<jvmarg value="-Djava.library.path=${nativelib}"/>
 			<jvmarg value="-Dorg.lwjgl.util.Debug=true"/>

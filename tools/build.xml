@@ -1,11 +1,12 @@
 <project name="tools" basedir="." default="compile">
 	<import file="../common/common.xml"/>
-	<property name="classpath" value="../common/build/classes:svn/svnkit.jar:${lib}/lwjgl.jar:${lib}/jsquish.jar:${lib}/lwjgl-natives-linux.jar:${lib}/lwjgl-glfw.jar:${lib}/lwjgl-glfw-natives-linux.jar:${lib}/lwjgl-opengl.jar:${lib}/lwjgl-opengl-natives-linux.jar:${lib}/lwjgl-openal.jar:${lib}/lwjgl-openal-natives-linux.jar:${lib}/lwjgl-jawt.jar:${lib}/png.jar"/>
 
 	<target name="compiledeps" depends="compile-common"/>
 
-	<target name="geometry" depends="compile">
-		<java failonerror="true" fork="yes" classpath="${classpath}:${build}/classes" classname="com.oddlabs.converter.ConvertToBinary">
+	<target name="geometry" depends="compile-tools">
+		<java failonerror="true" fork="yes" classname="com.oddlabs.converter.ConvertToBinary">
+			<classpath refid="tools.classpath"/>
+			<classpath refid="platform.classpath"/>
 			<jvmarg value="-ea"/>
 			<jvmarg value="-Xmx512000000"/>
 			<arg value="${geometry_file}"/>
@@ -14,8 +15,10 @@
 		</java>
 	</target>
 
-	<target name="geometry2" depends="compile">
-		<java failonerror="true" fork="yes" classpath="${classpath}:${build}/classes" classname="com.oddlabs.converter2.ConvertToBinary">
+	<target name="geometry2" depends="compile-tools">
+		<java failonerror="true" fork="yes" classname="com.oddlabs.converter2.ConvertToBinary">
+			<classpath refid="tools.classpath"/>
+			<classpath refid="platform.classpath"/>
 			<jvmarg value="-ea"/>
 			<jvmarg value="-Xmx512000000"/>
 			<arg value="${geometry_file}"/>
@@ -25,7 +28,9 @@
 	</target>
 
 	<target name="convert_image">
-		<java failonerror="true" fork="yes" classpath="${classpath}:${build}/classes" classname="com.oddlabs.imageutil.Convert">
+		<java failonerror="true" fork="yes" classname="com.oddlabs.imageutil.Convert">
+			<classpath refid="tools.classpath"/>
+			<classpath refid="platform.classpath"/>
 			<jvmarg value="-ea"/>
 			<jvmarg value="-Djava.awt.headless=true"/>
 			<arg file="${image_path}"/>
@@ -34,7 +39,7 @@
 		</java>
 	</target>
 
-	<target name="convert" depends="compile">
+	<target name="convert" depends="compile-tools">
 		<property name="dstdir.withtrailingslash" value="${dstdir}${file.separator}"/>
 		<propertyregex property="dstdir.replaced" input="${dstdir.withtrailingslash}" regexp="\\" replace="\\\\\\\\" defaultValue="${dstdir.withtrailingslash}" global="true"/>
 		<condition property="dstdir.regexp" value="${dstdir.replaced}" else="${dstdir.withtrailingslash}">
@@ -54,8 +59,10 @@
 		</outofdate>
 	</target>
 
-	<target name="textures" depends="compile">
-		<java failonerror="true" fork="yes" classpath="${classpath}:${build}/classes" classname="com.oddlabs.imageutil.ConvertTextures">
+	<target name="textures" depends="compile-tools">
+		<java failonerror="true" fork="yes" classname="com.oddlabs.imageutil.ConvertTextures">
+			<classpath refid="tools.classpath"/>
+			<classpath refid="platform.classpath"/>
 			<jvmarg value="-ea"/>
 			<jvmarg value="-Xmx512000000"/>
 			<arg value="${ressrc}"/>
@@ -63,23 +70,37 @@
 		</java>
 	</target>
 
-	<target name="copydist" depends="compile">
-		<java failonerror="true" fork="yes" classpath="../common/build/classes:svn/svnkit.jar:${build}/classes" classname="com.oddlabs.svnutil.CopyDist">
+	<target name="copydist" depends="compile-tools">
+		<java failonerror="true" fork="yes" classname="com.oddlabs.svnutil.CopyDist">
+			<classpath>
+				<pathelement path="${build}/classes"/>
+				<pathelement path="../common/build/classes"/>
+				<pathelement path="svn/svnkit.jar"/>
+			</classpath>
 			<arg path="${svnsrc}"/>
 			<arg path="${svndst}"/>
 		</java>
 	</target>
 
-	<target name="revision" depends="compile">
-		<java failonerror="true" fork="yes" classpath="svn/svnkit.jar:${build}/classes" classname="com.oddlabs.svnutil.DetermineRevision">
+	<target name="revision" depends="compile-tools">
+		<java failonerror="true" fork="yes" classname="com.oddlabs.svnutil.DetermineRevision">
+			<classpath>
+				<pathelement path="${build}/classes"/>
+				<pathelement path="svn/svnkit.jar"/>
+			</classpath>
 			<jvmarg value="-Xmx256000000"/>
 			<arg path="${svn_path}"/>
 			<arg path="${revision_number_file}"/>
 		</java>
 	</target>
 
-	<target name="createfont" depends="compile">
-		<java failonerror="true" fork="yes" classpath="../common/build/classes:${build}/classes:${commonstatic}/fonts" classname="com.oddlabs.fontutil.FontRenderer">
+	<target name="createfont" depends="compile-tools">
+		<java failonerror="true" fork="yes" classname="com.oddlabs.fontutil.FontRenderer">
+			<classpath>
+				<pathelement path="${build}/classes"/>
+				<pathelement path="../common/build/classes"/>
+				<pathelement path="${commonstatic}/fonts"/>
+			</classpath>
 			<jvmarg value="-ea"/>
 			<arg value="${fontname}"/>
 			<arg value="${fontsize}"/>
@@ -91,12 +112,16 @@
 		</java>
 	</target>
 
-	<target name="generatekeys" depends="compile">
+	<target name="generatekeys" depends="compile-tools">
 		<input
 			message="Enter password for private registration key:"
 			addproperty="password"
 			/>
-		<java failonerror="true" fork="yes" classpath="../common/build/classes:${build}/classes" classname="com.oddlabs.regkeygen.RegistrationKeygen">
+		<java failonerror="true" fork="yes" classname="com.oddlabs.regkeygen.RegistrationKeygen">
+			<classpath>
+				<pathelement path="${build}/classes"/>
+				<pathelement path="../common/build/classes"/>
+			</classpath>
 			<jvmarg value="-ea"/>
 			<arg path="${commonstatic}"/>
 			<arg value="${password}"/>
@@ -104,7 +129,7 @@
 		</java>
 	</target>
 	
-	<target name="changekeyspassword" depends="compile">
+	<target name="changekeyspassword" depends="compile-tools">
 		<input
 			message="Enter old password for private registration key:"
 			addproperty="old_password"

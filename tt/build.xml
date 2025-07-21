@@ -1,21 +1,9 @@
 <project name="tt" basedir="." default="compile">
 	<import file="../common/common.xml"/>
 
-	<property name="linux-classpath" value="${lib}/lwjgl-natives-linux.jar:${lib}/lwjgl-glfw-natives-linux.jar:${lib}/lwjgl-opengl-natives-linux.jar:${lib}/lwjgl-openal-natives-linux.jar"/>
-    <property name="macos-arm64-classpath" value="${lib}/lwjgl-natives-macos-arm64.jar:${lib}/lwjgl-glfw-natives-macos-arm64.jar:${lib}/lwjgl-opengl-natives-macos-arm64.jar:${lib}/lwjgl-openal-natives-macos-arm64.jar"/>
-    <property name="macos-x86-classpath" value="${lib}/lwjgl-natives-macos.jar:${lib}/lwjgl-glfw-natives-macos.jar:${lib}/lwjgl-opengl-natives-macos.jar:${lib}/lwjgl-openal-natives-macos.jar"/>
-    <property name="windows-classpath" value="${lib}/lwjgl-natives-windows.jar:${lib}/lwjgl-glfw-natives-windows.jar:${lib}/lwjgl-opengl-natives-windows.jar:${lib}/lwjgl-openal-natives-windows.jar"/>
-
-    <property name="platform-classpaths" value="${linux-classpath}:${macos-arm64-classpath}:${windows-classpath}:${macos-x86-classpath}"/>
-
-    <property name="tt-build-deps" value="${lib}/javasvn.jar:"/>
-	
-    <property name="classpath" value="../common/build/classes:${lib}/lwjgl-glfw.jar:${lib}/lwjgl-opengl.jar:${lib}/lwjgl-openal.jar:${lib}/lwjgl-jawt.jar:${lib}/jsquish.jar:${lib}/javasvn.jar:${lib}/lwjgl.jar:${lib}/jorbis.jar:${lib}/commons-pool-1.2.jar:${lib}/commons-dbcp-1.2.1.jar:${lib}/commons-collections-3.1.jar:${platform-classpaths}"/>
-
 	<property name="jre" value="jre1.8.0_381"/>
 	<property name="main_class" value="com.oddlabs.tt.Main"/>
 	
-	<property name="res_classpath" value="${build}:static:i18n:${commonstatic}"/>
 
 	<property name="revision_number_file" location="${build}/revision_number"/>
 	<property name="geometry_file" value="geometry.xml"/>
@@ -44,23 +32,17 @@
 	</target>
 
     <!-- Classpath -->
-    <path id="lwjgl.classpath">
-        <fileset dir="${lib}">
-            <include name="lwjgl*.jar"/>
-        </fileset>
-    </path>
+	<path id="build.classpath">
+		<pathelement location="${build}"/>
+		<pathelement location="${commonstatic}"/>
+		<pathelement location="i18n"/>
+		<pathelement location="static"/>
+	</path>
 
-    <condition property="lwjgl.natives" value="natives-windows">
-        <os family="Windows"/>
-    </condition>
-
-    <condition property="lwjgl.natives" value="natives-linux">
-        <os name="Linux"/>
-    </condition>
-
-    <condition property="lwjgl.natives" value="natives-macos">
-        <os name="Mac OS X"/>
-    </condition>
+	<target name="echo-classpath">
+		<echo message="Classpath: ${toString:platform.classpath}"/>
+		<echo message="Platform natives: ${platform-natives}"/>
+	</target>
 
 	<target name="geometry">
 		<ant inheritAll="false" dir="../tools" target="geometry">
@@ -179,14 +161,16 @@
 	</target>
 
 	<target name="proceduraltest" depends="compile">
-		<java fork="yes" classpath="../common/build/classes:${build}/classes" classname="com.oddlabs.tt.procedural.Main">
+		<java fork="yes" classname="com.oddlabs.tt.procedural.Main">
+			<classpath refid="platform.classpath"/>
 			<jvmarg value="-ea"/>
 			<jvmarg value="-Xmx200000000"/>
 		</java>
 	</target>
 
 	<target name="generatetextures" depends="compile">
-        <java failonerror="true" fork="yes" classpath="${lib}/lwjgl.jar:${lib}/lwjgl-natives-linux.jar:${lib}/lwjgl-glfw.jar:${lib}/lwjgl-glfw-natives-linux.jar:${lib}/lwjgl-opengl.jar:${lib}/lwjgl-opengl-natives-linux.jar:${lib}/lwjgl-openal.jar:${lib}/lwjgl-openal-natives-linux.jar:${lib}/lwjgl-jawt.jar:${build}:${build}/classes:../common/build/classes" classname="com.oddlabs.texturegenerator.TextureGenerator">
+        <java failonerror="true" fork="yes" classname="com.oddlabs.texturegenerator.TextureGenerator">
+			<classpath refid="platform.classpath"/>
 			<jvmarg value="-ea"/>
 			<jvmarg value="-Djava.library.path=${nativelib}"/>
 			<arg value="${srcdirtextures}"/>
@@ -338,5 +322,5 @@
 				<include name="lwjgl-openal-natives-linux.jar"/>
 			</fileset>
 		</delete>
-	</target>
+	</target>	
 </project>
