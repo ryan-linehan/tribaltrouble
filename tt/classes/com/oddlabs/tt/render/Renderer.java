@@ -389,8 +389,9 @@ System.out.println("last_event_log_path = " + last_event_log_path);
 			System.out.println("Starting bug reporter ...");
 			System.out.println("Event log dir: " + last_event_log_dir);
 			try {
-				URL url = new URL("https://" + settings.bugreport_address + "/reportbug.php");
-				BugClientWindow.showReporter(url, settings.last_revision, last_event_log_dir);
+				// For some reason the bug client window will never pop up and the game won't launch do to this
+				// URL url = new URL("https://" + settings.bugreport_address + "/reportbug.php");
+				// BugClientWindow.showReporter(url, settings.last_revision, last_event_log_dir);
 				System.out.println("Bug reporter completed");
 			} catch (Exception e) {
 				System.out.println("Failed to start bug reporter: " + e);
@@ -405,6 +406,7 @@ System.out.println("last_event_log_path = " + last_event_log_path);
 
 			// Check if the file is in working dir
 			System.out.println("Registration file not found, trying from working directory.");
+			System.out.println("Working directory: " + System.getProperty("user.dir"));
 			registration_file = new File(System.getProperty("user.dir"), Globals.REG_FILE_NAME);
 			
 			// With windows, the working directory is above, so check it in /app
