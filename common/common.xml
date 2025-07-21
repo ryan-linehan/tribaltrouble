@@ -155,21 +155,48 @@
 	</target>
 
 	<target name="run" depends="dorundeps">
-		<java fork="yes" classname="${main_class}">
-			<classpath refid="platform.classpath"/>
-			<classpath refid="build.classpath"/>
-			<classpath>
-				<pathelement path="${build}/classes"/>
-			</classpath>
-			<jvmarg value="-ea"/>
-			<jvmarg value="-Djava.library.path=${nativelib}"/>
-			<jvmarg value="-Dorg.lwjgl.util.Debug=true"/>
-			<jvmarg value="-Xmx80000000"/>
-			<jvmarg value="-Djdk.crypto.KeyAgreement.legacyKDF=true"/>
-			<!-- TODO: Should this be platform specific? Neccessary for macos -->
-			<jvmarg value="-XstartOnFirstThread"/>
-			<!--<jvmarg value="-Djavax.net.debug=ssl,handshake,trustmanager"/>-->
-			<!--	<jvmarg value="-Dorg.lwjgl.opengl.Window.undecorated=true"/>-->
-		</java>
+		<!-- Use XstartOnFirstThread only if on mac-->
+		<condition property="macosx.firstthread" value="true">
+    		<os name="Mac OS X"/>
+		</condition>
+		<if>
+            <isset property="macosx.firstthread"/>
+            <then>
+                <java fork="yes" classname="${main_class}">
+					<classpath refid="platform.classpath"/>
+					<classpath refid="build.classpath"/>
+					<classpath>
+						<pathelement path="${build}/classes"/>
+					</classpath>
+					<jvmarg value="-ea"/>
+					<jvmarg value="-Djava.library.path=${nativelib}"/>
+					<jvmarg value="-Dorg.lwjgl.util.Debug=true"/>
+					<jvmarg value="-Xmx80000000"/>
+					<jvmarg value="-Djdk.crypto.KeyAgreement.legacyKDF=true"/>
+					<jvmarg value="-XstartOnFirstThread"/>
+					
+					<!--<jvmarg value="-Djavax.net.debug=ssl,handshake,trustmanager"/>-->
+					<!--	<jvmarg value="-Dorg.lwjgl.opengl.Window.undecorated=true"/>-->
+				</java>
+            </then>
+			<else>
+				<java fork="yes" classname="${main_class}">
+					<classpath refid="platform.classpath"/>
+					<classpath refid="build.classpath"/>
+					<classpath>
+						<pathelement path="${build}/classes"/>
+					</classpath>
+					<jvmarg value="-ea"/>
+					<jvmarg value="-Djava.library.path=${nativelib}"/>
+					<jvmarg value="-Dorg.lwjgl.util.Debug=true"/>
+					<jvmarg value="-Xmx80000000"/>
+					<jvmarg value="-Djdk.crypto.KeyAgreement.legacyKDF=true"/>
+					
+					
+					<!--<jvmarg value="-Djavax.net.debug=ssl,handshake,trustmanager"/>-->
+					<!--	<jvmarg value="-Dorg.lwjgl.opengl.Window.undecorated=true"/>-->
+				</java>
+			</else>
+        </if>
 	</target>
 </project>
