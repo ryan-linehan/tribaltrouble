@@ -48,25 +48,45 @@ import com.oddlabs.tt.net.GameNetwork;
 import com.oddlabs.tt.global.Globals;
 import com.oddlabs.tt.guievent.MouseButtonListener;
 import com.oddlabs.tt.trigger.GameOverTrigger;
+import java.awt.Desktop;
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 
 public abstract strictfp class Menu extends CameraDelegate {
 
     protected final static float[] COLOR_NORMAL = new float[]{1f, 1f, 1f};
     protected final static float[] COLOR_ACTIVE = new float[]{1f, .8f, .63f};
     private final static int MENU_X = 160;
-    /** How wide the overlay image is as a png */
+    /**
+     * How wide the overlay image is as a png
+     */
     private final static int overlay_texture_width = 1024;
-    /** How high the overlay image is as a png */
+    /**
+     * How high the overlay image is as a png
+     */
     private final static int overlay_texture_height = 1024;
 
-    /** The desired width of the overlay image in game */
+    /**
+     * The desired width of the overlay image in game
+     */
     private final static int overlay_image_width = 800;
-    /** The desired height of the overlay image in game */
+    /**
+     * The desired height of the overlay image in game
+     */
     private final static int overlay_image_height = 600;
-    /** The name of the overlay texture without its extension */
+    /**
+     * The name of the overlay texture without its extension
+     */
     private final static String overlay_texture_name = "/textures/gui/mainmenu";
-    /** The name of the discord texture without its extension */
+    /**
+     * The name of the discord texture without its extension
+     */
     private final static String discord_texture_name = "/textures/gui/discord";
+    /**
+     * The name of the github texture without its extension
+     */
+    private final static String github_texture_name = "/textures/gui/github";
     public final static ResourceBundle bundle = ResourceBundle.getBundle(MainMenu.class.getName());
 
     private final NetworkSelector network;
@@ -77,6 +97,7 @@ public abstract strictfp class Menu extends CameraDelegate {
     private GUIImage overlay;
     private GUIImage logo;
     private GUIImage discord;
+    private GUIImage github;
 
     protected Menu(NetworkSelector network, GUIRoot gui_root, Camera camera) {
         super(gui_root, camera);
@@ -99,18 +120,23 @@ public abstract strictfp class Menu extends CameraDelegate {
 
         String logo_file = Utils.getBundleString(bundle, "logo_file");
         logo = new GUIImage((int) ((347f / 800f) * screen_width),
-		  					(int) ((206f / 600f) * screen_height),
-							0f,
-							0f,
-							347f / 512f,
-							(float) 206f / 256f,
-							logo_file);
-							
+                (int) ((206f / 600f) * screen_height),
+                0f,
+                0f,
+                347f / 512f,
+                (float) 206f / 256f,
+                logo_file);
+
         logo.setPos(0, screen_height - logo.getHeight());
         addChild(logo);
 
 
-        discord = new GUIImage(80, 80, 0f, 0f, (float)1, (float) 1, discord_texture_name, true);
+        github = new GUIImage(80, 80, 0f, 0f, (float) 1, (float) 1, github_texture_name, true);
+        github.setPos(screen_width - discord.getWidth() - 20 - github.getWidth() - 20, github.getHeight() / 2);
+        github.addMouseClickListener(new GithubClickedListener());
+        addChild(github);
+
+        discord = new GUIImage(80, 80, 0f, 0f, (float) 1, (float) 1, discord_texture_name, true);
         discord.setPos(screen_width - discord.getWidth() - 20, discord.getHeight() / 2);
         discord.addMouseClickListener(new DiscordClickedListener());
         addChild(discord);
@@ -339,9 +365,37 @@ public abstract strictfp class Menu extends CameraDelegate {
             current_menu = null;
         }
     }
+
     private final strictfp class DiscordClickedListener implements MouseClickListener {
-		public final void mouseClicked(int button, int x, int y, int clicks) {
-			System.out.println("Discord button clicked");
-		}
-	}
+
+        public final void mouseClicked(int button, int x, int y, int clicks) {
+            try {
+                Desktop.getDesktop().browse(new URI("https://discord.gg/degeKcze"));
+            } catch (IOException | URISyntaxException e) {
+                System.out.println("Failed to open Discord link: " + e.getMessage());
+            }
+        }
+    }
+
+    private final strictfp class TribalTroubleClicked implements MouseClickListener {
+
+        public final void mouseClicked(int button, int x, int y, int clicks) {
+            try {
+                Desktop.getDesktop().browse(new URI("https://tribaltrouble.org"));
+            } catch (IOException | URISyntaxException e) {
+                System.out.println("Failed to open Tribal Trouble link: " + e.getMessage());
+            }
+        }
+    }
+
+    private final strictfp class GithubClickedListener implements MouseClickListener {
+
+        public final void mouseClicked(int button, int x, int y, int clicks) {
+            try {
+                Desktop.getDesktop().browse(new URI("https://github.com/OmarAMokhtar/tribaltrouble"));
+            } catch (IOException | URISyntaxException e) {
+                System.out.println("Failed to open Github link: " + e.getMessage());
+            }
+        }
+    }
 }

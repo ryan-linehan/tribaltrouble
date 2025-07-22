@@ -17,7 +17,6 @@ public final strictfp class GUIImage extends GUIObject {
     private final float v2;
     private final Texture texture;
 
-	
     /**
      * Creates a GUIImage with specified texture coordinates.
      *
@@ -61,20 +60,22 @@ public final strictfp class GUIImage extends GUIObject {
      * @param v2 The bottom texture coordinate (0.0 to 1.0).
      */
     public GUIImage(int width, int height, float u1, float v1, float u2, float v2, Texture texture) {
-		this(width, height, u1, v1, u2, v2, texture, false);
+        this(width, height, u1, v1, u2, v2, texture, false);
     }
 
-	/**
-	 * Creates a GUIImage with specified texture coordinates and allows for mouse clicked events (aka focusing).
-	 * @param width The desired width of the image to display in game.
-	 * @param height The desired height of the image to display in game.
-	 * @param u1 The left texture coordinate (0.0 to 1.0).
-	 * @param v1 The top texture coordinate (0.0 to 1.0
-	 * @param u2 The right texture coordinate (0.0 to 1.0).
-	 * @param v2 The bottom texture coordinate (0.0 to 1.0
-	 * @param texture The texture to use for this image.
-	 * @param is_button If true, the image can be focused and clicked on.
-	 */
+    /**
+     * Creates a GUIImage with specified texture coordinates and allows for
+     * mouse clicked events (aka focusing).
+     *
+     * @param width The desired width of the image to display in game.
+     * @param height The desired height of the image to display in game.
+     * @param u1 The left texture coordinate (0.0 to 1.0).
+     * @param v1 The top texture coordinate (0.0 to 1.0
+     * @param u2 The right texture coordinate (0.0 to 1.0).
+     * @param v2 The bottom texture coordinate (0.0 to 1.0
+     * @param texture The texture to use for this image.
+     * @param is_button If true, the image can be focused and clicked on.
+     */
     public GUIImage(int width, int height, float u1, float v1, float u2, float v2, Texture texture, boolean is_button) {
         this.u1 = u1;
         this.v1 = v1;
@@ -111,4 +112,12 @@ public final strictfp class GUIImage extends GUIObject {
         GL11.glBegin(GL11.GL_QUADS);
     }
 
+
+    @Override
+    protected int getCursorIndex() {
+        if(isHovered()) {
+            return GUIRoot.CURSOR_TARGET;
+        }
+        return GUIRoot.CURSOR_NORMAL;
+    }
 }
