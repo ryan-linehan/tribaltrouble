@@ -130,14 +130,13 @@ public abstract strictfp class Menu extends CameraDelegate {
         logo.setPos(0, screen_height - logo.getHeight());
         addChild(logo);
 
-
-        github = new GUIImage(80, 80, 0f, 0f, (float) 1, (float) 1, github_texture_name, true);
-        github.setPos(screen_width - discord.getWidth() - 20 - github.getWidth() - 20, github.getHeight() / 2);
+        discord = new GUIImage(80, 80, 0f, 0f, (float) 1, (float) 1, discord_texture_name, true);
+        github = new GUIImage(76, 76, 0f, 0f, (float) 1, (float) 1, github_texture_name, true);
+        github.setPos(screen_width - github.getWidth() - 20, discord.getHeight() / 2 + 4);
         github.addMouseClickListener(new GithubClickedListener());
         addChild(github);
 
-        discord = new GUIImage(80, 80, 0f, 0f, (float) 1, (float) 1, discord_texture_name, true);
-        discord.setPos(screen_width - discord.getWidth() - 20, discord.getHeight() / 2);
+        discord.setPos(screen_width - discord.getWidth() - 20 - github.getWidth() - 20, discord.getHeight() / 2);
         discord.addMouseClickListener(new DiscordClickedListener());
         addChild(discord);
     }
