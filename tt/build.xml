@@ -303,8 +303,6 @@
 			<arg value="--icon" />
 			<arg value="tribaltrouble.ico" />
 		</exec>
-
-		<copy todir="${dist}/windows/TribalTrouble" file="config.properties" />
 		
 	</target>
 	<!-- ant dist MUST be ran first. -->
