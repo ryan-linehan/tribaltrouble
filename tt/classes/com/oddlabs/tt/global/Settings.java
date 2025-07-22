@@ -237,18 +237,14 @@ public final strictfp class Settings implements Serializable {
 			try {
 				if (field_type.equals(boolean.class)) {
 					boolean field_value = (new Boolean(value)).booleanValue();
-					System.out.println("Setting " + field.getName() + " to " + field_value);
 					field.setBoolean(this, field_value);
 				} else if (field_type.equals(int.class)) {
 					int field_value = (new Integer(value)).intValue();
-					System.out.println("Setting " + field.getName() + " to " + field_value);
 					field.setInt(this, field_value);
 				} else if (field_type.equals(float.class)) {
 					float field_value = (new Float(value)).floatValue();
-					System.out.println("Setting " + field.getName() + " to " + field_value);
 					field.setFloat(this, field_value);
 				} else if (field_type.equals(String.class)) {
-					System.out.println("Setting " + field.getName() + " to " + value);
 					field.set(this, value);
 				} else
 					throw new RuntimeException("Unsupported Settings type " + field_type);
