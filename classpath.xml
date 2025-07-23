@@ -3,7 +3,7 @@
 
 	<target name="os-check">
 		<echo message="${os.name}" />
-        <echo message="${os.arch}" />
+		<echo message="${os.arch}" />
 	</target>
 
 	<!-- Platform conditions to select for platform.classpath -->
@@ -82,6 +82,26 @@
 	<path id="tools.classpath">
 		<pathelement path="../tools/build/classes" />
 		<pathelement path="../tools/svn/svnkit.jar" />
+	</path>
+
+	<!-- Server-only classpath -->
+	<path id="server.classpath">
+		<fileset dir="${lib}">
+			<include name="jorbis.jar" />
+			<include name="jsquish.jar" />
+			<include name="commons-pool-1.2.jar" />
+			<include name="commons-dbcp-1.2.1.jar" />
+			<include name="commons-collections-3.1.jar" />
+			<include name="lwjgl.jar" />
+			<include name="lwjgl-opengl.jar" />
+			<include name="lwjgl-openal.jar" />
+			<include name="lwjgl-jawt.jar" />
+			<include name="lwjgl-glfw.jar" />
+			<include name="png.jar" />
+			<include name="mysql-connector-j-9.3.0.jar" />
+		</fileset>
+		<path refid="${platform-natives}" />
+		<pathelement path="../common/build/classes" />
 	</path>
 
 </project>
