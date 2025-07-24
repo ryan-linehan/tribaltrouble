@@ -61,7 +61,7 @@ jobs:
         java-version: '21'
         distribution: 'temurin'
     - name: Build mac binaries
-      run: ant -noinput -buildfile tt/build.xml build-macosx-arm64
+      run: ant -noinput -buildfile tt/build.xml build-mac-arm64
     - name: Upload files
       uses: actions/upload-artifact@v4
       with:
