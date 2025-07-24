@@ -1,5 +1,6 @@
 
 # Tribal Trouble
+
 ![Tribal Trouble](./.github/images/tt_logo.png)
 
 ![License](https://img.shields.io/badge/license-GPLv2-orange.svg)
@@ -82,10 +83,6 @@ Optional Steps (Recommend for server hosting)
     - Make sure the keys are generated under `./common/static/`.
 
     > Why is key generation optional? The keys it generates are commited to the repository. If you intend to run a server you may want generate your own keys since they are used for encryption/decryption with the client and server
-
-### Run Game Server
-
-1. Download the server release artifact
 
 ### Build + Run Game Server
 
