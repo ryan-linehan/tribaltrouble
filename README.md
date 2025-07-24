@@ -1,5 +1,6 @@
 
 # Tribal Trouble
+![Tribal Trouble](./.github/images/tt_logo.png)
 
 ![License](https://img.shields.io/badge/license-GPLv2-orange.svg)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
@@ -27,7 +28,18 @@ This fork aims to:
 
 ## 🎮 How to play?
 
-If you want to play the game with no hassle check out [Tribal Trouble](https://tribaltrouble.org) or see the releases section of the github. Also come join us on [discord](https://discord.gg/degeKcze) as we're still a small community!
+If you want to play the game with minimal hassle check out [Tribal Trouble](https://tribaltrouble.org) or see the releases section of the github. Also come join us on [discord](https://discord.gg/degeKcze) as we're still a small community!
+
+The game is currently unsigned and not available through another platform like steam so when you launch the game different OSes will respond differently:
+
+- Windows
+  - Launch the `TribalTrouble.exe`
+  - A windows defender modal will pop up. Click more info > run anyway
+- Mac
+  - Launch the application
+  - A modal appears warning the application is unsigned and should be moved to the trash. Click done
+  - Go to system settings > Privacy & Security and click Open Anyway:
+    ![Not Opened on Mac](./.github/images/open_anyway_mac.png)
 
 ## 🛠️ Build Requirements
 
@@ -70,6 +82,10 @@ Optional Steps (Recommend for server hosting)
     - Make sure the keys are generated under `./common/static/`.
 
     > Why is key generation optional? The keys it generates are commited to the repository. If you intend to run a server you may want generate your own keys since they are used for encryption/decryption with the client and server
+
+### Run Game Server
+
+1. Download the server release artifact
 
 ### Build + Run Game Server
 
