@@ -42,12 +42,12 @@ jobs:
         java-version: '21'
         distribution: 'temurin'
     - name: Build mac binaries
-      run: ant -noinput -buildfile tt/build.xml build-mac
+      run: ant -noinput -buildfile tt/build.xml build-mac-x86
     - name: Upload files
       uses: actions/upload-artifact@v4
       with:
         name: mac-x86
-        path: tt/build/dist/macosx-ppc/
+        path: tt/build/dist/macosx-x86/
 
   build-mac-arm64:
   
@@ -61,9 +61,9 @@ jobs:
         java-version: '21'
         distribution: 'temurin'
     - name: Build mac binaries
-      run: ant -noinput -buildfile tt/build.xml build-mac
+      run: ant -noinput -buildfile tt/build.xml build-macosx-arm64
     - name: Upload files
       uses: actions/upload-artifact@v4
       with:
         name: mac-arm64
-        path: tt/build/dist/macosx-ppc/
+        path: tt/build/dist/macosx-arm64/

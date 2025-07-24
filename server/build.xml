@@ -52,7 +52,7 @@
 
 	<target name="all" depends="router, matchmaker, bugreporter" />
 
-	<target name="run-server" depends="all">
+	<target name="run-matchmaker" depends="all">
 		<java fork="true" classname="${main_class_server}" failonerror="true">
 			<classpath>
 				<pathelement location="../common/build/classes" />
@@ -84,4 +84,6 @@
 			</classpath>
 		</java>
 	</target>
+
+	<target name="run-servers" depends="run-matchmaker, run-router" />
 </project>
