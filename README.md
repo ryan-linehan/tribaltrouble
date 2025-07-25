@@ -55,7 +55,7 @@ The game is currently unsigned and not available through another platform like s
 
 ## 🏗️ Building
 
-Instruction below assume you are in a terminal at the root of the repository
+Each instruction below assumes you are in a terminal at the root of the repository
 
 ### Build + Run Game Client
 

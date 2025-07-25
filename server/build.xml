@@ -1,4 +1,8 @@
-<project name="servers" basedir="." default="all">
+<project name="servers" basedir="." default="all" xmlns:ivy="antlib:org.apache.ivy.ant">
+	<!-- Ivy Ant integration for dependency management -->
+	<taskdef resource="org/apache/ivy/ant/antlib.xml" uri="antlib:org.apache.ivy.ant"
+		classpath="../ivy_lib/ivy-2.5.3.jar" />
+	<property name="ivy.settings.file" value="../ivysettings.xml" />
 	<import file="../common/common.xml" />
 	<property name="classpath"
 		value="../common/build/classes:${lib}/commons-pool-1.2.jar:${lib}/commons-dbcp-1.2.1.jar:${lib}/commons-collections-3.1.jar:${lib}/mysql-connector-j-9.3.0.jar" />
@@ -11,7 +15,18 @@
 		<pathelement location="${commonstatic}" />
 		<pathelement location="i18n" />
 		<pathelement location="static" />
+		<fileset dir="../ivy_lib">
+			<include name="*.jar" />
+		</fileset>
 	</path>
+
+	<!-- Ivy resolve target to fetch dependencies -->
+	<target name="resolve">
+		<ivy:settings file="../ivysettings.xml" />
+		<ivy:resolve />
+		<ivy:retrieve pattern="../ivy_lib/[artifact]-[revision](-[classifier]).[ext]" />
+	</target>
+
 	<target name="compiledeps" depends="compile-common">
 	</target>
 
@@ -65,6 +80,7 @@
 					<include name="mysql-connector-j-9.3.0.jar" />
 				</fileset>
 			</classpath>
+			<classpath refid="build.classpath" />
 			<jvmarg value="-Djdk.crypto.KeyAgreement.legacyKDF=true" />
 		</java>
 	</target>

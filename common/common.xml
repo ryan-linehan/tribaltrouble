@@ -47,6 +47,8 @@
 		<javac debug="yes" source="${java_source_version}" target="${java_source_version}"
 			srcdir="classes" destdir="${build}/classes">
 			<classpath refid="platform.classpath" />
+			<!-- Figure out how we can only use this for the server?  -->
+			<classpath refid="build.classpath" />
 			<classpath>
 				<pathelement path="${lib}/javasvn.jar" />
 			</classpath>
