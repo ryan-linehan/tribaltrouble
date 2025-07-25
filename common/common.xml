@@ -13,6 +13,15 @@
 	<property name="java_source_version" value="1.8" />
 	<import file="../classpath.xml" />
 
+
+	<!-- Classpath -->
+	<path id="build.classpath">
+		<pathelement location="${build}" />
+		<pathelement location="${commonstatic}" />
+		<pathelement location="i18n" />
+		<pathelement location="static" />
+	</path>
+	
 	<target name="init">
 		<tstamp />
 		<mkdir dir="${build}" />

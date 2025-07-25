@@ -193,7 +193,8 @@
 		<mkdir dir="${dist}/common" />
 		<mkdir dir="${dist}/linux-x86" />
 		<mkdir dir="${dist}/windows" />
-		<mkdir dir="${dist}/macosx-ppc" />
+		<mkdir dir="${dist}/macosx-x86" />
+		<mkdir dir="${dist}/macosx-arm64" />
 		<jar compress="false" destfile="${dist}/common/tt-code.jar">
 			<fileset dir="${build}/classes">
 				<include name="com/oddlabs/tt/**/*class" />
@@ -306,11 +307,9 @@
 		</exec>
 
 		<copy todir="${dist}/windows/TribalTrouble" file="config.properties" />
-		
-	</target>
-	<!-- ant dist MUST be ran first. -->
-	<target name="build-mac" depends="dist">
 
+	</target>
+	<target name="build-mac-x86" depends="dist">
 		<!-- Set app name -->
 		<property name="app_name" value="TribalTrouble" />
 
@@ -318,7 +317,7 @@
 			<arg value="--name" />
 			<arg value="${app_name}" />
 			<arg value="--dest" />
-			<arg value="${dist}/macosx-ppc" />
+			<arg value="${dist}/macosx-x86" />
 			<arg value="--input" />
 			<arg value="${dist}/common" />
 			<arg value="--main-jar" />
@@ -328,13 +327,40 @@
 			<arg value="--java-options" />
 			<arg
 				value="-ea -XstartOnFirstThread -cp $APPDIR:$APPDIR/* -Djdk.crypto.KeyAgreement.legacyKDF=true" />
-			<!-- remove the below values for dmg installer to be produced instead -->
-			<arg value="--type" />
-			<arg value="app-image" />
+			<!-- add the below values for dmg installer to be produced instead -->
+			<!-- <arg value="-type" /> add a dash back if uncommenting
+			<arg value="app-image" /> -->
 			<!-- Note: The process will complain about signing but the application can still run -->
 			<!-- Note: - After release version of mac is installed user needs to drop registration
-			file
-				and the config.properties file at /user/<your_user>/ or MP will not work -->
+			file at /user/<your_user>/ or MP will not work -->
 		</exec>
 	</target>
+	<target name="build-mac-arm64" depends="dist">
+		<!-- Set app name -->
+		<property name="app_name" value="TribalTrouble" />
+
+		<exec executable="jpackage" dir="." failonerror="true">
+			<arg value="--name" />
+			<arg value="${app_name}" />
+			<arg value="--dest" />
+			<arg value="${dist}/macosx-arm64" />
+			<arg value="--input" />
+			<arg value="${dist}/common" />
+			<arg value="--main-jar" />
+			<arg value="tt-code.jar" />
+			<arg value="--main-class" />
+			<arg value="com.oddlabs.tt.Main" />
+			<arg value="--java-options" />
+			<arg
+				value="-ea -XstartOnFirstThread -cp $APPDIR:$APPDIR/* -Djdk.crypto.KeyAgreement.legacyKDF=true" />
+			<!-- add the below values for dmg installer to be produced instead -->
+			<!-- <arg value="-type" /> add a dash back when uncommented
+			<arg value="app-image" /> -->
+			<!-- Note: The process will complain about signing but the application can still run -->
+			<!-- Note: - After release version of mac is installed user needs to drop registration
+			 file at /user/<your_user>/ or MP will not work -->
+		</exec>
+	</target>
+
+	<target name="build-all" depends="build-windows, build-mac-x86, build-mac-arm64" />
 </project>
