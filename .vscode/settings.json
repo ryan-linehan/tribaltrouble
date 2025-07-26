@@ -1,0 +1,70 @@
+{
+    "java.project.sourcePaths": [
+        "common/classes",
+        "server/classes",
+        "tt/classes",
+        "tools/classes",
+        "loader/classes",
+        "tt/i18n",
+        "tt/static"
+    ],
+    "java.project.outputPath": "build/classes",
+    "java.project.referencedLibraries": {
+        "include": [
+            "common/lib/java/**/*.jar",
+            "ivy_lib/*.jar"
+        ],
+        "exclude": [],
+        "sources": {}
+    },
+    "java.compile.nullAnalysis.mode": "disabled",
+    "java.configuration.updateBuildConfiguration": "automatic",
+    "java.import.generatesMetadataFilesAtProjectRoot": false,
+    "java.autobuild.enabled": true,
+    "java.maxConcurrentBuilds": 1,
+    "java.import.gradle.enabled": false,
+    "java.import.maven.enabled": false,
+    "java.compile.sourceLevel": "1.8",
+    "java.compile.targetLevel": "1.8",
+    "java.project.resourceFilters": [
+        "node_modules",
+        ".git",
+        "build"
+    ],
+    "java.codeGeneration.insertionLocation": "afterCursor",
+    "java.sources.organizeImports.starThreshold": 99,
+    "java.sources.organizeImports.staticStarThreshold": 99,
+    "java.completion.importOrder": [
+        "java",
+        "javax", 
+        "com",
+        "org"
+    ],
+    "java.eclipse.downloadSources": true,
+    "java.maven.downloadSources": true,
+    "java.saveActions.organizeImports": true,
+    "java.completion.favoriteStaticMembers": [
+        "org.junit.Assert.*",
+        "org.junit.Assume.*",
+        "org.junit.jupiter.api.Assertions.*",
+        "org.junit.jupiter.api.Assumptions.*",
+        "org.junit.jupiter.api.DynamicContainer.*",
+        "org.junit.jupiter.api.DynamicTest.*",
+        "org.mockito.Mockito.*",
+        "org.mockito.ArgumentMatchers.*",
+        "org.mockito.Answers.*"
+    ],
+    "files.exclude": {
+        "**/build/": true,
+        "**/target/": true,
+        "**/.factorypath": true,
+        "**/.settings": true,
+        "**/.metadata": true
+    },
+    "java.format.settings.url": ".vscode/java-formatter.xml",
+    "[java]": {
+        "editor.insertSpaces": false,
+        "editor.detectIndentation": false,
+        "editor.tabSize": 4
+    }
+}

@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<!-- Source Paths -->
+	<classpathentry kind="src" path="common/classes"/>
+	<classpathentry kind="src" path="server/classes"/>
+	<classpathentry kind="src" path="tt/classes"/>
+	<classpathentry kind="src" path="tools/classes"/>
+	<classpathentry kind="src" path="loader/classes"/>
+	<classpathentry kind="src" path="tt/i18n"/>
+	
+	<!-- JRE Container -->
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	
+	<!-- Common Libraries -->
+	<classpathentry kind="lib" path="common/lib/java/commons-collections-3.1.jar"/>
+	<classpathentry kind="lib" path="common/lib/java/commons-dbcp-1.2.1.jar"/>
+	<classpathentry kind="lib" path="common/lib/java/commons-pool-1.2.jar"/>
+	<classpathentry kind="lib" path="common/lib/java/jorbis.jar"/>
+	<classpathentry kind="lib" path="common/lib/java/jsquish.jar"/>
+	<classpathentry kind="lib" path="common/lib/java/mysql-connector-j-9.3.0.jar"/>
+	<classpathentry kind="lib" path="common/lib/java/png.jar"/>
+	
+	<!-- LWJGL Libraries -->
+	<classpathentry kind="lib" path="common/lib/java/lwjgl.jar"/>
+	<classpathentry kind="lib" path="common/lib/java/lwjgl-glfw.jar"/>
+	<classpathentry kind="lib" path="common/lib/java/lwjgl-jawt.jar"/>
+	<classpathentry kind="lib" path="common/lib/java/lwjgl-openal.jar"/>
+	<classpathentry kind="lib" path="common/lib/java/lwjgl-opengl.jar"/>
+	
+	<!-- Discord4J Libraries -->
+	<classpathentry kind="lib" path="ivy_lib/discord4j-common-3.2.6.jar"/>
+	<classpathentry kind="lib" path="ivy_lib/discord4j-core-3.2.6.jar"/>
+	<classpathentry kind="lib" path="ivy_lib/discord4j-gateway-3.2.6.jar"/>
+	<classpathentry kind="lib" path="ivy_lib/discord4j-rest-3.2.6.jar"/>
+	<classpathentry kind="lib" path="ivy_lib/discord4j-voice-3.2.6.jar"/>
+	<classpathentry kind="lib" path="ivy_lib/discord-json-1.6.18.jar"/>
+	<classpathentry kind="lib" path="ivy_lib/discord-json-api-1.6.18.jar"/>
+	
+	<!-- Jackson JSON Libraries -->
+	<classpathentry kind="lib" path="ivy_lib/jackson-annotations-2.14.2.jar"/>
+	<classpathentry kind="lib" path="ivy_lib/jackson-core-2.14.2.jar"/>
+	<classpathentry kind="lib" path="ivy_lib/jackson-databind-2.14.2.jar"/>
+	<classpathentry kind="lib" path="ivy_lib/jackson-datatype-jdk8-2.14.2.jar"/>
+	<classpathentry kind="lib" path="ivy_lib/jackson-datatype-jsr310-2.14.2.jar"/>
+	
+	<!-- Netty Libraries -->
+	<classpathentry kind="lib" path="ivy_lib/netty-buffer-4.1.93.Final.jar"/>
+	<classpathentry kind="lib" path="ivy_lib/netty-codec-4.1.93.Final.jar"/>
+	<classpathentry kind="lib" path="ivy_lib/netty-codec-dns-4.1.93.Final.jar"/>
+	<classpathentry kind="lib" path="ivy_lib/netty-codec-http-4.1.93.Final.jar"/>
+	<classpathentry kind="lib" path="ivy_lib/netty-codec-http2-4.1.93.Final.jar"/>
+	<classpathentry kind="lib" path="ivy_lib/netty-codec-socks-4.1.93.Final.jar"/>
+	<classpathentry kind="lib" path="ivy_lib/netty-common-4.1.93.Final.jar"/>
+	<classpathentry kind="lib" path="ivy_lib/netty-handler-4.1.93.Final.jar"/>
+	<classpathentry kind="lib" path="ivy_lib/netty-handler-proxy-4.1.93.Final.jar"/>
+	<classpathentry kind="lib" path="ivy_lib/netty-resolver-4.1.93.Final.jar"/>
+	<classpathentry kind="lib" path="ivy_lib/netty-resolver-dns-4.1.93.Final.jar"/>
+	<classpathentry kind="lib" path="ivy_lib/netty-transport-4.1.93.Final.jar"/>
+	
+	<!-- Reactor Libraries -->
+	<classpathentry kind="lib" path="ivy_lib/reactive-streams-1.0.4.jar"/>
+	<classpathentry kind="lib" path="ivy_lib/reactor-core-3.4.30.jar"/>
+	<classpathentry kind="lib" path="ivy_lib/reactor-extra-3.4.10.jar"/>
+	<classpathentry kind="lib" path="ivy_lib/reactor-netty-core-1.0.33.jar"/>
+	<classpathentry kind="lib" path="ivy_lib/reactor-netty-http-1.0.33.jar"/>
+	
+	<!-- Other Utility Libraries -->
+	<classpathentry kind="lib" path="ivy_lib/caffeine-2.8.8.jar"/>
+	<classpathentry kind="lib" path="ivy_lib/checker-qual-3.8.0.jar"/>
+	<classpathentry kind="lib" path="ivy_lib/error_prone_annotations-2.4.0.jar"/>
+	<classpathentry kind="lib" path="ivy_lib/Servicer-1.0.3.jar"/>
+	<classpathentry kind="lib" path="ivy_lib/simple-fsm-1.0.1.jar"/>
+	<classpathentry kind="lib" path="ivy_lib/stores-api-3.2.2.jar"/>
+	<classpathentry kind="lib" path="ivy_lib/stores-jdk-3.2.2.jar"/>
+	
+	<!-- Output Path -->
+	<classpathentry kind="output" path="build/classes"/>
+</classpath>

@@ -1,0 +1,47 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Run MatchmakingServer",
+            "request": "launch",
+            "mainClass": "com.oddlabs.matchserver.MatchmakingServer",
+            "projectName": "tribaltrouble",
+            "classPaths": [
+                "${workspaceFolder}/server/classes",
+                "${workspaceFolder}/common/classes",
+                "${workspaceFolder}/common/static",
+                "${workspaceFolder}/common/lib/java/*",
+                "${workspaceFolder}/ivy_lib/*"
+            ],
+            "vmArgs": "-Djdk.crypto.KeyAgreement.legacyKDF=true",
+            "env": {
+                "TT_SERVER_PASSWORD": "your_password_here"
+            }
+        },
+        {
+            "type": "java",
+            "name": "Run Tribal Trouble Game",
+            "request": "launch",
+            "mainClass": "com.oddlabs.tt.Main",
+            "projectName": "tribaltrouble",
+            "classPaths": [
+                "${workspaceFolder}/tt/classes",
+                "${workspaceFolder}/common/classes",
+                "${workspaceFolder}/tt/static",
+                "${workspaceFolder}/tt/i18n",
+                "${workspaceFolder}/common/static",
+                "${workspaceFolder}/common/lib/java/*",
+                "${workspaceFolder}/ivy_lib/*"
+            ],
+            "vmArgs": "-ea -Djava.library.path=${workspaceFolder}/common/lib/java -Dorg.lwjgl.util.Debug=true -Xmx80000000 -Djdk.crypto.KeyAgreement.legacyKDF=true"
+        },
+        {
+            "type": "java",
+            "name": "Current File",
+            "request": "launch",
+            "mainClass": "${file}",
+            "projectName": "tribaltrouble"
+        }
+    ]
+}
