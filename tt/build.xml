@@ -273,7 +273,6 @@
 		</copy>
 
 		<copy todir="${dist}/common" file="../binaries/registration" />
-		<copy todir="${dist}/common" file="config.properties" />
 	</target>
 
 	<!-- ant dist MUST be ran first. -->
@@ -305,9 +304,7 @@
 			<arg value="--icon" />
 			<arg value="tribaltrouble.ico" />
 		</exec>
-
-		<copy todir="${dist}/windows/TribalTrouble" file="config.properties" />
-
+		
 	</target>
 	<target name="build-mac-x86" depends="dist">
 		<!-- Set app name -->
