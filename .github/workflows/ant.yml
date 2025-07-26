@@ -5,9 +5,9 @@ name: Java CI
 
 on:
   push:
-    branches: [ "remastering_graphics" ]
+    branches: [ "new_main" ]
   pull_request:
-    branches: [ "remastering_graphics" ]
+    branches: [ "new_main" ]
   workflow_dispatch:
 
 jobs:
