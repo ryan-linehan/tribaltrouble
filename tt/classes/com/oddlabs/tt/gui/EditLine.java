@@ -349,19 +349,14 @@ public strictfp class EditLine extends TextField {
     private boolean doShiftModifier(KeyboardEvent event) {
         // TODO: Same but for ctrl
         if (LocalInput.isShiftDownCurrently() && LocalInput.isControlDownCurrently() && event.getKeyCode() == Keyboard.KEY_LEFT) {
-            // WORD selection to the left
             String contents = getContents();
             if (getIndex() == 0) {
                 return true;
             }
-            // cursor at start of selection / no selection
-            // select until a space is seen
-            // if a space is seen immediately select until the next space
-            // if start of line is then just keep cursor and selection
-            System.out.println("Selecting word to the left");
             boolean isCursorAtStartOfSelection = getIndex() <= selectionStart || selectionStart == -1;
             int startingIndex = getIndex();
 
+            // When cursor is not at the start of the word we will start at the current word for the next selection
             if (!isCursorAtStartOfSelection) {
                 startingIndex = selectionStart;
             }
@@ -392,15 +387,46 @@ public strictfp class EditLine extends TextField {
             }
             setIndex(startingIndex);
         } else if (LocalInput.isShiftDownCurrently() && LocalInput.isControlDownCurrently() && event.getKeyCode() == Keyboard.KEY_RIGHT) {
-            //  TODO: right word selection
+            String contents = getContents();
+            if (getIndex() == contents.length()) {
+                return true;
+            }
 
+            boolean isCursorAtStartOfSelection = getIndex() <= selectionStart || selectionStart == -1;
+            int startingIndex = getIndex() - 1;
+            if (!isCursorAtStartOfSelection) {
+                startingIndex = selectionEnd;
+            }
+
+            boolean characterInfrontOfCursorIsSpace = contents.charAt(getIndex() - 1) == ' ';
+            if (characterInfrontOfCursorIsSpace) {
+
+                while (startingIndex < contents.length() && contents.charAt(startingIndex) == ' ') {
+                    startingIndex++;
+                }
+            }
+
+            boolean didLoop = false;
+            while (startingIndex < contents.length() && contents.charAt(startingIndex) != ' ') {
+                startingIndex++;
+                didLoop = true;
+            }
+
+            // set the cursor back one since we went past the next space that was there
+            if (didLoop) {
+                startingIndex--;
+            }
+
+            if (selectionStart == -1) {
+                selectionStart = getIndex() - 1;
+                selectionEnd = startingIndex + 1;
+            } else {
+                selectionEnd = startingIndex + 1;
+            }
+
+            setIndex(selectionEnd);
+            return true;
         } else if (LocalInput.isShiftDownCurrently() && event.getKeyCode() == Keyboard.KEY_HOME) {
-            // curosr is at the start of selection
-            // && left arrow key is pressed
-            //  -> highlight to the start of the line including what is already highlighted
-            // cursor is at end of select
-            // && left arrow key is pressed
-            // -> unhighlight highlight to the start of the line clearing current highlight
             boolean isCursorAtStartOfSelection = getIndex() <= selectionStart;
             if (selectionStart == -1) {
                 selectionStart = getIndex();
@@ -414,12 +440,6 @@ public strictfp class EditLine extends TextField {
             setIndex(0);
             return true;
         } else if (LocalInput.isShiftDownCurrently() && event.getKeyCode() == Keyboard.KEY_END) {
-            // cursor is at start of selection
-            // && right arrow key is pressed
-            //  -> unhighlight current section and highlight to end of line after current selection
-            // cursor is at end of selection
-            // && right arrow key is pressed
-            //  -> highlight to the end of the line including what is already highlighted
             boolean isCursorAtStartOfSelection = getIndex() <= selectionStart;
             if (selectionStart == -1) {
                 selectionStart = getIndex();
@@ -491,9 +511,6 @@ public strictfp class EditLine extends TextField {
             String afterReplace = getContents().substring(beforeReplace.length() + (selectionEnd - selectionStart), getContents().length());
             String newContent = beforeReplace + afterReplace;
 
-            // System.out.println("beforeReplace: '" + beforeReplace + "'");
-            // System.out.println("afterReplace: '" + afterReplace + "'");
-            // System.out.println("newContent: '" + newContent + "'");
             // resets the cursor index to 0
             set(newContent);
 
