@@ -140,12 +140,16 @@ public strictfp class EditLine extends TextField {
                 // Selection home function is handled in doShiftModifier()
                 if (!LocalInput.isShiftDownCurrently()) {
                     index = 0;
+                    selectionStart = -1;
+                    selectionEnd = -1;
                 }
                 break;
             case Keyboard.KEY_END:
                 // Selection end function is handled in doShiftModifier()
                 if (!LocalInput.isShiftDownCurrently()) {
                     index = getText().length();
+                    selectionStart = -1;
+                    selectionEnd = -1;
                 }
                 break;
             case Keyboard.KEY_TAB:
@@ -290,13 +294,93 @@ public strictfp class EditLine extends TextField {
         } else if (LocalInput.isControlDownCurrently() && event.getKeyCode() == Keyboard.KEY_C) {
             copySelectionToClipboard();
             return true;
+        } else if (LocalInput.isControlDownCurrently() && event.getKeyCode() == Keyboard.KEY_X) {
+            cutSelectionToClipboard();
+            return true;
         } else if (LocalInput.isControlDownCurrently() && event.getKeyCode() == Keyboard.KEY_A) {
             selectionStart = 0;
             selectionEnd = getContents().length();
             setIndex(selectionEnd);
             correctOffsetX();
             return true;
+        } else if (!LocalInput.isShiftDownCurrently() && LocalInput.isControlDownCurrently() && event.getKeyCode() == Keyboard.KEY_LEFT) {
+            String contents = getContents();
+            if (getIndex() == 0) {
+                return true;
+            }
+            boolean isCursorAtStartOfSelection = getIndex() <= selectionStart || selectionStart == -1;
+            int startingIndex = getIndex();
+
+            // When cursor is not at the start of the word we will start at the current word for the next selection
+            if (!isCursorAtStartOfSelection) {
+                startingIndex = selectionStart;
+            }
+
+            boolean characterBehindCursorIsSpace = contents.charAt(getIndex()) == ' ';
+
+            if (characterBehindCursorIsSpace) {
+                while (startingIndex > 0 && contents.charAt(startingIndex) == ' ') {
+                    startingIndex--;
+                }
+            }
+
+            boolean didLoop = false;
+            while (startingIndex >= 0 && contents.charAt(startingIndex) != ' ') {
+                didLoop = true;
+                startingIndex--;
+            }
+            // set the cursor back one since we went past the space
+            if (didLoop) {
+                startingIndex++;
+            }
+
+            setIndex(startingIndex);
+            if (selectionStart != -1 || selectionEnd != -1) {
+                // If we have a selection, we need to clear it
+                selectionStart = -1;
+                selectionEnd = -1;
+            }
+        } else if (!LocalInput.isShiftDownCurrently() && LocalInput.isControlDownCurrently() && event.getKeyCode() == Keyboard.KEY_RIGHT) {
+            String contents = getContents();
+            if (getIndex() == contents.length()) {
+                return true;
+            }
+
+            boolean isCursorAtStartOfSelection = getIndex() <= selectionStart || selectionStart == -1;
+            int startingIndex = getIndex() - 1;
+            if (!isCursorAtStartOfSelection) {
+                startingIndex = selectionEnd;
+            }
+
+            boolean characterInfrontOfCursorIsSpace = contents.charAt(getIndex() - 1) == ' ';
+            if (characterInfrontOfCursorIsSpace) {
+
+                while (startingIndex < contents.length() && contents.charAt(startingIndex) == ' ') {
+                    startingIndex++;
+                }
+            }
+
+            boolean didLoop = false;
+            while (startingIndex < contents.length() && contents.charAt(startingIndex) != ' ') {
+                startingIndex++;
+                didLoop = true;
+            }
+
+            // set the cursor back one since we went past the next space that was there
+            if (didLoop) {
+                startingIndex--;
+            }
+
+            setIndex(startingIndex + 1);
+            if (selectionStart != -1 || selectionEnd != -1) {
+                // If we have a selection, we need to clear it
+                selectionStart = -1;
+                selectionEnd = -1;
+            }
+            return true;
         }
+        // TODO: DO CUT TO CLIPBOARD?
+
         return false;
     }
 
@@ -343,6 +427,26 @@ public strictfp class EditLine extends TextField {
             Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
             StringSelection selection = new StringSelection(selectedText);
             clipboard.setContents(selection, null);
+        }
+    }
+
+    private void cutSelectionToClipboard() {
+        if (selectionStart != -1 && selectionEnd != -1 && selectionStart != selectionEnd) {
+            String selectedText = getContents().substring(selectionStart, selectionEnd);
+            
+            Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+            StringSelection selection = new StringSelection(selectedText);
+            clipboard.setContents(selection, null);
+
+            // Remove the selected text from the EditLine
+            String beforeReplace = getContents().substring(0, selectionStart);
+            String afterReplace = getContents().substring(beforeReplace.length() + (selectionEnd - selectionStart), getContents().length());
+            String newContent = beforeReplace + afterReplace;
+            set(newContent);
+            setIndex(beforeReplace.length());
+            // Clear selection
+            selectionStart = -1;
+            selectionEnd = -1;
         }
     }
 
