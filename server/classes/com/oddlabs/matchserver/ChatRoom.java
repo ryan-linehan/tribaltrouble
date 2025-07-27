@@ -7,6 +7,7 @@ import discord4j.core.event.domain.message.MessageCreateEvent;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.channel.TextChannel;
 import reactor.core.publisher.Mono;
+import reactor.core.Disposable;
 
 import com.oddlabs.matchmaking.MatchmakingClientInterface;
 import com.oddlabs.matchmaking.ChatRoomUser;
@@ -23,6 +24,7 @@ public final strictfp class ChatRoom {
     private final Set<Client> users = new HashSet();
     private final String name;
     private TextChannel discordChannel = null;
+    private Disposable discordSubscription = null;
 
     public ChatRoom(String name) {
         this.name = name;
@@ -30,7 +32,7 @@ public final strictfp class ChatRoom {
         if (discordChannel == null) {
             System.err.println("Discord channel for " + name + " not found!");
         } else {
-            discordChannel.getClient().on(MessageCreateEvent.class, this::handleIncomingDiscordMessage).subscribe();
+            discordSubscription = discordChannel.getClient().on(MessageCreateEvent.class, this::handleIncomingDiscordMessage).subscribe();
             System.out.println("Discord channel for " + name + " found: " + (discordChannel).getName());
         }
     }
@@ -142,9 +144,21 @@ public final strictfp class ChatRoom {
             users.remove(client);
             if (users.size() == 0) {
                 chat_rooms.remove(getName());
+                cleanup();
             } else {
                 sendUsers();
             }
+        }
+    }
+
+    /**
+     * Cleanup method to dispose of Discord subscription and prevent memory leaks
+     */
+    public final void cleanup() {
+        if (discordSubscription != null && !discordSubscription.isDisposed()) {
+            System.out.println("Disposing Discord subscription for chat room " + name);
+            discordSubscription.dispose();
+            discordSubscription = null;
         }
     }
 
@@ -158,7 +172,7 @@ public final strictfp class ChatRoom {
      * @return
      */
     private Mono<Void> handleIncomingDiscordMessage(MessageCreateEvent event) {
-        System.err.println("handling on chatroom" + name);
+        System.out.println("handling on chatroom" + name);
         if (this.discordChannel != null) {
             Message message = event.getMessage();
 
