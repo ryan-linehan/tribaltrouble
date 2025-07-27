@@ -17,6 +17,7 @@ public class DiscordBotService {
     Snowflake bot_id;
     private GatewayDiscordClient gateway;
     private static DiscordBotService instance;
+    private boolean isInitialized = false;
 
     public static DiscordBotService getInstance() {
         if (instance == null) {
@@ -43,8 +44,12 @@ public class DiscordBotService {
             setupEventHandlers();
             return gateway.onDisconnect();
         });
-
+        isInitialized = true;
         login.subscribe();
+    }
+
+    public boolean isInitialized() {
+        return isInitialized;
     }
 
     /**
@@ -73,6 +78,8 @@ public class DiscordBotService {
      * off the tribal trouble chat room number
      */
     public TextChannel getDiscordChannelByTTRoomNumber(int roomNumber) {
+        if(!isInitialized)
+            return null;
         if (roomNumber < 1 || roomNumber > message_channels.size()) {
             return null;
         }

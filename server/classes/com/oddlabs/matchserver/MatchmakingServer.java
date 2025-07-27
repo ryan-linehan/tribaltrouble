@@ -161,8 +161,14 @@ public final class MatchmakingServer implements ConnectionListenerInterface {
     public final static void main(String[] args) {
         try {
             String token = System.getenv("TT_DISCORD_TOKEN");
-            DiscordBotService.getInstance().initialize(token);
-
+            if(token == null || token.isEmpty()) {
+                logger.info("No discord bot token found at TT_DISCORD_TOKEN environment variable, skipping Discord bot initialization.");
+            }
+            else {
+                DiscordBotService.getInstance().initialize(token);
+                logger.info("Discord bot initialized with token.");
+            }
+            
             new MatchmakingServer();
         } catch (Exception e) {
             System.out.println("Exception: " + e);
