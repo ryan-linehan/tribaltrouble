@@ -15,12 +15,23 @@ import com.oddlabs.matchmaking.ChatRoomUser;
 import java.io.Serializable;
 import java.time.Instant;
 import java.util.*;
-import java.util.concurrent.ConcurrentLinkedQueue;
 
 public final strictfp class ChatRoom {
-
+    public static class MessageTuple {
+        public final String author;
+        public final String message;
+        
+        public MessageTuple(String author, String message) {
+            this.author = author;
+            this.message = message;
+        }
+    }
+    
     private final static Map<String, ChatRoom> chat_rooms = new HashMap();
-
+    private static final int MAX_MESSAGES = 100;
+    private MessageTuple[] messages = new MessageTuple[MAX_MESSAGES];
+    private int currentIndex = 0;
+    private int messageCount = 0;
     private final Set<Client> users = new HashSet();
     private final String name;
     private TextChannel discordChannel = null;
@@ -42,9 +53,10 @@ public final strictfp class ChatRoom {
     }
 
     /**
-     * Joins a standard chat room for the client. This method will find the first
-     * chat room that is not more than half full and join the client to it. If
-     * no such room exists, a new one will be created.
+     * Joins a standard chat room for the client. This method will find the
+     * first chat room that is not more than half full and join the client to
+     * it. If no such room exists, a new one will be created.
+     *
      * @param client
      */
     public final static void joinStandardChatRoom(Client client) {
@@ -58,12 +70,22 @@ public final strictfp class ChatRoom {
             }
 
             client.joinRoom(room_name);
+            // Send existing messages to the new client
+            for (int j = 0; j < room.messageCount; j++) {
+                int index = (room.currentIndex - room.messageCount + j + MAX_MESSAGES) % MAX_MESSAGES;
+                MessageTuple message = room.messages[index];
+                if (message != null) {
+                    System.out.println("Sending message to client: " + message.author + ": " + message.message);
+                    client.getClientInterface().receiveChatRoomMessage(message.author, message.message);
+                }
+            }
             return; // Client has joined a room
         }
     }
 
     /**
      * Gets a chat room by name, creating it if it does not exist.
+     *
      * @param room_name
      * @return
      */
@@ -112,15 +134,29 @@ public final strictfp class ChatRoom {
         }
     }
 
+    private String formatChat(String owner, String message) {
+        return "<" + owner + "> " + message;
+    }
+
     /**
      * Sends a message to all connected users in the chat room.
+     *
      * @param owner
      * @param msg
      */
     public final void sendMessage(String owner, String msg) {
+        addMessage(new MessageTuple(owner, msg));
         for (Client client : users) {
             MatchmakingClientInterface ci = client.getClientInterface();
             ci.receiveChatRoomMessage(owner, msg);
+        }
+    }
+
+    private void addMessage(MessageTuple message) {
+        messages[currentIndex] = message;
+        currentIndex = (currentIndex + 1) % MAX_MESSAGES;
+        if (messageCount < MAX_MESSAGES) {
+            messageCount++;
         }
     }
 
@@ -152,7 +188,8 @@ public final strictfp class ChatRoom {
     }
 
     /**
-     * Cleanup method to dispose of Discord subscription and prevent memory leaks
+     * Cleanup method to dispose of Discord subscription and prevent memory
+     * leaks
      */
     public final void cleanup() {
         if (discordSubscription != null && !discordSubscription.isDisposed()) {
@@ -167,8 +204,11 @@ public final strictfp class ChatRoom {
     }
 
     /**
-     * Sends a message to the chat room associated with the discord channel that the message was sent through
-     * @param event The message event containing the message details from discord
+     * Sends a message to the chat room associated with the discord channel that
+     * the message was sent through
+     *
+     * @param event The message event containing the message details from
+     * discord
      * @return
      */
     private Mono<Void> handleIncomingDiscordMessage(MessageCreateEvent event) {
@@ -186,7 +226,7 @@ public final strictfp class ChatRoom {
                 if (!isMessageFromBot) {
                     System.out.println("Message from " + authorId + ": " + content + " at " + timestamp);
                     String author = "@" + message.getAuthor().map(user -> user.getUsername()).orElse("Unknown");
-                    System.out.println("Queueing Discord message for main thread processing");                
+                    System.out.println("Queueing Discord message for main thread processing");
                     sendMessage(author, content);
                 }
             }
