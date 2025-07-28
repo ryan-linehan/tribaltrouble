@@ -167,6 +167,8 @@ public final strictfp class ChatRoom {
     public final void trySendDiscordMessage(String owner, String msg) {
         // Send the message to the discord channel if one is setup for this chat room
         if (this.discordChannel != null) {
+            if(!msg.startsWith("<"))
+                msg = formatChat(owner, msg);
             this.discordChannel.createMessage(msg).subscribe();
         }
     }

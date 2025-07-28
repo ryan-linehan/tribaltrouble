@@ -513,6 +513,7 @@ public final strictfp class Client implements MatchmakingServerInterface, Connec
                 String formatted_message = getProfile().getNick() + " has created a game called \"" + current_game.getName() + "\".";
                 server.getChatLogger().info(formatted_message);
                 current_room.sendMessage("Server", formatted_message);
+                current_room.trySendDiscordMessage("Server", formatted_message);
             }
         }
     }
