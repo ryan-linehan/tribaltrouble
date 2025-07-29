@@ -322,8 +322,28 @@ public final strictfp class GameCamera extends Camera {
 	}
 
 	public final void mouseMoved(int x, int y) {
-		if ((owner == null || !owner.isSelecting()) && (x < SCROLL_BUFFER || y < SCROLL_BUFFER ||
-				x > LocalInput.getViewWidth() - 1 - SCROLL_BUFFER || y > LocalInput.getViewHeight() - 1 - SCROLL_BUFFER)) {
+		// Debug: Print mouse coordinates and view dimensions
+		//System.out.println("Mouse: (" + x + ", " + y + ") ViewSize: (" + LocalInput.getViewWidth() + ", " + LocalInput.getViewHeight() + ")");
+		
+		// Debug: Print all boundary comparison values
+		int leftBoundary = SCROLL_BUFFER;
+		int topBoundary = SCROLL_BUFFER;
+		int rightBoundary = LocalInput.getViewWidth() - 1 - SCROLL_BUFFER;
+		int bottomBoundary = LocalInput.getViewHeight() - 1 - SCROLL_BUFFER;
+		
+		// System.out.println("=== BOUNDARY DEBUG ===");
+		// System.out.println("Mouse position: x=" + x + ", y=" + y);
+		// System.out.println("View dimensions: " + LocalInput.getViewWidth() + "x" + LocalInput.getViewHeight());
+		// System.out.println("SCROLL_BUFFER: " + SCROLL_BUFFER);
+		// System.out.println("Left boundary (x < " + leftBoundary + "): " + (x < leftBoundary));
+		// System.out.println("Top boundary (y < " + topBoundary + "): " + (y < topBoundary));
+		// System.out.println("Right boundary (x > " + rightBoundary + "): " + (x > rightBoundary));
+		// System.out.println("Bottom boundary (y > " + bottomBoundary + "): " + (y > bottomBoundary));
+		// System.out.println("Overall scroll trigger: " + ((x < leftBoundary) || (y < topBoundary) || (x > rightBoundary) || (y > bottomBoundary)));
+		// System.out.println("======================");
+		
+		if ((owner == null || !owner.isSelecting()) && (x < leftBoundary || y < topBoundary ||
+				x > rightBoundary || y > bottomBoundary)) {
 			if (scroll_start) {
 				scroll_start = false;
 				if (!scrollSpeedLocked(0)) {
