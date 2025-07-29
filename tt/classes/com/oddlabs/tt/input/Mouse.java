@@ -12,6 +12,7 @@ import java.util.Queue;
 import java.util.LinkedList;
 
 public final strictfp class Mouse {
+
     private static boolean created = false;
     private static boolean grabbed = false;
     private static int mouseX = 0;
@@ -28,9 +29,11 @@ public final strictfp class Mouse {
     private static MouseEvent currentEvent = null;
 
     public static class MouseEvent {
+
         public final int x, y, dx, dy, dWheel, button;
         public final boolean buttonState;
         public final EventType type;
+
         public MouseEvent(int x, int y, int dx, int dy, int dWheel, int button, boolean buttonState, EventType type) {
             this.x = x;
             this.y = y;
@@ -42,32 +45,58 @@ public final strictfp class Mouse {
             this.type = type;
         }
     }
-    public enum EventType { MOVE, BUTTON, SCROLL }
+
+    public enum EventType {
+        MOVE, BUTTON, SCROLL
+    }
 
     public static void create() {
-        if (created) return;
+        if (created) {
+            return;
+        }
         long window = Display.getWindow();
-        if (window == 0) throw new IllegalStateException("Display must be created before Mouse");
+        if (window == 0) {
+            throw new IllegalStateException("Display must be created before Mouse");
+        }
 
         GLFW.glfwSetCursorPosCallback(window, new GLFWCursorPosCallback() {
             @Override
             public void invoke(long win, double xpos, double ypos) {
-                int ix = (int)xpos;
-                int iy = Display.getHeight() - (int)ypos;
+                int ix = (int) xpos;
+                int iy = Display.getHeight() - (int) ypos;
+
+                // Clamp coordinates to stay within game bounds
+                int clampedX = Math.max(0, Math.min(ix, Display.getWidth() - 1));
+                int clampedY = Math.max(0, Math.min(iy, Display.getHeight() - 1));
+                
+                // If coordinates were clamped, reset GLFW cursor position to prevent drift
+                if (clampedX != ix || clampedY != iy) {
+                    // Convert back to GLFW coordinate space and reset cursor
+                    double newGlfwX = clampedX;
+                    double newGlfwY = Display.getHeight() - clampedY;
+                    GLFW.glfwSetCursorPos(win, newGlfwX, newGlfwY);
+                }
+                
+                ix = clampedX;
+                iy = clampedY;
+
+                //System.out.println("GLFW raw: (" + xpos + ", " + ypos + ") -> Processed: (" + ix + ", " + iy + ") DisplaySize: (" + Display.getWidth() + ", " + Display.getHeight() + ")");
                 dX = ix - mouseX;
                 dY = iy - mouseY;
                 lastMouseX = mouseX;
                 lastMouseY = mouseY;
                 mouseX = ix;
                 mouseY = iy;
-
+                //System.out.println("Mouse moved to: (" + mouseX + ", " + mouseY + ") Delta: (" + dX + ", " + dY + ")");
                 eventQueue.offer(new MouseEvent(mouseX, mouseY, dX, dY, 0, -1, false, EventType.MOVE));
             }
         });
         GLFW.glfwSetMouseButtonCallback(window, new GLFWMouseButtonCallback() {
             @Override
             public void invoke(long win, int button, int action, int mods) {
-                if (button < 0 || button >= buttonStates.length) return;
+                if (button < 0 || button >= buttonStates.length) {
+                    return;
+                }
                 boolean pressed = action == GLFW.GLFW_PRESS;
                 buttonStates[button] = pressed;
                 eventQueue.offer(new MouseEvent(mouseX, mouseY, 0, 0, 0, button, pressed, EventType.BUTTON));
@@ -76,7 +105,7 @@ public final strictfp class Mouse {
         GLFW.glfwSetScrollCallback(window, new GLFWScrollCallback() {
             @Override
             public void invoke(long win, double xoffset, double yoffset) {
-                dWheel = (int)(yoffset * 100);
+                dWheel = (int) (yoffset * 100);
                 eventQueue.offer(new MouseEvent(mouseX, mouseY, 0, 0, dWheel, -1, false, EventType.SCROLL));
             }
         });
@@ -111,21 +140,27 @@ public final strictfp class Mouse {
     public static int getEventX() {
         return currentEvent != null ? currentEvent.x : mouseX;
     }
+
     public static int getEventY() {
         return currentEvent != null ? currentEvent.y : mouseY;
     }
+
     public static int getEventDX() {
         return currentEvent != null ? currentEvent.dx : 0;
     }
+
     public static int getEventDY() {
         return currentEvent != null ? currentEvent.dy : 0;
     }
+
     public static int getEventDWheel() {
         return currentEvent != null ? currentEvent.dWheel : 0;
     }
+
     public static int getEventButton() {
         return currentEvent != null ? currentEvent.button : -1;
     }
+
     public static boolean getEventButtonState() {
         return currentEvent != null && currentEvent.type == EventType.BUTTON ? currentEvent.buttonState : false;
     }
@@ -133,18 +168,23 @@ public final strictfp class Mouse {
     public static int getX() {
         return mouseX;
     }
+
     public static int getY() {
         return mouseY;
     }
+
     public static int getDX() {
         return dX;
     }
+
     public static int getDY() {
         return dY;
     }
+
     public static int getDWheel() {
         return dWheel;
     }
+
     public static boolean isButtonDown(int button) {
         return button >= 0 && button < buttonStates.length && buttonStates[button];
     }
@@ -156,6 +196,7 @@ public final strictfp class Mouse {
             GLFW.glfwSetInputMode(window, GLFW.GLFW_CURSOR, grab ? GLFW.GLFW_CURSOR_DISABLED : GLFW.GLFW_CURSOR_NORMAL);
         }
     }
+
     public static boolean isGrabbed() {
         return grabbed;
     }
@@ -166,8 +207,11 @@ public final strictfp class Mouse {
             GLFW.glfwSetCursorPos(window, x, y);
             mouseX = x;
             mouseY = y;
+            // mouseX = Math.max(0, Math.min(mouseX, Display.getWidth() - 1));
+            // mouseY = Math.max(0, Math.min(mouseY, Display.getHeight() - 1));
         }
     }
 
-    public static void update() {}
-} 
+    public static void update() {
+    }
+}
