@@ -11,6 +11,7 @@ import discord4j.core.object.entity.channel.TextChannel;
 import discord4j.core.object.entity.channel.Channel;
 
 import reactor.core.publisher.Mono;
+import reactor.core.Disposable;
 
 public class DiscordBotService {
 
@@ -30,18 +31,14 @@ public class DiscordBotService {
 
     }
 
-    public void initialize(String token) {
+    public void initialize(String token, long serverId) {
         DiscordClient client = DiscordClient.create(token);
 
         Mono<Void> login = client.withGateway((GatewayDiscordClient gateway) -> {
             this.gateway = gateway;
             // Extra discord things that can be done
             bot_id = gateway.getSelfId();
-            // Get connected servers
-            gateway.getGuilds().subscribe(guild -> {
-                System.out.printf("Connected to guild: %s (ID: %s)%n", guild.getName(), guild.getId().asString());
-            });
-            setupEventHandlers();
+            setupEventHandlers(serverId);
             return gateway.onDisconnect();
         });
         isInitialized = true;
@@ -64,8 +61,8 @@ public class DiscordBotService {
     /**
      * Sets up event handlers for the Discord bot
      */
-    private void setupEventHandlers() {
-        initTribalTroubleTextChannels();
+    private void setupEventHandlers(long serverId) {
+        initTribalTroubleTextChannels(serverId);
         gateway.on(ReadyEvent.class, this::handleReady).subscribe();
     }
 
@@ -92,13 +89,17 @@ public class DiscordBotService {
      * be name tt_chatroom_<number> where <number> is the same as the tribal
      * trouble chat room number
      */
-    private void initTribalTroubleTextChannels() {
+    private void initTribalTroubleTextChannels(long serverId) {
         if (gateway != null) {
             gateway.getGuilds()
                     .doOnNext(guild -> System.out.printf("Channels in guild: %s%n", guild.getName()))
+                    .filter(guild -> {
+                        System.out.printf("Checking guild ID: %s against server ID: %d%n", guild.getId().asString(), serverId);
+                        return guild.getId().equals(Snowflake.of(serverId));
+                    })
                     .flatMap(guild -> guild.getChannels())
+                    .take(1)
                     .subscribe(channel -> {
-
                         System.out.printf("  - %s (ID: %s, Type: %s)%n",
                                 channel.getName(),
                                 channel.getId().asString(),

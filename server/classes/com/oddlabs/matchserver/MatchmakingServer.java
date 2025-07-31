@@ -161,14 +161,26 @@ public final class MatchmakingServer implements ConnectionListenerInterface {
     public final static void main(String[] args) {
         try {
             String token = System.getenv("TT_DISCORD_TOKEN");
-            if(token == null || token.isEmpty()) {
+            String serverIdAsString = System.getenv("TT_SERVER_ID");
+            if (token == null || token.isEmpty()) {
                 logger.info("No discord bot token found at TT_DISCORD_TOKEN environment variable, skipping Discord bot initialization.");
+
+            } else if (serverIdAsString == null || serverIdAsString.isEmpty()) {
+                logger.info("No discord guild name found at TT_DISCORD_GUILD environment variable, skipping Discord bot initialization.");
+            } else {
+                try {
+                    long serverId = Long.parseLong(serverIdAsString);
+                    if (serverId <= 0) {
+                        logger.log(Level.INFO, "Invalid discord guild ID (must be positive): {0}, skipping Discord bot initialization.", serverIdAsString);
+                    } else {
+                        DiscordBotService.getInstance().initialize(token, serverId);
+                        logger.log(Level.INFO, "Discord bot initialized with token for server id: {0}", serverId);
+                    }
+                } catch (NumberFormatException e) {
+                    logger.log(Level.WARNING, "Invalid discord guild ID format: {0}, skipping Discord bot initialization. Error: {1}", new Object[]{serverIdAsString, e.getMessage()});
+                }
             }
-            else {
-                DiscordBotService.getInstance().initialize(token);
-                logger.info("Discord bot initialized with token.");
-            }
-            
+
             new MatchmakingServer();
         } catch (Exception e) {
             System.out.println("Exception: " + e);
