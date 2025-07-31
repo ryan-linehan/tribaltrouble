@@ -7,10 +7,12 @@ import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
 import java.awt.Toolkit;
 import com.oddlabs.tt.input.Keyboard;
-import org.lwjgl.Sys;
 import com.oddlabs.tt.font.Index;
 import com.oddlabs.tt.font.TextLineRenderer;
 import com.oddlabs.tt.guievent.EnterListener;
+import java.awt.datatransfer.DataFlavor;
+import java.awt.datatransfer.UnsupportedFlavorException;
+import java.io.IOException;
 import javax.swing.plaf.basic.BasicSplitPaneUI;
 
 public strictfp class EditLine extends TextField {
@@ -379,14 +381,22 @@ public strictfp class EditLine extends TextField {
             }
             return true;
         }
-        // TODO: DO CUT TO CLIPBOARD?
 
         return false;
     }
 
     private void pasteClipboard() {
-        String clipboard = (String) LocalEventQueue.getQueue().getDeterministic().log(Sys.getClipboard());
-        if (clipboard != null) {
+        Clipboard sysClipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+        String clipboard;
+        try {
+            clipboard = sysClipboard.getData(DataFlavor.stringFlavor).toString();
+        } catch (UnsupportedFlavorException | IOException e) {
+            // If we cannot access the clipboard, we just return
+            System.err.println("Error accessing clipboard: " + e.getMessage());
+            return;
+        }        
+
+        if (clipboard != null && !clipboard.isEmpty()) {
             for (char item : clipboard.toCharArray()) {
                 if (!isAllowed(item)) {
                     return;
@@ -451,19 +461,14 @@ public strictfp class EditLine extends TextField {
     }
 
     private boolean doShiftModifier(KeyboardEvent event) {
-        // TODO: Same but for ctrl
         if (LocalInput.isShiftDownCurrently() && LocalInput.isControlDownCurrently() && event.getKeyCode() == Keyboard.KEY_LEFT) {
             String contents = getContents();
             if (getIndex() == 0) {
                 return true;
             }
             boolean isCursorAtStartOfSelection = getIndex() <= selectionStart || selectionStart == -1;
+            System.out.println("isCursorAtStartOfSelection: " + isCursorAtStartOfSelection);
             int startingIndex = getIndex();
-
-            // When cursor is not at the start of the word we will start at the current word for the next selection
-            if (!isCursorAtStartOfSelection) {
-                startingIndex = selectionStart;
-            }
 
             boolean characterBehindCursorIsSpace = contents.charAt(getIndex()) == ' ';
 
@@ -496,7 +501,8 @@ public strictfp class EditLine extends TextField {
                 return true;
             }
 
-            boolean isCursorAtStartOfSelection = getIndex() <= selectionStart || selectionStart == -1;
+            boolean isCursorAtStartOfSelection = getIndex() - 1 <= selectionStart || selectionStart == -1;
+
             int startingIndex = getIndex() - 1;
             if (!isCursorAtStartOfSelection) {
                 startingIndex = selectionEnd;
@@ -556,7 +562,7 @@ public strictfp class EditLine extends TextField {
             selectionEnd = getContents().length();
             setIndex(getContents().length());
             return true;
-        } else if (LocalInput.isShiftDownCurrently() && event.getKeyCode() == Keyboard.KEY_RIGHT && (selectionEnd < getContents().length() || selectionEnd == -1)) {
+        } else if (LocalInput.isShiftDownCurrently() && event.getKeyCode() == Keyboard.KEY_RIGHT && (selectionEnd <= getContents().length() || selectionEnd == -1)) {
             // First time shift is pressed and cursor has moved
             if (selectionStart == -1) {
                 selectionStart = getIndex() - 1;
@@ -578,7 +584,7 @@ public strictfp class EditLine extends TextField {
                 selectionEnd = getContents().length();
             }
             return true;
-        } else if (LocalInput.isShiftDownCurrently() && event.getKeyCode() == Keyboard.KEY_LEFT && (selectionStart > 0 || selectionStart == -1)) {
+        } else if (LocalInput.isShiftDownCurrently() && event.getKeyCode() == Keyboard.KEY_LEFT && (selectionStart >= 0 || selectionStart == -1)) {
             // First time shift is pressed and the cursor has moved
             if (selectionStart == -1) {
                 selectionStart = getIndex();
