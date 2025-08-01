@@ -13,6 +13,29 @@
 	<property name="java_source_version" value="1.8" />
 	<import file="../classpath.xml" />
 	
+	<!-- Classpaths -->
+	<path id="_common.combined.run.classpath">
+		<path refid="build.classpath" />
+		<path refid="build.classes.classpath" />
+		<path refid="common.classes.classpath" />
+		<path refid="platform.classpath" />
+		<path refid="build.tt.classpath" />
+	</path>
+
+	<path id="_common.combined.compile.javasvn.classpath">
+		<path refid="platform.classpath" />
+		<path refid="common.classes.classpath" />
+		<path refid="library.javasvn.classpath" />
+	</path>
+
+	<path id="_common.combined.compile.svnkit.classpath">
+		<path refid="platform.classpath" />
+		<path refid="common.classes.classpath" />
+		<path refid="library.svnkit.classpath" />
+	</path>
+
+	<!-- End of classpaths -->
+
 	<target name="init">
 		<tstamp />
 		<mkdir dir="${build}" />
@@ -37,19 +60,14 @@
 	<target name="compile" depends="init,compiledeps">
 		<javac debug="yes" source="${java_source_version}" target="${java_source_version}"
 			srcdir="classes" destdir="${build}/classes">
-			<classpath refid="platform.classpath" />
-			<classpath refid="common.classes.classpath" />
-			<classpath refid="library.javasvn.classpath" />
+			<classpath refid="_common.combined.compile.javasvn.classpath" />
 		</javac>
 	</target>
 
 	<target name="compile-tools" depends="init,compiledeps">
 		<javac debug="yes" source="${java_source_version}" target="${java_source_version}"
 			srcdir="classes" destdir="${build}/classes">
-			<classpath refid="platform.classpath" />
-			<classpath refid="tools.classes.classpath" />
-			<classpath refid="common.classes.classpath" />
-			<classpath refid="library.svnkit.classpath" />
+			<classpath refid="_common.combined.compile.svnkit.classpath" />
 		</javac>
 	</target>
 
@@ -59,11 +77,7 @@
 
 	<target name="eventloadzipped" depends="dorundeps">
 		<java fork="yes" classname="${main_class}">
-			<classpath refid="platform.classpath" />
-			<classpath refid="build.classes.classpath" />
-			<classpath refid="build.classpath" />
-			<classpath refid="common.classes.classpath" />
-			<classpath refid="build.tt.classpath" />
+			<classpath refid="_common.combined.run.classpath" />
 
 			<jvmarg value="-ea" />
 			<jvmarg value="-Djava.library.path=${nativelib}" />
@@ -76,11 +90,7 @@
 
 	<target name="eventload" depends="dorundeps">
 		<java fork="yes" classname="${main_class}">
-			<classpath refid="platform.classpath" />
-			<classpath refid="build.classes.classpath" />
-			<classpath refid="build.classpath" />
-			<classpath refid="common.classes.classpath" />
-			<classpath refid="build.tt.classpath" />
+			<classpath refid="_common.combined.run.classpath" />
 
 			<jvmarg value="-ea" />
 			<jvmarg value="-Djava.library.path=${nativelib}" />
@@ -93,11 +103,7 @@
 
 	<target name="grabframes" depends="dorundeps">
 		<java fork="yes" classname="${main_class}">
-			<classpath refid="platform.classpath" />
-			<classpath refid="build.classes.classpath" />
-			<classpath refid="build.classpath" />
-			<classpath refid="common.classes.classpath" />
-			<classpath refid="build.tt.classpath" />
+			<classpath refid="_common.combined.run.classpath" />
 
 			<jvmarg value="-ea" />
 			<jvmarg value="-Djava.library.path=${nativelib}" />
@@ -108,11 +114,7 @@
 
 	<target name="profile" depends="dorundeps">
 		<java fork="yes" classname="${main_class}">
-			<classpath refid="platform.classpath" />
-			<classpath refid="build.classes.classpath" />
-			<classpath refid="build.classpath" />
-			<classpath refid="common.classes.classpath" />
-			<classpath refid="build.tt.classpath" />
+			<classpath refid="_common.combined.run.classpath" />
 
 			<jvmarg value="-ea" />
 			<jvmarg value="-Xbootclasspath/a:/home/elias/snot/jprofiler4/bin/agent.jar" />
@@ -123,11 +125,7 @@
 
 	<target name="cpuprofile" depends="dorundeps">
 		<java fork="yes" classname="${main_class}">
-			<classpath refid="platform.classpath" />
-			<classpath refid="build.classes.classpath" />
-			<classpath refid="build.classpath" />
-			<classpath refid="common.classes.classpath" />
-			<classpath refid="build.tt.classpath" />
+			<classpath refid="_common.combined.run.classpath" />
 
 			<jvmarg value="-ea" />
 			<jvmarg value="-Djava.library.path=${nativelib}" />
@@ -137,11 +135,7 @@
 
 	<target name="memprofile" depends="dorundeps">
 		<java fork="yes" classname="${main_class}">
-			<classpath refid="platform.classpath" />
-			<classpath refid="build.classes.classpath" />
-			<classpath refid="build.classpath" />
-			<classpath refid="common.classes.classpath" />
-			<classpath refid="build.tt.classpath" />
+			<classpath refid="_common.combined.run.classpath" />
 
 			<jvmarg value="-ea" />
 			<jvmarg value="-verbose:gc" />
@@ -152,11 +146,7 @@
 
 	<target name="gcprofile" depends="dorundeps">
 		<java fork="yes" classname="${main_class}">
-			<classpath refid="platform.classpath" />
-			<classpath refid="build.classes.classpath" />
-			<classpath refid="build.classpath" />
-			<classpath refid="common.classes.classpath" />
-			<classpath refid="build.tt.classpath" />
+			<classpath refid="_common.combined.run.classpath" />
 
 			<jvmarg value="-ea" />
 			<jvmarg value="-Djava.library.path=${nativelib}" />
@@ -173,11 +163,7 @@
 			<isset property="macosx.firstthread" />
 			<then>
 				<java fork="yes" classname="${main_class}">
-					<classpath refid="platform.classpath" />
-					<classpath refid="build.classes.classpath" />
-					<classpath refid="build.classpath" />
-					<classpath refid="common.classes.classpath" />
-					<classpath refid="build.tt.classpath" />	
+					<classpath refid="_common.combined.run.classpath" />
 
 					<jvmarg value="-ea" />
 					<jvmarg value="-Djava.library.path=${nativelib}" />
@@ -193,11 +179,7 @@
 			</then>
 			<else>
 				<java fork="yes" classname="${main_class}">
-					<classpath refid="platform.classpath" />
-					<classpath refid="build.classes.classpath" />
-					<classpath refid="build.classpath" />
-					<classpath refid="build.tt.classpath" />
-					<classpath refid="common.classes.classpath" />
+					<classpath refid="_common.combined.run.classpath" />
 
 					<jvmarg value="-ea" />
 					<jvmarg value="-Djava.library.path=${nativelib}" />
