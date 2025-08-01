@@ -1,6 +1,7 @@
 package com.oddlabs.tt.net;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.util.ArrayList;
@@ -340,6 +341,9 @@ public final strictfp class PeerHub implements Animated, RouterHandler {
 				status[i] = peer.getPlayer().getStatus();
 		}
 		Network.getMatchmakingClient().getInterface().updateGameStatus(getTick(), status);
+
+		ByteBuffer spectator_buffer = ByteBuffer.allocate(10);
+		Network.getMatchmakingClient().getInterface().updateSpectatorInfo(getTick(), spectator_buffer);
 	}
 
 	private final Iterator getPeerIterator()  {

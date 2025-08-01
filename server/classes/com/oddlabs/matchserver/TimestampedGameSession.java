@@ -3,6 +3,8 @@ package com.oddlabs.matchserver;
 import com.oddlabs.matchmaking.GameSession;
 import com.oddlabs.matchmaking.Participant;
 import com.oddlabs.matchmaking.MatchmakingServerInterface;
+import java.nio.ByteBuffer;
+import java.io.File;
 
 import java.sql.SQLException;
 
@@ -44,6 +46,8 @@ public final strictfp class TimestampedGameSession {
 	
 	private boolean all_5_wins;
 	private int[] player_ratings;
+
+    private File spectator_file;
 	
 	public TimestampedGameSession(GameSession session, int database_id) {
 		this.session = session;
@@ -56,6 +60,7 @@ public final strictfp class TimestampedGameSession {
 		for (int i = 0; i < num_participants; i++)
 			nicks += session.getParticipants()[i].getNick() + " ";
 		MatchmakingServer.getLogger().info("Game " + database_id + " created. [" + nicks + "] " + getParticipantStates());
+        spectator_file = new File("/var/games/" + database_id);
 	}
 
 	private final String getParticipantStates() {
@@ -144,6 +149,10 @@ public final strictfp class TimestampedGameSession {
 			}
 		}
 	}
+
+    public final void updateSpectatorInfo(int tick, ByteBuffer buffer) {
+        // spectator_file.write(buffer);
+    }
 
 	private final int getWinningTeamFromLastStatus() {
 		if (last_status != null && last_tick > STATUS_WINNING_TICK) {

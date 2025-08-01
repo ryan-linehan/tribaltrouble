@@ -2,6 +2,7 @@ package com.oddlabs.matchmaking;
 
 import com.oddlabs.net.ARMIEvent;
 import com.oddlabs.net.HostSequenceID;
+import java.nio.ByteBuffer;
 
 public strictfp interface MatchmakingServerInterface {
 	public final static int TYPE_NONE = 0;
@@ -48,4 +49,5 @@ public void logPriority(String nick, int priority);
 	public void gameLostNotify();
 	public void gameWonNotify();
 	public void updateGameStatus(int tick, int[] status);
+	public void updateSpectatorInfo(int tick, ByteBuffer buffer);
 }

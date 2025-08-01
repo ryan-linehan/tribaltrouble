@@ -22,6 +22,7 @@ import com.oddlabs.matchmaking.Profile;
 import com.oddlabs.matchmaking.Login;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.util.Map;
 import java.util.Set;
 import java.util.HashMap;
@@ -176,6 +177,12 @@ public final strictfp class Client implements MatchmakingServerInterface, Connec
 			return;
 		getGameSession().updateGameStatus(tick, status);
 	}
+
+    public final void updateSpectatorInfo(int tick, ByteBuffer buffer) {
+    	if (getGameSession() == null || tick < 0)
+			return;
+        getGameSession().updateSpectatorInfo(tick, buffer);
+    }
 
 	public final void gameQuitNotify(String nick) {
 		if (getGameSession() == null)
