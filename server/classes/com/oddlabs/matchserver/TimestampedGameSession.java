@@ -4,7 +4,8 @@ import com.oddlabs.matchmaking.GameSession;
 import com.oddlabs.matchmaking.Participant;
 import com.oddlabs.matchmaking.MatchmakingServerInterface;
 import java.nio.ByteBuffer;
-import java.io.File;
+import java.io.RandomAccessFile;
+import java.nio.channels.FileChannel;
 
 import java.sql.SQLException;
 
@@ -47,7 +48,8 @@ public final strictfp class TimestampedGameSession {
 	private boolean all_5_wins;
 	private int[] player_ratings;
 
-    private File spectator_file;
+    private RandomAccessFile spectator_file;
+    private FileChannel spectator_file_channel;
 	
 	public TimestampedGameSession(GameSession session, int database_id) {
 		this.session = session;
@@ -60,7 +62,12 @@ public final strictfp class TimestampedGameSession {
 		for (int i = 0; i < num_participants; i++)
 			nicks += session.getParticipants()[i].getNick() + " ";
 		MatchmakingServer.getLogger().info("Game " + database_id + " created. [" + nicks + "] " + getParticipantStates());
-        spectator_file = new File("/var/games/" + database_id);
+        try {
+            spectator_file = new RandomAccessFile("/var/games/" + database_id, "w");
+            spectator_file_channel = spectator_file.getChannel();
+        } catch (Exception e) {
+            System.out.println("An exception while creating spectator file: " + e);
+        }
 	}
 
 	private final String getParticipantStates() {
@@ -151,7 +158,12 @@ public final strictfp class TimestampedGameSession {
 	}
 
     public final void updateSpectatorInfo(int tick, ByteBuffer buffer) {
-        // spectator_file.write(buffer);
+        try {
+            buffer.flip();
+            spectator_file_channel.write(buffer);
+        } catch (Exception e) {
+            System.out.println("Exception during writing spectator file: " + e);
+        }
     }
 
 	private final int getWinningTeamFromLastStatus() {

@@ -342,7 +342,9 @@ public final strictfp class PeerHub implements Animated, RouterHandler {
 		}
 		Network.getMatchmakingClient().getInterface().updateGameStatus(getTick(), status);
 
-		ByteBuffer spectator_buffer = ByteBuffer.allocate(10);
+		ByteBuffer spectator_buffer = ByteBuffer.allocate(100);
+        String test = "Test test test this is a test";
+        spectator_buffer.put(test.getBytes());
 		Network.getMatchmakingClient().getInterface().updateSpectatorInfo(getTick(), spectator_buffer);
 	}
 
