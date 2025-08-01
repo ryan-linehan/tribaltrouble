@@ -64,7 +64,39 @@
 		</fileset>
 	</path>
 
-	<!-- Classpaths -->
+	<!-- Class and build classpaths -->
+	<path id="common.classes.classpath">
+		<pathelement path="../common/build/classes" />
+	</path>	
+
+	<path id="common.static.classpath">
+		<pathelement location="../common/static" />
+	</path>	
+	
+	<path id="build.classpath">
+		<pathelement location="build" />
+	</path>
+
+	<path id="build.classes.classpath">
+		<pathelement location="build/classes" />
+	</path>
+
+	<!-- For tt build.xml, common.xml -->
+	<path id="build.tt.classpath">
+		<pathelement location="../tt/i18n" />
+		<pathelement location="../tt/static" />
+	</path>	
+
+	<!-- For tools build.xml -->
+	<path id="tools.classes.classpath">
+		<pathelement path="../tools/build/classes" />
+	</path>
+
+	<path id="common.static.fonts.classpath" >
+		<pathelement path="${commonstatic}/fonts" />
+	</path>
+
+	<!-- Jar classpaths -->
 	<path id="platform.classpath">
 		<fileset dir="${lib}">
 			<include name="jorbis.jar" />
@@ -80,23 +112,17 @@
 			<include name="png.jar" />
 		</fileset>
 		<path refid="${platform-natives}" />
-		<pathelement path="../common/build/classes" />
 	</path>
 
-	<path id="tools.classpath">
-		<pathelement path="../tools/build/classes" />
+	<!-- Compiling tools uses svnkit, everything else uses javasvn. -->
+	<path id="library.svnkit.classpath">
 		<pathelement path="../tools/svn/svnkit.jar" />
 	</path>
-	
-	<path id="build.classpath">
-		<pathelement location="build" />
-		<pathelement location="build/classes" />
-		<pathelement location="../common/static" />
-		<pathelement location="../tt/i18n" />
-		<pathelement location="../tt/static" />
+
+	<path id="library.javasvn.classpath">
+		<pathelement path="${lib}/javasvn.jar" />
 	</path>
 
-	<!-- Server classpath -->
 	<path id="server.classpath">
 		<fileset dir="${lib}">
 			<include name="commons-pool-1.2.jar" />
@@ -104,9 +130,5 @@
 			<include name="commons-collections-3.1.jar" />
 			<include name="mysql-connector-j-9.3.0.jar" />
 		</fileset>
-		<pathelement path="../common/build/classes" />
-		<pathelement location="build/classes" />
-		<pathelement location="../common/static" />
 	</path>
-
 </project>

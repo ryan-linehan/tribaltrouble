@@ -5,8 +5,11 @@
 
 	<target name="geometry" depends="compile-tools">
 		<java failonerror="true" fork="yes" classname="com.oddlabs.converter.ConvertToBinary">
-			<classpath refid="tools.classpath" />
+			<classpath refid="tools.classes.classpath" />
 			<classpath refid="platform.classpath" />
+			<classpath refid="common.classes.classpath" />
+			<classpath refid="library.svnkit.classpath" />
+
 			<jvmarg value="-ea" />
 			<jvmarg value="-Xmx512000000" />
 			<arg value="${geometry_file}" />
@@ -17,8 +20,11 @@
 
 	<target name="geometry2" depends="compile-tools">
 		<java failonerror="true" fork="yes" classname="com.oddlabs.converter2.ConvertToBinary">
-			<classpath refid="tools.classpath" />
+			<classpath refid="tools.classes.classpath" />
 			<classpath refid="platform.classpath" />
+			<classpath refid="common.classes.classpath" />
+			<classpath refid="library.svnkit.classpath" />
+
 			<jvmarg value="-ea" />
 			<jvmarg value="-Xmx512000000" />
 			<arg value="${geometry_file}" />
@@ -29,8 +35,11 @@
 
 	<target name="convert_image">
 		<java failonerror="true" fork="yes" classname="com.oddlabs.imageutil.Convert">
-			<classpath refid="tools.classpath" />
+			<classpath refid="tools.classes.classpath" />
 			<classpath refid="platform.classpath" />
+			<classpath refid="common.classes.classpath" />
+			<classpath refid="library.svnkit.classpath" />
+
 			<jvmarg value="-ea" />
 			<jvmarg value="-Djava.awt.headless=true" />
 			<arg file="${image_path}" />
@@ -64,8 +73,11 @@
 
 	<target name="textures" depends="compile-tools">
 		<java failonerror="true" fork="yes" classname="com.oddlabs.imageutil.ConvertTextures">
-			<classpath refid="tools.classpath" />
+			<classpath refid="tools.classes.classpath" />
 			<classpath refid="platform.classpath" />
+			<classpath refid="common.classes.classpath" />
+			<classpath refid="library.svnkit.classpath" />
+
 			<jvmarg value="-ea" />
 			<jvmarg value="-Xmx512000000" />
 			<arg value="${ressrc}" />
@@ -75,11 +87,10 @@
 
 	<target name="copydist" depends="compile-tools">
 		<java failonerror="true" fork="yes" classname="com.oddlabs.svnutil.CopyDist">
-			<classpath>
-				<pathelement path="${build}/classes" />
-				<pathelement path="../common/build/classes" />
-				<pathelement path="svn/svnkit.jar" />
-			</classpath>
+			<classpath refid="build.classes.classpath" />
+			<classpath refid="common.classes.classpath" />
+			<classpath refid="library.svnkit.classpath" />
+			
 			<arg path="${svnsrc}" />
 			<arg path="${svndst}" />
 		</java>
@@ -87,10 +98,9 @@
 
 	<target name="revision" depends="compile-tools">
 		<java failonerror="true" fork="yes" classname="com.oddlabs.svnutil.DetermineRevision">
-			<classpath>
-				<pathelement path="${build}/classes" />
-				<pathelement path="svn/svnkit.jar" />
-			</classpath>
+			<classpath refid="build.classes.classpath" />
+			<classpath refid="library.svnkit.classpath" />
+
 			<jvmarg value="-Xmx256000000" />
 			<arg path="${svn_path}" />
 			<arg path="${revision_number_file}" />
@@ -99,11 +109,10 @@
 
 	<target name="createfont" depends="compile-tools">
 		<java failonerror="true" fork="yes" classname="com.oddlabs.fontutil.FontRenderer">
-			<classpath>
-				<pathelement path="${build}/classes" />
-				<pathelement path="../common/build/classes" />
-				<pathelement path="${commonstatic}/fonts" />
-			</classpath>
+			<classpath refid="build.classes.classpath" />
+			<classpath refid="common.classes.classpath" />
+			<classpath refid="common.static.fonts.classpath" />
+
 			<jvmarg value="-ea" />
 			<arg value="${fontname}" />
 			<arg value="${fontsize}" />
@@ -121,10 +130,9 @@
 			addproperty="password"
 		/>
 		<java failonerror="true" fork="yes" classname="com.oddlabs.regkeygen.RegistrationKeygen">
-			<classpath>
-				<pathelement path="${build}/classes" />
-				<pathelement path="../common/build/classes" />
-			</classpath>
+			<classpath refid="build.classes.classpath" />
+			<classpath refid="common.classes.classpath" />
+
 			<jvmarg value="-ea" />
 			<arg path="${commonstatic}" />
 			<arg value="${password}" />
@@ -141,9 +149,11 @@
 			message="Enter new password for private registration key:"
 			addproperty="new_password"
 		/>
-		<java failonerror="true" fork="yes"
-			classpath="../common/build/classes:${build}/classes:${commonstatic}"
-			classname="com.oddlabs.regkeygen.RegistrationKeygen">
+		<java failonerror="true" fork="yes" classname="com.oddlabs.regkeygen.RegistrationKeygen">
+			<classpath refid="build.classes.classpath" />
+			<classpath refid="common.classes.classpath" />
+			<classpath refid="common.static.classpath" />
+
 			<jvmarg value="-ea" />
 			<arg path="${commonstatic}" />
 			<arg value="${new_password}" />

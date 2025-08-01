@@ -47,6 +47,9 @@
 	<target name="run-matchmaker" depends="all">
 		<java fork="true" classname="${main_class_server}" failonerror="true">
 			<classpath refid="server.classpath" />
+			<classpath refid="build.classes.classpath" />
+			<classpath refid="common.static.classpath" />
+			<classpath refid="common.classes.classpath" />
 
 			<jvmarg value="-Djdk.crypto.KeyAgreement.legacyKDF=true" />
 		</java>
@@ -55,6 +58,9 @@
 	<target name="run-router" depends="all">
 		<java fork="true" classname="${main_class_router}" failonerror="true">
 			<classpath refid="server.classpath" />
+			<classpath refid="build.classes.classpath" />
+			<classpath refid="common.static.classpath" />
+			<classpath refid="common.classes.classpath" />
 		</java>
 	</target>
 
