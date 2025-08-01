@@ -12,15 +12,6 @@
 	<property name="commonstatic" value="../common/static" />
 	<property name="java_source_version" value="1.8" />
 	<import file="../classpath.xml" />
-
-
-	<!-- Classpath -->
-	<path id="build.classpath">
-		<pathelement location="${build}" />
-		<pathelement location="${commonstatic}" />
-		<pathelement location="i18n" />
-		<pathelement location="static" />
-	</path>
 	
 	<target name="init">
 		<tstamp />
@@ -69,9 +60,7 @@
 		<java fork="yes" classname="${main_class}">
 			<classpath refid="platform.classpath" />
 			<classpath refid="build.classpath" />
-			<classpath>
-				<pathelement path="${build}/classes" />
-			</classpath>
+
 			<jvmarg value="-ea" />
 			<jvmarg value="-Djava.library.path=${nativelib}" />
 			<jvmarg value="-Dorg.lwjgl.util.Debug=true" />
@@ -85,9 +74,7 @@
 		<java fork="yes" classname="${main_class}">
 			<classpath refid="platform.classpath" />
 			<classpath refid="build.classpath" />
-			<classpath>
-				<pathelement path="${build}/classes" />
-			</classpath>
+
 			<jvmarg value="-ea" />
 			<jvmarg value="-Djava.library.path=${nativelib}" />
 			<jvmarg value="-Dorg.lwjgl.util.Debug=true" />
@@ -101,9 +88,7 @@
 		<java fork="yes" classname="${main_class}">
 			<classpath refid="platform.classpath" />
 			<classpath refid="build.classpath" />
-			<classpath>
-				<pathelement path="${build}/classes" />
-			</classpath>
+
 			<jvmarg value="-ea" />
 			<jvmarg value="-Djava.library.path=${nativelib}" />
 			<jvmarg value="-Dgrabframes=true" />
@@ -115,9 +100,7 @@
 		<java fork="yes" classname="${main_class}">
 			<classpath refid="platform.classpath" />
 			<classpath refid="build.classpath" />
-			<classpath>
-				<pathelement path="${build}/classes" />
-			</classpath>
+
 			<jvmarg value="-ea" />
 			<jvmarg value="-Xbootclasspath/a:/home/elias/snot/jprofiler4/bin/agent.jar" />
 			<jvmarg value="-agentlib:jprofilerti" />
@@ -129,9 +112,7 @@
 		<java fork="yes" classname="${main_class}">
 			<classpath refid="platform.classpath" />
 			<classpath refid="build.classpath" />
-			<classpath>
-				<pathelement path="${build}/classes" />
-			</classpath>
+
 			<jvmarg value="-ea" />
 			<jvmarg value="-Djava.library.path=${nativelib}" />
 			<jvmarg value="-Xrunhprof:cpu=samples" />
@@ -142,9 +123,7 @@
 		<java fork="yes" classname="${main_class}">
 			<classpath refid="platform.classpath" />
 			<classpath refid="build.classpath" />
-			<classpath>
-				<pathelement path="${build}/classes" />
-			</classpath>
+
 			<jvmarg value="-ea" />
 			<jvmarg value="-verbose:gc" />
 			<jvmarg value="-Djava.library.path=${nativelib}" />
@@ -156,9 +135,7 @@
 		<java fork="yes" classname="${main_class}">
 			<classpath refid="platform.classpath" />
 			<classpath refid="build.classpath" />
-			<classpath>
-				<pathelement path="${build}/classes" />
-			</classpath>
+
 			<jvmarg value="-ea" />
 			<jvmarg value="-Djava.library.path=${nativelib}" />
 			<jvmarg value="-verbose:gc" />
@@ -176,9 +153,7 @@
 				<java fork="yes" classname="${main_class}">
 					<classpath refid="platform.classpath" />
 					<classpath refid="build.classpath" />
-					<classpath>
-						<pathelement path="${build}/classes" />
-					</classpath>
+
 					<jvmarg value="-ea" />
 					<jvmarg value="-Djava.library.path=${nativelib}" />
 					<jvmarg value="-Dorg.lwjgl.util.Debug=true" />
@@ -195,15 +170,12 @@
 				<java fork="yes" classname="${main_class}">
 					<classpath refid="platform.classpath" />
 					<classpath refid="build.classpath" />
-					<classpath>
-						<pathelement path="${build}/classes" />
-					</classpath>
+
 					<jvmarg value="-ea" />
 					<jvmarg value="-Djava.library.path=${nativelib}" />
 					<jvmarg value="-Dorg.lwjgl.util.Debug=true" />
 					<jvmarg value="-Xmx80000000" />
 					<jvmarg value="-Djdk.crypto.KeyAgreement.legacyKDF=true" />
-
 
 					<!--<jvmarg
 					value="-Djavax.net.debug=ssl,handshake,trustmanager"/>-->
