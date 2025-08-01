@@ -49,5 +49,5 @@ public void logPriority(String nick, int priority);
 	public void gameLostNotify();
 	public void gameWonNotify();
 	public void updateGameStatus(int tick, int[] status);
-	public void updateSpectatorInfo(int tick, ByteBuffer buffer);
+	public void updateSpectatorInfo(int tick, String info);
 }
