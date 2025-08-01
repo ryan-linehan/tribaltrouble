@@ -99,14 +99,14 @@
 	<!-- Server classpath -->
 	<path id="server.classpath">
 		<fileset dir="${lib}">
-			<include name="jorbis.jar" />
-			<include name="jsquish.jar" />
 			<include name="commons-pool-1.2.jar" />
 			<include name="commons-dbcp-1.2.1.jar" />
 			<include name="commons-collections-3.1.jar" />
 			<include name="mysql-connector-j-9.3.0.jar" />
 		</fileset>
 		<pathelement path="../common/build/classes" />
+		<pathelement location="build/classes" />
+		<pathelement location="../common/static" />
 	</path>
 
 </project>
