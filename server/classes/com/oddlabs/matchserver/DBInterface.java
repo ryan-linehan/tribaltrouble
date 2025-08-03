@@ -610,7 +610,13 @@ public final strictfp class DBInterface {
 			MatchmakingServer.getLogger().throwing(DBInterface.class.getName(), "startGame", e);
 		}
 	}
-
+	/**
+	 * Ends a game session and updates the database.
+	 * @param tgs The timestamped game session to end.
+	 * @param end_time The time at which the game ended.
+	 * @param winner The ID of the winning team. When -1 then the player lost against the AI or the game state was determined to be invalid and someone cheated.
+	 * 	NULL if the game does not end naturally (dropped for example)
+	 */
 	public final static void endGame(TimestampedGameSession tgs, long end_time, int winner) {
 		GameSession session = tgs.getSession();
 		Participant[] participants = session.getParticipants();

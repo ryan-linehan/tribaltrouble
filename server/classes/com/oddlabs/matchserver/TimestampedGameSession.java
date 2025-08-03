@@ -299,7 +299,13 @@ public final strictfp class TimestampedGameSession {
 			teamWon(server, team_result);
 		else {
 			MatchmakingServer.getLogger().warning("Game " + database_id + ". No one lost. Playing agains AI " + getParticipantStates());
-			DBInterface.endGame(this, end_time, -1);
+			int winning_team = -1;
+			for(int i = 0; i < team_result.length; i++) {
+				if (team_result[i] == TEAM_WON)
+					winning_team = i;
+			}
+			DBInterface.endGame(this, end_time, winning_team);
+			
 			game_ended = true;
 			return;
 		}
