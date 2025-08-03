@@ -13,6 +13,7 @@ import com.oddlabs.tt.render.UIRenderer;
 import com.oddlabs.net.NetworkSelector;
 import com.oddlabs.router.SessionID;
 import com.oddlabs.matchmaking.Participant;
+import com.oddlabs.matchmaking.GamePlayer;
 import com.oddlabs.matchmaking.GameSession;
 
 import java.util.List;
@@ -65,22 +66,27 @@ final strictfp class WorldStarter implements LoadCallback {
 			initial_action.run(viewer);
 		List participant_list = new ArrayList();
 		Player[] players = viewer.getWorld().getPlayers();
+		GamePlayer[] gamePlayers = new GamePlayer[players.length];
 		for (short i = 0; i < players.length; i++) {
 			Player player = players[i];
-			if (player_slots[i].getType() != PlayerSlot.HUMAN)
+			if (player_slots[i].getType() != PlayerSlot.HUMAN) {
+				gamePlayers[i] = new GamePlayer(null, player.getPlayerInfo().getTeam(), player.getPlayerInfo().getRace(), player_slots[i].getPlayerType());
 				continue;
+			}
+				
 			int host_id;
 			if (player_slots[i].getAddress() != null)
 				host_id = player_slots[i].getAddress().getHostID();
 			else
 				host_id = -1;
 			Participant p = new Participant(host_id, player.getPlayerInfo().getName(),  player.getPlayerInfo().getTeam(), player.getPlayerInfo().getRace());
+			gamePlayers[i] = new GamePlayer(player.getPlayerInfo().getName(),  player.getPlayerInfo().getTeam(), player.getPlayerInfo().getRace(), player_slots[i].getPlayerType());
 			participant_list.add(p);
 		}
 		Participant[] participants = new Participant[participant_list.size()];
 		participant_list.toArray(participants);
 		if (Network.getMatchmakingClient().isConnected()) {
-			GameSession game_session = new GameSession(session_id, participants, ingame_info.isRated());
+			GameSession game_session = new GameSession(session_id, participants, ingame_info.isRated(), gamePlayers);
 			Network.getMatchmakingClient().getInterface().gameStartedNotify(game_session);
 		}
 		System.out.println("PeerHub created (session_id = " + session_id + ") Player list:");

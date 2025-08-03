@@ -24,6 +24,7 @@ import org.apache.commons.pool.impl.StackKeyedObjectPoolFactory;
 import com.oddlabs.matchmaking.Profile;
 import com.oddlabs.matchmaking.Login;
 import com.oddlabs.matchmaking.Game;
+import com.oddlabs.matchmaking.GamePlayer;
 import com.oddlabs.matchmaking.Participant;
 import com.oddlabs.matchmaking.LoginDetails;
 import com.oddlabs.matchmaking.RankingEntry;
@@ -577,27 +578,25 @@ public final strictfp class DBInterface {
 	
 	public final static void startGame(TimestampedGameSession tgs, MatchmakingServer server) {
 		GameSession session = tgs.getSession();
-		Participant[] participants = session.getParticipants();
+		GamePlayer[] playerInfo = session.getPlayerInfo();
 		String participant_sql = "";
-		for (int i = 0; i < participants.length; i++)
+		for (int i = 0; i < playerInfo.length; i++)
 			participant_sql = participant_sql + "G.player"+(i+1)+"_name = ?, G.player"+(i+1)+"_race = ?, G.player"+(i+1)+"_team = ?, ";
 		
 		try {
 			PreparedStatement stmt = DBUtils.createStatement("UPDATE games G SET " + participant_sql + "G.time_start = ?, G.status = ? WHERE G.id = ?");
 			try {
 				int index = 1;
-				for (int i = 0; i < participants.length; i++) {
+				for (int i = 0; i < playerInfo.length; i++) {
 					String nick = "Unknown";
-					Client client = server.getClientFromID(participants[i].getMatchID());
-					if (client != null)
-						nick = client.getProfile().getNick();
+					nick = playerInfo[i].getNick();
 					stmt.setString(index++, nick);
-					if (participants[i].getRace() == 0)
+					if (playerInfo[i].getRace() == 0)
 						stmt.setString(index++, "N");
 					else
 						stmt.setString(index++, "V");
-			
-					stmt.setInt(index++, participants[i].getTeam());
+
+					stmt.setInt(index++, playerInfo[i].getTeam());
 				}
 				stmt.setTimestamp(index++, new Timestamp(System.currentTimeMillis()));
 				stmt.setString(index++, "started");
