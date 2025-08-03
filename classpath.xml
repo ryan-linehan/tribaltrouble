@@ -64,7 +64,39 @@
 		</fileset>
 	</path>
 
-	<!-- Classpaths -->
+	<!-- Class and build classpaths -->
+	<path id="common.classes.classpath">
+		<pathelement path="../common/build/classes" />
+	</path>	
+
+	<path id="common.static.classpath">
+		<pathelement location="../common/static" />
+	</path>	
+	
+	<path id="build.classpath">
+		<pathelement location="build" />
+	</path>
+
+	<path id="build.classes.classpath">
+		<pathelement location="build/classes" />
+	</path>
+
+	<!-- For tt build.xml, common.xml -->
+	<path id="build.tt.classpath">
+		<pathelement location="../tt/i18n" />
+		<pathelement location="../tt/static" />
+	</path>	
+
+	<!-- For tools build.xml -->
+	<path id="tools.classes.classpath">
+		<pathelement path="../tools/build/classes" />
+	</path>
+
+	<path id="common.static.fonts.classpath" >
+		<pathelement path="${commonstatic}/fonts" />
+	</path>
+
+	<!-- Jar classpaths -->
 	<path id="platform.classpath">
 		<fileset dir="${lib}">
 			<include name="jorbis.jar" />
@@ -80,32 +112,23 @@
 			<include name="png.jar" />
 		</fileset>
 		<path refid="${platform-natives}" />
-		<pathelement path="../common/build/classes" />
 	</path>
 
-	<path id="tools.classpath">
-		<pathelement path="../tools/build/classes" />
+	<!-- Compiling tools uses svnkit, everything else uses javasvn. -->
+	<path id="library.svnkit.classpath">
 		<pathelement path="../tools/svn/svnkit.jar" />
 	</path>
 
-	<!-- Server-only classpath -->
+	<path id="library.javasvn.classpath">
+		<pathelement path="${lib}/javasvn.jar" />
+	</path>
+
 	<path id="server.classpath">
 		<fileset dir="${lib}">
-			<include name="jorbis.jar" />
-			<include name="jsquish.jar" />
 			<include name="commons-pool-1.2.jar" />
 			<include name="commons-dbcp-1.2.1.jar" />
 			<include name="commons-collections-3.1.jar" />
-			<include name="lwjgl.jar" />
-			<include name="lwjgl-opengl.jar" />
-			<include name="lwjgl-openal.jar" />
-			<include name="lwjgl-jawt.jar" />
-			<include name="lwjgl-glfw.jar" />
-			<include name="png.jar" />
 			<include name="mysql-connector-j-9.3.0.jar" />
 		</fileset>
-		<path refid="${platform-natives}" />
-		<pathelement path="../common/build/classes" />
 	</path>
-
 </project>

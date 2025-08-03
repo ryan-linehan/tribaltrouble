@@ -68,7 +68,6 @@ import com.oddlabs.tt.camera.CameraState;
 import com.oddlabs.tt.camera.MenuCamera;
 import com.oddlabs.tt.event.LocalEventQueue;
 import com.oddlabs.tt.render.RenderQueues;
-import com.oddlabs.tt.form.RegistrationForm;
 import com.oddlabs.tt.form.WelcomeForm;
 import com.oddlabs.tt.delegate.MainMenu;
 import com.oddlabs.tt.form.MessageForm;
@@ -172,10 +171,6 @@ public final strictfp class Renderer {
 
     public final static float getFPS() {
         return fps.getAveragePerUpdate();
-    }
-
-    public final static RegistrationClient getRegistrationClient() {
-        return registration_client;
     }
 
     public final static boolean isRegistered() {
@@ -341,9 +336,6 @@ public final strictfp class Renderer {
 
         TaskThread task_thread = network.getTaskThread();
         HttpRequestParameters request_parameters = createRegistrationParameters();
-        //Checking original registration file location
-        File registration_file = setupRegistrationFile(game_dir);
-        registration_client = new RegistrationClient(task_thread, registration_file, request_parameters, RegistrationClient.CLIENT_TYPE_ONLINE);
 
         cleanLogs(deterministic, last_event_log_dir, event_log_dir, event_logs_dir);
         Skin.load();
@@ -669,16 +661,7 @@ public final strictfp class Renderer {
         setMusicPath("/music/menu.ogg", 0f);
         MainMenu main_menu = new MainMenu(network, gui_root, new MenuCamera(world, manager));
         gui_root.pushDelegate(main_menu);
-        if (!isRegistered()) {
-            if (!Settings.getSettings().online) {
-                main_menu.setMenuCentered(new RegistrationForm(gui_root, false, main_menu));
-            } else if (Settings.getSettings().first_run) {
-                Settings.getSettings().first_run = false;
-                if (!(Settings.getSettings().hide_update || Settings.getSettings().hide_register)) {
-                    main_menu.setMenuCentered(new WelcomeForm(gui_root, main_menu));
-                }
-            }
-        }/*
+        /*
 		if (first_progress && Settings.getSettings().warning_no_sound && !LocalInput.alIsCreated()) {
 			ResourceBundle bundle = ResourceBundle.getBundle(Renderer.class.getName());
 			gui_root.addModalForm(new WarningForm(Utils.getBundleString(bundle, "sound_not_available_caption"), Utils.getBundleString(bundle, "sound_not_available_message")));
@@ -976,32 +959,5 @@ public final strictfp class Renderer {
         GL11.glClearColor(0f, 0f, 0f, 0f);
         GL11.glClear(GL11.GL_COLOR_BUFFER_BIT);
         //GL11.glClearColor(1f, 0f, 1f, 0f);
-    }
-
-    /* Old code that used to get registration client extracted out to a method -- obsolete */
-    private final RegistrationClient getRegistrationClientByAffliliate() {
-// 		TaskThread task_thread = network.getTaskThread();
-// 		if (Settings.getSettings().affiliate_id.equals("reflexive")) {
-// System.out.println("affiliate_id equals reflexive");
-// 			registration_client = new ReflexiveRegistrationClient(task_thread, 526, "21658", "Tribal Trouble", "29.95");
-// 		} else if (Settings.getSettings().affiliate_id.equals("totalgaming")) {
-// System.out.println("affiliate_id equals totalgaming");
-// 			registration_client = new TotalgamingRegistrationClient(task_thread, registration_file, request_parameters);
-// 		} else if (Settings.getSettings().affiliate_id.equals("garagegames")) {
-// System.out.println("affiliate_id equals garagegames");
-// 			registration_client = new RegistrationClient(task_thread, registration_file, request_parameters, RegistrationClient.CLIENT_TYPE_FOREIGN);
-// 		} else if (Settings.getSettings().affiliate_id.equals("arcadetown") || !Settings.getSettings().online) {
-// System.out.println("affiliate_id equals arcadetown");
-// 			registration_client = new RegistrationClient(task_thread, registration_file, request_parameters, RegistrationClient.CLIENT_TYPE_OFFLINE);
-// 			registration_client.setKey(Settings.getSettings().reg_key);
-// 		} else if (Settings.getSettings().affiliate_id.equals("trymedia")) {
-// System.out.println("affiliate_id equals trymedia");
-// 			registration_client = new TrymediaRegistrationClient(task_thread, registration_file, request_parameters, RegistrationClient.CLIENT_TYPE_OFFLINE);
-// 			Settings.getSettings().reg_key = registration_client.getPotentialKey();
-// 		} else {			
-// 			registration_client = new RegistrationClient(task_thread, registration_file, request_parameters, RegistrationClient.CLIENT_TYPE_ONLINE);
-// 		}
-// 		return registration_client;
-        return null;
     }
 }
