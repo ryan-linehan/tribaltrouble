@@ -406,9 +406,9 @@ System.out.println("wrapped_connection.getLocalAddress()	 = " + wrapped_connecti
 		if (!Renderer.isRegistered())
 			matchmaking_login_interface.loginAsGuest(revision);
 		else if (login_details != null)
-			matchmaking_login_interface.createUser(login, login_details, signed_key, revision);
+			matchmaking_login_interface.createUser(login, login_details, null, revision);
 		else
-			matchmaking_login_interface.login(login, signed_key, revision);
+			matchmaking_login_interface.login(login, null, revision);
 	}
 
 	public final void error(AbstractConnection conn, IOException e) {
