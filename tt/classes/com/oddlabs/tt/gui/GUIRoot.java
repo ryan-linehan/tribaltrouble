@@ -228,6 +228,7 @@ public final strictfp class GUIRoot extends GUIObject implements Updatable {
 
 	protected final void displayChangedNotify(int width, int height) {
 		//Reset The Current Viewport And Perspective Transformation
+		GL11.glViewport(0, 0, width, height);
 		setDim(width, height);
 		if (width != 0) {
 			float scale = getUnitsPerPixel(Globals.GUI_Z);

@@ -615,14 +615,13 @@ public abstract strictfp class AbstractOptionsMenu extends Form {
 		private GLFWVidMode mode;
 		
 		public final void doChange(boolean switch_now) {
-			//LocalInput.getLocalInput().switchMode(mode, switch_now);
-			//gui_root.displayChanged();
+			LocalInput.getLocalInput().switchMode(mode);
 		}
 
 		public final void rowChosen(Object o) {
-			//mode = (SerializableDisplayMode)o;
-			//DisplayChangeForm display_change_form = new DisplayChangeForm(this);
-			//gui_root.addModalForm(display_change_form);
+			mode = (GLFWVidMode)o;
+			DisplayChangeForm display_change_form = new DisplayChangeForm(this);
+			gui_root.addModalForm(display_change_form);
 		}
 		
 		public final void rowDoubleClicked(Object o) {
