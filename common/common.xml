@@ -18,6 +18,7 @@
 		<path refid="build.classpath" />
 		<path refid="build.classes.classpath" />
 		<path refid="common.classes.classpath" />
+		<path refid="common.static.classpath" />
 		<path refid="platform.classpath" />
 		<path refid="build.tt.classpath" />
 	</path>
