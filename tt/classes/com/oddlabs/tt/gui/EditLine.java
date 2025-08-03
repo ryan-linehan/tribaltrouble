@@ -180,12 +180,10 @@ public strictfp class EditLine extends TextField {
         }
 
         if (doControlModifier(event)) {
-            System.out.println("CONTROL MODIFYER");
             correctOffsetX();
             return;
         } // Highlight text
         else if (doShiftModifier(event)) {
-            System.out.println("SHIFT MODIFYER");
             correctOffsetX();
             return;
         }
@@ -466,12 +464,7 @@ public strictfp class EditLine extends TextField {
     }
 
     private boolean doShiftModifier(KeyboardEvent event) {
-        // System.out.println("LocalInput.isShiftDownCurrently(): " + LocalInput.isShiftDownCurrently());
-        // System.out.println("LocalInput.isControlDownCurrently(): " + LocalInput.isControlDownCurrently());
-        // System.out.println("event.getKeyCode(): " + event.getKeyCode());
-        // System.err.println("doShiftModifier");
         if (LocalInput.isShiftDownCurrently() && LocalInput.isControlDownCurrently() && event.getKeyCode() == Keyboard.KEY_LEFT) {
-            System.err.println("SHIFT + CONTROL + LEFT pressed");
             String contents = getContents();
             if (getIndex() == 0) {
                 return true;
@@ -506,7 +499,6 @@ public strictfp class EditLine extends TextField {
             setIndex(startingIndex);
             return true;
         } else if (LocalInput.isShiftDownCurrently() && LocalInput.isControlDownCurrently() && event.getKeyCode() == Keyboard.KEY_RIGHT) {
-            System.err.println("SHIFT + CONTROL + RIGHT pressed");
             String contents = getContents();
             if (getIndex() == contents.length()) {
                 return true;
@@ -548,7 +540,6 @@ public strictfp class EditLine extends TextField {
             setIndex(selectionEnd);
             return true;
         } else if (LocalInput.isShiftDownCurrently() && event.getKeyCode() == Keyboard.KEY_HOME) {
-            System.out.println("HOME WITH SHIFT PRESSED");
             boolean isCursorAtStartOfSelection = getIndex() <= selectionStart;
             if (selectionStart == -1) {
                 selectionStart = getIndex();
@@ -562,7 +553,6 @@ public strictfp class EditLine extends TextField {
             setIndex(0);
             return true;
         } else if (LocalInput.isShiftDownCurrently() && event.getKeyCode() == Keyboard.KEY_END) {
-            System.out.println("END WITH SHIFT PRESSED");
             boolean isCursorAtStartOfSelection = getIndex() <= selectionStart;
             if (selectionStart == -1) {
                 selectionStart = getIndex();
@@ -576,7 +566,6 @@ public strictfp class EditLine extends TextField {
             setIndex(getContents().length());
             return true;
         } else if (LocalInput.isShiftDownCurrently() && event.getKeyCode() == Keyboard.KEY_RIGHT && (selectionEnd <= getContents().length() || selectionEnd == -1)) {
-            System.out.println("RIGHT WITH SHIFT PRESSED");
             // First time shift is pressed and cursor has moved
             if (selectionStart == -1) {
                 selectionStart = getIndex() - 1;
@@ -600,10 +589,8 @@ public strictfp class EditLine extends TextField {
             return true;
         } else if (LocalInput.isShiftDownCurrently() && event.getKeyCode() == Keyboard.KEY_LEFT && (selectionStart >= 0 || selectionStart == -1)) {
             // First time shift is pressed and the cursor has moved
-            System.out.println("LEFT WITH SHIFT PRESSED");
             boolean isCursorAtStartOfSelection = getIndex() <= selectionStart;
             if (selectionStart == -1) {
-                System.out.println("selectionStart is -1");
                 selectionStart = getIndex();
                 if (selectionStart < 0) {
                     selectionStart = 0;
@@ -612,10 +599,8 @@ public strictfp class EditLine extends TextField {
             } else {
                 // cursor is at start of selection                
                 if (getIndex() < selectionStart) {
-                    System.out.println("cursor is at start of selection");
                     selectionStart--;
                 } else if(!isCursorAtStartOfSelection) {
-                    System.out.println("cursor is at end of selection");
                     selectionEnd--;
                 }                
             }
@@ -626,7 +611,6 @@ public strictfp class EditLine extends TextField {
             if (selectionStart < 0) {
                 selectionStart = 0;
             }
-            System.out.println("selectionStart: " + selectionStart + ", selectionEnd: " + selectionEnd);
             return true;
         } else if (selectionStart != -1 && selectionEnd != -1
                 && (event.getKeyChar() != '\0'
@@ -667,7 +651,6 @@ public strictfp class EditLine extends TextField {
         } // unhighlight if the cursor moves without shift
         else if (!LocalInput.isShiftDownCurrently() && (event.getKeyCode() == Keyboard.KEY_LEFT || event.getKeyCode() == Keyboard.KEY_RIGHT)
                 && (selectionStart != -1 || selectionEnd != -1)) {
-            System.out.println("Unhighlighting selection");
             // Clear selection if shift is not down and the key pressed is not left/right
             if (event.getKeyCode() == Keyboard.KEY_LEFT) {
                 setIndex(selectionStart);

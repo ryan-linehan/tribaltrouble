@@ -20,6 +20,7 @@ public final strictfp class Display {
     private static int height = 1080;
     private static int refreshRate = 60;
     private static boolean fullscreen = false;
+    private static long monitor;
 
     public static boolean isCreated() {
         return created;
@@ -40,10 +41,7 @@ public final strictfp class Display {
         fullscreen = Settings.getSettings().fullscreen;
         refreshRate = Settings.getSettings().view_freq;        
 
-        long monitor = GLFW.glfwGetPrimaryMonitor();
-
-        GLFWVidMode videoMode = GLFW.glfwGetVideoMode(monitor);
-
+        monitor = GLFW.glfwGetPrimaryMonitor();
 
         System.out.println("width: " + width);
         System.out.println("height: " + height);
@@ -144,5 +142,17 @@ public final strictfp class Display {
 
     public static boolean isALCreated() {
         return true;
+    }
+
+    public static GLFWVidMode[] getVidModes() {
+        org.lwjgl.glfw.GLFWVidMode.Buffer buffer = GLFW.glfwGetVideoModes(monitor);
+        if (buffer == null) {
+            return new GLFWVidMode[0];
+        }
+        GLFWVidMode[] modes = new GLFWVidMode[buffer.remaining()];
+        for (int i = 0; i < buffer.remaining(); i++) {
+            modes[i] = buffer.get(i);
+        }
+        return modes;
     }
 } 
