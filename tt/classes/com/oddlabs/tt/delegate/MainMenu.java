@@ -69,14 +69,6 @@ public final strictfp class MainMenu extends Menu {
 		}
 	}
 
-	private void addRegisterButton() {
-		if (!Renderer.isRegistered() && !Settings.getSettings().hide_register) {
-			MenuButton register_game = new MenuButton(Utils.getBundleString(bundle, "register"), COLOR_NORMAL, COLOR_ACTIVE);
-			addChild(register_game);
-			register_game.addMouseClickListener(new RegisterListener());
-		}
-	}
-
 	private void addBuyButton() {
 		if (!Renderer.isRegistered() && Settings.getSettings().online) {
 			ImageBuyButton img_buy = new ImageBuyButton(getGUIRoot());
@@ -94,8 +86,6 @@ public final strictfp class MainMenu extends Menu {
 
 	protected void addButtons() {
 		addGameTypeButtons();
-		
-		addRegisterButton();
 		
 		addDefaultOptionsButton();
 
@@ -118,12 +108,6 @@ public final strictfp class MainMenu extends Menu {
 				Network.getMatchmakingClient().close();
 				new LoginForm(getNetwork(), getGUIRoot(), MainMenu.this);
 			}
-		}
-	}
-
-	private final strictfp class RegisterListener implements MouseClickListener {
-		public final void mouseClicked(int button, int x, int y, int clicks) {
-			setMenuCentered(new RegistrationForm(getGUIRoot(), true, MainMenu.this));
 		}
 	}
 

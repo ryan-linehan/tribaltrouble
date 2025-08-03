@@ -87,8 +87,10 @@ public final strictfp class Authenticator implements MatchmakingServerLoginInter
 	}
 
 	public final void createUser(Login login, LoginDetails login_details, SignedObject reg_key, int revision) {
-		String reg_key_encoded = checkKey(reg_key);
-		if (login == null || !login.isValid() || reg_key_encoded == null) {
+		// We are not passing the registration key anymore. We do not care anymore.
+		// We keep the registration key so as to not break older clients that do send
+		// the registration key.
+		if (login == null || !login.isValid()) {
 			close();
 			return;
 		}
@@ -115,15 +117,14 @@ public final strictfp class Authenticator implements MatchmakingServerLoginInter
 			client_interface.loginError(MatchmakingClientInterface.USERNAME_ERROR_ALREADY_EXISTS);
 			return;
 		}
-		
-		DBInterface.createUser(login, login_details, reg_key_encoded);
-		MatchmakingServer.getLogger().info("Created user " + login.getUsername() + " with email address " + login_details.getEmail() + " with key " + reg_key_encoded);
-		doLogin(login.getUsername(), reg_key_encoded, revision);
+
+		DBInterface.createUser(login, login_details, null);
+		MatchmakingServer.getLogger().info("Created user " + login.getUsername() + " with email address " + login_details.getEmail() + " with key " + null);
+		doLogin(login.getUsername(), null, revision);
 	}
 
 	public final void login(Login login, SignedObject reg_key, int revision) {
-		String reg_key_encoded = checkKey(reg_key);
-		if (login == null || !login.isValid() || reg_key_encoded == null) {
+		if (login == null || !login.isValid()) {
 			close();
 			return;
 		}
@@ -138,7 +139,10 @@ public final strictfp class Authenticator implements MatchmakingServerLoginInter
 			return;
 		}
 		
-		doLogin(username, reg_key_encoded, revision);
+		// We are not passing the registration key anymore. We do not care anymore.
+		// We keep the registration key so as to not break older clients that do send
+		// the registration key.
+		doLogin(username, null, revision);
 	}
 
 	public final void loginAsGuest(int revision) {
@@ -155,20 +159,6 @@ public final strictfp class Authenticator implements MatchmakingServerLoginInter
 			return false;
 		} else
 			return true;
-	}
-
-	private final String checkKey(SignedObject reg_key) {
-		String reg_code = null;
-		if (reg_key != null) {
-			try {
-				RegistrationInfo reg_info = (RegistrationInfo)reg_key.getObject();
-				reg_code = RegistrationKey.encode(reg_info.getKey());
-			} catch (Exception e) {
-				System.out.println("Exception: " + e);
-				MatchmakingServer.getLogger().warning("Could not verify signature because of: " + e.getMessage());
-			}
-		}
-		return reg_code;
 	}
 
 	private final void doLogin(String username, String reg_key_encoded, int revision) {
