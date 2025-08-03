@@ -39,6 +39,7 @@ import com.oddlabs.tt.gui.InfoPrinter;
 import com.oddlabs.tt.delegate.SelectionDelegate;
 import com.oddlabs.tt.trigger.GameOverTrigger;
 import com.oddlabs.tt.landscape.World;
+import com.oddlabs.tt.landscape.HeightMap;
 import com.oddlabs.tt.landscape.WorldParameters;
 import com.oddlabs.tt.viewer.NotificationManager;
 import com.oddlabs.tt.player.Player;
@@ -54,6 +55,7 @@ import com.oddlabs.router.SessionInfo;
 import com.oddlabs.tt.util.StatCounter;
 import com.oddlabs.tt.util.StateChecksum;
 import com.oddlabs.tt.util.Utils;
+import com.oddlabs.tt.model.Selectable;
 
 public final strictfp class PeerHub implements Animated, RouterHandler {
 	public final static ResourceBundle bundle = ResourceBundle.getBundle(PeerHub.class.getName());
@@ -63,6 +65,7 @@ public final strictfp class PeerHub implements Animated, RouterHandler {
 	private final static int CLIENT_MAX_DELAY_MILLIS = 60;
 	private final static float FREE_QUIT_TIME = 120f;
 	private final static int TICKS_PER_STATUS_UPDATE = (int)(20/AnimationManager.ANIMATION_SECONDS_PER_TICK);
+	private final static int TICKS_PER_SPECTATOR_UPDATE = 5;
 	private final static int TICKS_PER_CHECKSUM = (int)(10/AnimationManager.ANIMATION_SECONDS_PER_TICK);
 
 	private static boolean waiting_for_ack = false;
@@ -91,8 +94,9 @@ public final strictfp class PeerHub implements Animated, RouterHandler {
 	private int server_millis;
 	private int paused;
 	private boolean is_synchronized;
-
-//private int ignore_peer = -1;
+	private boolean sent_map = false;
+	private boolean sent_trees = false;
+    private int rows_sent = 0;
 
 	static {
 		SYSTEM_NAME = Utils.getBundleString(bundle, "system_name");
@@ -115,7 +119,6 @@ public final strictfp class PeerHub implements Animated, RouterHandler {
 		if (!is_multiplayer) {
 			this.router = new Router(network, com.oddlabs.util.Utils.getLoopbackAddress(), 0, Logger.getAnonymousLogger(), new RouterListener() {
 				public final void routerFailed(IOException e) {
-//					PeerHub.this.routerFailed(e);
 					throw new RuntimeException(e);
 				}
 			});
@@ -275,7 +278,6 @@ public final strictfp class PeerHub implements Animated, RouterHandler {
 			if (!isPaused()) {
 				doTick(t);
 				int min_tick = millisToTick(server_millis - MILLISECONDS_PER_HEARTBEAT - CLIENT_MAX_DELAY_MILLIS);
-				//System.out.println("min_tick-getTick() = " + (min_tick-getTick()));
 				while (getTick() < min_tick)
 					doTick(t);
 			} else
@@ -294,6 +296,17 @@ public final strictfp class PeerHub implements Animated, RouterHandler {
 
 		if (getTick()%TICKS_PER_STATUS_UPDATE == 0 && Network.getMatchmakingClient().isConnected())
 			sendStatusUpdate();
+
+        if (!sent_map) {
+            sendMap();
+        }
+
+        if (!sent_trees) {
+            sendTrees();
+        }
+
+        if (getTick()%TICKS_PER_SPECTATOR_UPDATE == 0 && Network.getMatchmakingClient().isConnected())
+			sendSpectatorInfo();
 
 		for (int i = 0; i < peer_index_to_peer.length; i++) {
 			Peer peer = peer_index_to_peer[i];
@@ -340,9 +353,53 @@ public final strictfp class PeerHub implements Animated, RouterHandler {
 				status[i] = peer.getPlayer().getStatus();
 		}
 		Network.getMatchmakingClient().getInterface().updateGameStatus(getTick(), status);
+    }
 
-        String test = "Test test test this is a test";
-		Network.getMatchmakingClient().getInterface().updateSpectatorInfo(getTick(), test);
+	private final void sendMap() {
+        HeightMap map = local_player.getWorld().getHeightMap();
+        int size = map.getGridUnitsPerWorld();
+        if (rows_sent < size) {
+            String info = "M " + rows_sent + " ";
+            for (int x = 0; x < size; x++) {
+                info += map.getHeight(x, rows_sent) + " ";
+            }
+            rows_sent++;
+            info += "\n";
+		    Network.getMatchmakingClient().getInterface().updateSpectatorInfo(0, info);
+        } else {
+            sent_map = true;
+        }
+    }
+
+    private final void sendTrees() {
+        HeightMap map = local_player.getWorld().getHeightMap();
+        String info = "T ";
+        List trees = map.getTrees();
+        for (int t = 0; t < trees.size(); t++) {
+            int[] pos = (int[])trees.get(t);
+            info += pos[0] + " " + pos[1] + " ";
+        }
+        info += "\n";
+		Network.getMatchmakingClient().getInterface().updateSpectatorInfo(0, info);
+        sent_trees = true;
+    }
+
+    private final void sendSpectatorInfo() {
+        int tick = getTick();
+        String info = tick + " ";
+        Player[] players = local_player.getWorld().getPlayers();
+        for (int i = 0; i < players.length; i++) {
+            int race = players[i].getPlayerInfo().getRace();
+            info += "RACE" + race + " ";
+            Set units = players[i].getUnits().getSet();
+		    Iterator it = units.iterator();
+            while (it.hasNext()) {
+			    Selectable s = (Selectable)it.next();
+                info += "P " + s.getGridX() + " " + s.getGridY() + " ";
+            }
+        }
+        info += "\n";
+		Network.getMatchmakingClient().getInterface().updateSpectatorInfo(tick, info);
 	}
 
 	private final Iterator getPeerIterator()  {
@@ -434,7 +491,7 @@ public final strictfp class PeerHub implements Animated, RouterHandler {
 	public final void close() {
 		closeNetwork();
 		LocalEventQueue.getQueue().getManager().removeAnimation(this);
-System.out.println("PeerHub closed");
+        System.out.println("PeerHub closed");
 	}
 
 	private static int getFreeQuitTicksLeft(World world) {

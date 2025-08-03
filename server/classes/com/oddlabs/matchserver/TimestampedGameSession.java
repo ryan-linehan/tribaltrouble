@@ -62,7 +62,7 @@ public final strictfp class TimestampedGameSession {
 			nicks += session.getParticipants()[i].getNick() + " ";
 		MatchmakingServer.getLogger().info("Game " + database_id + " created. [" + nicks + "] " + getParticipantStates());
         try {
-            spectator_file = new File("/var/games/" + database_id, "w");
+            spectator_file = new File("/var/games/" + database_id);
             spectator_file_writer = new FileWriter(spectator_file);
         } catch (Exception e) {
             System.out.println("An exception while creating spectator file: " + e);
@@ -159,6 +159,7 @@ public final strictfp class TimestampedGameSession {
     public final void updateSpectatorInfo(int tick, String info) {
         try {
             spectator_file_writer.write(info);
+            spectator_file_writer.flush();
         } catch (Exception e) {
             System.out.println("Exception during writing spectator file: " + e);
         }
