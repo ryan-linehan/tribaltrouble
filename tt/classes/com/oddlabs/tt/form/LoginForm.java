@@ -112,20 +112,6 @@ public final strictfp class LoginForm extends Form implements RegisterProgressFo
 		compileCanvas();
 		
 		main_menu.setMenu(this);
-		
-		/*if (Renderer.isRegistered()) {
-			if (Renderer.getRegistrationClient().getRegistrationInfo() != null) {
-				main_menu.setMenu(this);
-			} else {
-				RegisterProgressForm form = new RegisterProgressForm(gui_root, this);
-				Renderer.getRegistrationClient().setListener(form);
-				Renderer.getRegistrationClient().register(true);
-			}
-		} else {
-			Form form = new MatchmakingConnectingForm(network, gui_root, null, main_menu, null, null);
-			main_menu.setMenu(form);
-			form.centerPos();
-		}*/
 	}
 
 	public final void registrationFailed() {

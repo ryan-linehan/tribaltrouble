@@ -398,7 +398,6 @@ public final strictfp class MatchmakingClient implements MatchmakingClientInterf
 	}
 	
 	public final void connected(AbstractConnection connection) {
-		SignedObject signed_key = Renderer.getRegistrationClient().getSignedRegistrationKey();
 		Connection wrapped_connection = (Connection)conn.getWrappedConnection();
 		matchmaking_login_interface.setLocalRemoteAddress(wrapped_connection.getLocalAddress());
 System.out.println("wrapped_connection.getLocalAddress()	 = " + wrapped_connection.getLocalAddress()	);
