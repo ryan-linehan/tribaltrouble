@@ -47,10 +47,9 @@ import com.oddlabs.tt.global.Settings;
 import com.oddlabs.tt.gui.Color;
 import com.oddlabs.tt.gui.EditLine;
 import com.oddlabs.util.Quad;
-import com.oddlabs.tt.render.Display;
 
-import org.lwjgl.glfw.GLFWVidMode;
-
+import com.oddlabs.tt.render.DisplayModel;
+import com.oddlabs.tt.render.DisplayModelItem;
 
 public abstract strictfp class AbstractOptionsMenu extends Form {
 
@@ -70,6 +69,7 @@ public abstract strictfp class AbstractOptionsMenu extends Form {
     private final ResourceBundle bundle = ResourceBundle.getBundle(OptionsMenu.class.getName());
     private final MultiColumnComboBox language_list_box;
     private final PulldownMenu pm_gamespeed;
+    private final PulldownMenu pulldown_rr = new PulldownMenu();
     private int last_detail_value;
 
     public AbstractOptionsMenu(GUIRoot gui_root) {
@@ -139,14 +139,7 @@ public abstract strictfp class AbstractOptionsMenu extends Form {
         group_sound.compileCanvas();
         group_sound.setDisabled(!LocalInput.alIsCreated());
 
-        // Fullscreen
-		Group group_fullscreen = new Group();
-		display.addChild(group_fullscreen);
-        cb_fullscreen = new CheckBox(LocalInput.inFullscreen(), Utils.getBundleString(bundle, "fullscreen"), Utils.getBundleString(bundle, "fullscreen_tip"));
-		cb_fullscreen.addCheckBoxListener(new CBFullscreen());
-		group_fullscreen.addChild(cb_fullscreen);
-		cb_fullscreen.place();
-		group_fullscreen.compileCanvas();
+        
 
         // Invert camera
         Group group_invert_camera = new Group();
@@ -184,45 +177,6 @@ public abstract strictfp class AbstractOptionsMenu extends Form {
         label_detail.place();
         pb_detail.place(label_detail, BOTTOM_LEFT);
         group_detail.compileCanvas();
-
-
-		// Display mode
-		Group mode_group = new Group();
-		display.addChild(mode_group);
-
-		Label mode_label = new Label(Utils.getBundleString(bundle, "display_mode"), Skin.getSkin().getEditFont());
-		mode_group.addChild(mode_label);
-
-		ColumnInfo[] mode_infos = new ColumnInfo[]{new ColumnInfo("", 150)};
-		MultiColumnComboBox mode_list_box = new MultiColumnComboBox(gui_root, mode_infos, 200, false);
-		addChild(mode_list_box);
-
-		GLFWVidMode[] modes = Display.getVidModes();
-		//SerializableDisplayMode current_mode = LocalInput.getCurrentMode();
-
-		Row current_row = null;
-
-		int index = 0;
-		for (int i = 0; i < modes.length; i++) {
-            String mode_string = Utils.getBundleString(bundle, "mode", new Object[]{
-                Integer.toString(modes[i].width()), Integer.toString(modes[i].height()), Integer.toString(modes[i].refreshRate())});
-
-            Label label = new SortedLabel(mode_string, i, Skin.getSkin().getMultiColumnComboBoxData().getFont());
-            Row row = new Row(new GUIObject[]{label}, modes[i]);
-            mode_list_box.addRow(row);
-
-            /*if (modes[i].equals(current_mode))
-                current_row = row;*/
-            index++;
-		}
-		if (current_row != null)
-			mode_list_box.selectRow(current_row);
-
-		mode_list_box.addRowListener(new DisplayModeListener());
-		mode_group.addChild(mode_list_box);
-		mode_label.place();
-		mode_list_box.place(mode_label, BOTTOM_LEFT);
-		mode_group.compileCanvas();
 
         // Mapmode delay
         Group group_mapmode = new Group();
@@ -289,7 +243,7 @@ public abstract strictfp class AbstractOptionsMenu extends Form {
 //		addChild(language_list_box);
 
         checkLanguage();
-        current_row = null;
+        Row current_row = null;
         IconLabel label = new IconLabel(Skin.getSkin().getFlagDefault(), new Label(Utils.getBundleString(bundle, "system_default"), Skin.getSkin().getMultiColumnComboBoxData().getFont()));
         Row row = new Row(new GUIObject[]{label}, Renderer.getRenderer().getDefaultLocale());
         language_list_box.addRow(row);
@@ -350,12 +304,34 @@ public abstract strictfp class AbstractOptionsMenu extends Form {
         }
         general.compileCanvas();
 
+
+        // Display and graphics
+        
+        // Fullscreen
+		Group group_fullscreen = new Group();
+		display.addChild(group_fullscreen);
+        cb_fullscreen = new CheckBox(DisplayModel.inFullscreen(), Utils.getBundleString(bundle, "fullscreen"), Utils.getBundleString(bundle, "fullscreen_tip"));
+		cb_fullscreen.addCheckBoxListener(new CBFullscreen());
+		group_fullscreen.addChild(cb_fullscreen);
+		cb_fullscreen.place();
+		group_fullscreen.compileCanvas();
+
+        Group display_apply = CreateDisplayApply();
+        display.addChild(display_apply);
+
+        Group refreshrate_group = CreateRefreshrateSelect();
+        display.addChild(refreshrate_group);
+
+        Group mode_group = CreateDisplaySettings();
+        display.addChild(mode_group);
+
         mode_group.place();
         group_detail.place(mode_group, RIGHT_TOP);
-        
-        // Fullscreen + display
         group_fullscreen.place(group_detail, BOTTOM_LEFT);
+        display_apply.place(display, BOTTOM_LEFT, 10);
+        refreshrate_group.place(group_fullscreen, BOTTOM_LEFT);
         display.compileCanvas();
+        
 
         group_music.place();
         group_sound.place(group_music, BOTTOM_LEFT);
@@ -429,6 +405,75 @@ public abstract strictfp class AbstractOptionsMenu extends Form {
             slider_music.setDisabled(!marked);
             Settings.getSettings().play_music = marked;
         }
+    }
+
+    private final Group CreateRefreshrateSelect() {
+        Group refreshrate_group = new Group();
+        Label label_rr = new Label("Refreshrate:", Skin.getSkin().getEditFont());
+        refreshrate_group.addChild(label_rr);
+        int[] refreshRates = DisplayModel.getRefreshRates();
+        int selected_index = 0;
+        int curr_refreshrate = DisplayModel.getCurrentResolution().refreshRate();
+
+        for (int i = 0; i<refreshRates.length; i++) {
+            pulldown_rr.addItem(new PulldownItem(refreshRates[i] + " Hz"));
+            
+            if (refreshRates[i] == curr_refreshrate)
+                selected_index = i;
+        }
+        PulldownButton pulldownbtn_rr = new PulldownButton(gui_root, pulldown_rr, 100);
+        pulldown_rr.addItemChosenListener(new RefreshrateListener(selected_index, refreshRates));
+        refreshrate_group.addChild(pulldownbtn_rr);
+        label_rr.place();
+        pulldownbtn_rr.place(label_rr, BOTTOM_LEFT);
+        refreshrate_group.compileCanvas();
+        return refreshrate_group;
+    }
+
+    private final Group CreateDisplayApply() {
+        Group apply = new Group();
+        HorizButton apply_btn = new HorizButton("Apply", 120);
+        apply_btn.addMouseClickListener(new DisplayApplyListener());
+        apply.addChild(apply_btn);
+        apply_btn.place();
+        apply.compileCanvas();
+        return apply;
+    }
+    
+    private final Group CreateDisplaySettings() {
+        Group mode_group = new Group();
+
+		Label mode_label = new Label(Utils.getBundleString(bundle, "display_mode"), Skin.getSkin().getEditFont());
+		mode_group.addChild(mode_label);
+
+		ColumnInfo[] mode_infos = new ColumnInfo[]{new ColumnInfo("", 150)};
+		MultiColumnComboBox mode_list_box = new MultiColumnComboBox(gui_root, mode_infos, 200, false);
+		addChild(mode_list_box);
+
+		DisplayModelItem[] modes = DisplayModel.getUniqueResolutions();
+		DisplayModelItem current_mode = DisplayModel.getCurrentResolution();
+
+		Row current_row = null;
+
+		for (int i = 0; i < modes.length; i++) {
+            String mode_string = Integer.toString(modes[i].width()) + "x"+ Integer.toString(modes[i].height());
+
+            Label label = new SortedLabel(mode_string, i, Skin.getSkin().getMultiColumnComboBoxData().getFont());
+            Row row = new Row(new GUIObject[]{label}, modes[i]);
+            mode_list_box.addRow(row);
+
+            if (modes[i].resolution_equals(current_mode))
+                current_row = row;
+		}
+		if (current_row != null)
+			mode_list_box.selectRow(current_row);
+
+		mode_list_box.addRowListener(new DisplayModeListener());
+		mode_group.addChild(mode_list_box);
+		mode_label.place();
+		mode_list_box.place(mode_label, BOTTOM_LEFT);
+        mode_group.compileCanvas();
+        return mode_group;
     }
 
 	/** Creates the group that displalys the network setting controls in the options menu
@@ -607,24 +652,46 @@ public abstract strictfp class AbstractOptionsMenu extends Form {
 		}
 
 		public final void checked(boolean marked) {
-
+            DisplayModel.setFullscreen(marked);
 		}
 	}
 
     private final strictfp class DisplayModeListener implements RowListener, DoNowListener {
-		private GLFWVidMode mode;
+		private DisplayModelItem mode;
 		
 		public final void doChange(boolean switch_now) {
-			LocalInput.getLocalInput().switchMode(mode);
 		}
 
 		public final void rowChosen(Object o) {
-			mode = (GLFWVidMode)o;
-			DisplayChangeForm display_change_form = new DisplayChangeForm(this);
-			gui_root.addModalForm(display_change_form);
+			mode = (DisplayModelItem)o;
+			DisplayModel.setCurrentResolution(mode);
+            //DisplayChangeForm display_change_form = new DisplayChangeForm(this);
+			//gui_root.addModalForm(display_change_form);
 		}
 		
 		public final void rowDoubleClicked(Object o) {
 		}
-	}  
+	}
+
+    private final strictfp class DisplayApplyListener implements MouseClickListener {
+		public final void mouseClicked(int button, int x, int y, int clicks) {
+			DisplayModel.saveToConfig();
+		}
+	}
+
+    private final strictfp class RefreshrateListener implements ItemChosenListener {
+        private int[] refreshRates;
+
+        public RefreshrateListener(int index, int[] _refreshRates) {
+            pulldown_rr.chooseItem(index);
+            refreshRates = _refreshRates;
+        }
+        public final void itemChosen(PulldownMenu menu, int item_index) {
+            int refreshRate = refreshRates[item_index];
+
+            DisplayModelItem curr_res = DisplayModel.getCurrentResolution();
+            curr_res.setRefreshRate(refreshRate);
+            DisplayModel.setCurrentResolution(curr_res);
+        }
+    }
 }

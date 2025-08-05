@@ -35,6 +35,7 @@ public final strictfp class Display {
             System.out.println("Unable to initialize GLFW");
             return;
         }
+
         System.out.println("Is settings null? " + (Settings.getSettings() == null));
         width = Settings.getSettings().view_width;
         height = Settings.getSettings().view_height;
@@ -145,7 +146,8 @@ public final strictfp class Display {
     }
 
     public static GLFWVidMode[] getVidModes() {
-        org.lwjgl.glfw.GLFWVidMode.Buffer buffer = GLFW.glfwGetVideoModes(monitor);
+        long target_monitor = GLFW.glfwGetPrimaryMonitor();
+        org.lwjgl.glfw.GLFWVidMode.Buffer buffer = GLFW.glfwGetVideoModes(target_monitor);
         if (buffer == null) {
             return new GLFWVidMode[0];
         }
