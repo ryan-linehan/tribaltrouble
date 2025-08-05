@@ -56,6 +56,8 @@ import com.oddlabs.tt.util.StatCounter;
 import com.oddlabs.tt.util.StateChecksum;
 import com.oddlabs.tt.util.Utils;
 import com.oddlabs.tt.model.Selectable;
+import com.oddlabs.tt.model.Unit;
+import com.oddlabs.tt.model.Building;
 
 public final strictfp class PeerHub implements Animated, RouterHandler {
 	public final static ResourceBundle bundle = ResourceBundle.getBundle(PeerHub.class.getName());
@@ -95,6 +97,7 @@ public final strictfp class PeerHub implements Animated, RouterHandler {
 	private int paused;
 	private boolean is_synchronized;
 	private boolean sent_map = false;
+	private boolean sent_init_info = false;
 	private boolean sent_trees = false;
     private int rows_sent = 0;
 
@@ -301,6 +304,10 @@ public final strictfp class PeerHub implements Animated, RouterHandler {
             sendMap();
         }
 
+        if (!sent_init_info) {
+            sendInitInfo();
+        }
+
         if (!sent_trees) {
             sendTrees();
         }
@@ -384,18 +391,41 @@ public final strictfp class PeerHub implements Animated, RouterHandler {
         sent_trees = true;
     }
 
+    private final void sendInitInfo() {
+        String info = "I ";
+        Player[] players = local_player.getWorld().getPlayers();
+        for (int i = 0; i < players.length; i++) {
+            float[] color = players[i].getColor();
+            String name = players[i].getPlayerInfo().getName();
+            int race = players[i].getPlayerInfo().getRace();
+            int team = players[i].getPlayerInfo().getTeam();
+            info += "NAME " + name + " ";
+            info += "RACE " + race + " ";
+            info += "TEAM " + team + " ";
+            info += "COLOR " + color[0] + " " + color[1] + " " + color[2] + " ";
+        }
+        info += "\n";
+		Network.getMatchmakingClient().getInterface().updateSpectatorInfo(0, info);
+        sent_init_info = true;
+    }
+
     private final void sendSpectatorInfo() {
         int tick = getTick();
         String info = tick + " ";
         Player[] players = local_player.getWorld().getPlayers();
         for (int i = 0; i < players.length; i++) {
-            int race = players[i].getPlayerInfo().getRace();
-            info += "RACE" + race + " ";
+            info += "P " + i + " ";
             Set units = players[i].getUnits().getSet();
 		    Iterator it = units.iterator();
             while (it.hasNext()) {
-			    Selectable s = (Selectable)it.next();
-                info += "P " + s.getGridX() + " " + s.getGridY() + " ";
+                Object obj = it.next();
+                if (obj instanceof Unit) {
+			        Unit u = (Unit)obj;
+                    info += "U " + u.getGridX() + " " + u.getGridY() + " ";
+                } else if (obj instanceof Building) {
+			        Building b = (Building)obj;
+                    info += "B " + b.getGridX() + " " + b.getGridY() + " " + b.getSize() + " ";
+                }
             }
         }
         info += "\n";

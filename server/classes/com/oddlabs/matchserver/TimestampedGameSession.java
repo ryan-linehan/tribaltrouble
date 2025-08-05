@@ -246,6 +246,7 @@ public final strictfp class TimestampedGameSession {
 		MatchmakingServer.getLogger().info("Game " + database_id + ": " + client.getUsername() + " finished. Result " + result_string + " " + getParticipantStates());
 		//if (game_state != GAME_STARTING)
 			evaluateGame(server);
+        updateSpectatorInfo(0, "END");
 	}
 	
 	private final void evaluateGame(MatchmakingServer server) {
