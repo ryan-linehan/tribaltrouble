@@ -6,6 +6,7 @@ import discord4j.common.util.Snowflake;
 import discord4j.core.event.domain.message.MessageCreateEvent;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.channel.TextChannel;
+import discord4j.core.spec.EmbedCreateSpec;
 import reactor.core.publisher.Mono;
 import reactor.core.Disposable;
 
@@ -169,7 +170,14 @@ public final strictfp class ChatRoom {
         if (this.discordChannel != null) {
             if(!msg.startsWith("<"))
                 msg = formatChat(owner, msg);
-            this.discordChannel.createMessage(msg).subscribe();
+            this.discordChannel.createMessage(msg).retry(3).subscribe();
+        }
+    }
+
+    public final void trySendDiscordEmbed(EmbedCreateSpec embed) {
+        // Send the embed to the discord channel if one is setup for this chat room
+        if (this.discordChannel != null) {
+            this.discordChannel.createMessage(embed).retry(3).subscribe();
         }
     }
 
