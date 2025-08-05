@@ -10,7 +10,7 @@ public abstract strictfp class TextField extends GUIObject implements CharSequen
 
 	private final StringBuffer text;
 	private final Font font;
-	private final int max_chars;
+	protected final int max_chars;
 
 	public TextField(Font font, int max_chars) {
 		this("", font, max_chars);

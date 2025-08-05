@@ -71,7 +71,6 @@ public final class MatchmakingServer implements ConnectionListenerInterface {
 
         this.public_reg_key = RegistrationKey.loadPublicKey();
         String password = System.getenv("TT_SERVER_PASSWORD");
-        System.out.println("Using password: " + password);
         DBUtils.initConnection("jdbc:mysql://localhost/oddlabs", "matchmaker", password);
         logger.info("Generating encryption keys.");
         this.param_spec = KeyManager.generateParameterSpec();
@@ -117,7 +116,7 @@ public final class MatchmakingServer implements ConnectionListenerInterface {
             old_logged_in.close();
             logger.info(username + " overtaked old login");
         }
-        Client client = new Client(this, conn, remote_address, local_remote_address, username, key_code_encoded == null, revision, host_id);
+        Client client = new Client(this, conn, remote_address, local_remote_address, username, false, revision, host_id);
         online_users.put(username.toLowerCase(), client);
         client_map.put(new Integer(client.getHostID()), client);
         logger.info(username + " logged in, with key " + key_code_encoded);

@@ -218,53 +218,53 @@ public final strictfp class Client implements MatchmakingServerInterface, Connec
         setGameSession(null);
     }
 
-    public final void gameStartedNotify(GameSession game_session) {
-        if (game_session == null || game_session.getParticipants() == null || game_session.getParticipants().length == 0) {
-            MatchmakingServer.getLogger().warning("Invalid GameSession received from " + getUsername());
-            return;
-        }
-        Participant[] participants = game_session.getParticipants();
-        int database_id = -1;
-        for (int i = 0; i < participants.length; i++) {
-            Client client = server.getClientFromID(participants[i].getMatchID());
-            if (client == null) {
-                MatchmakingServer.getLogger().warning("Invalid participant in GameSession from " + getUsername());
-                break;
-            }
-            Profile p = client.getProfile();
-            if (p == null || !p.getNick().equals(participants[i].getNick())) {
-                MatchmakingServer.getLogger().warning("Invalid nickparticipant in GameSession from " + getUsername() + " or " + client.getUsername() + " has given wrong nick");
-                break;
-            }
-            if (i == 0) {
-                database_id = client.getCurrentGame().getDatabaseID();
-            }
-            // Check if one of the others already established the session
-            TimestampedGameSession client_session = client.getGameSession();
-            if (client_session != null && client_session.getSession().getID() == game_session.getID()) {
-                // If the session ids match, it must be the same game
-                if (!client_session.getSession().equals(game_session)) {
-                    MatchmakingServer.getLogger().warning("GameSession from " + getUsername() + " does not match the one from " + client.getUsername());
-                    break;
-                }
-                if (!client_session.join(server, this)) {
-                    MatchmakingServer.getLogger().warning(getUsername() + " joined session " + Integer.toHexString(game_session.getID()) + " too late or seat already taken");
-                    break;
-                }
-                MatchmakingServer.getLogger().info("GameSession " + Integer.toHexString(game_session.getID()) + " joined by " + getUsername());
-                setGameSession(client_session);
-                return;
-            }
-        }
-        MatchmakingServer.getLogger().info("Game " + database_id + ": New GameSession " + Integer.toHexString(game_session.getID()) + " started by " + getUsername());
-        TimestampedGameSession new_session = new TimestampedGameSession(game_session, database_id);
-        if (new_session.join(server, this)) {
-            setGameSession(new_session);
-            DBInterface.startGame(new_session, server);
-        } else {
-            MatchmakingServer.getLogger().warning("Game " + database_id + ": " + getUsername() + " could not join own game");
-        }
-    }
+	/** Called from the 'host' client to the server to start the game */
+	public final void gameStartedNotify(GameSession game_session) {
+		if (game_session == null || game_session.getParticipants() == null || game_session.getParticipants().length == 0) {
+			MatchmakingServer.getLogger().warning("Invalid GameSession received from " + getUsername());
+			return;
+		}
+		Participant[] participants = game_session.getParticipants();
+		int database_id = -1;
+		for (int i = 0; i < participants.length; i++) {
+			Client client = server.getClientFromID(participants[i].getMatchID());
+			if (client == null) {
+				MatchmakingServer.getLogger().warning("Invalid participant in GameSession from " + getUsername());
+				break;
+			}
+			Profile p = client.getProfile();
+			if (p == null || !p.getNick().equals(participants[i].getNick())) {
+				MatchmakingServer.getLogger().warning("Invalid nickparticipant in GameSession from " + getUsername() + " or " + client.getUsername() + " has given wrong nick");
+				break;
+			}
+			if (i == 0)
+				database_id = client.getCurrentGame().getDatabaseID();
+			// Check if one of the others already established the session
+			TimestampedGameSession client_session = client.getGameSession();
+			if (client_session != null && client_session.getSession().getID() == game_session.getID()) {
+				// If the session ids match, it must be the same game
+				if (!client_session.getSession().equals(game_session)) {
+					MatchmakingServer.getLogger().warning("GameSession from " + getUsername() + " does not match the one from " + client.getUsername());
+					break;
+				}
+				if (!client_session.join(server, this)) {
+					MatchmakingServer.getLogger().warning(getUsername() + " joined session " + Integer.toHexString(game_session.getID()) + " too late or seat already taken");
+					break;
+				}
+				MatchmakingServer.getLogger().info("GameSession " + Integer.toHexString(game_session.getID()) + " joined by " + getUsername());
+				setGameSession(client_session);
+				return;
+			}
+		}
+		MatchmakingServer.getLogger().info("Game " + database_id + ": New GameSession " + Integer.toHexString(game_session.getID()) + " started by " + getUsername());
+		TimestampedGameSession new_session = new TimestampedGameSession(game_session, database_id);
+		if (new_session.join(server, this)) {
+			setGameSession(new_session);
+			DBInterface.startGame(new_session, server);
+		} else {
+			MatchmakingServer.getLogger().warning("Game " + database_id + ": " + getUsername() + " could not join own game");
+		}
+	}
 
     private final void setGameSession(TimestampedGameSession t) {
         if (t != null && current_session != null) {

@@ -1,8 +1,6 @@
 <project name="tools" basedir=".">
 	<import file="../common/common.xml"/>
 
-	<property name="classpath" value="../common/build/classes"/>
-
 	<target name="compiledeps" depends="compile-common">
 	</target>
 
