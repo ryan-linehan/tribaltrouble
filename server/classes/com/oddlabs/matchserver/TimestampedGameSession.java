@@ -1,10 +1,17 @@
 package com.oddlabs.matchserver;
 
+import com.oddlabs.matchmaking.GamePlayer;
 import com.oddlabs.matchmaking.GameSession;
 import com.oddlabs.matchmaking.Participant;
+import com.oddlabs.matchmaking.PlayerTypes;
+
+import discord4j.core.spec.EmbedCreateSpec;
+
 import com.oddlabs.matchmaking.MatchmakingServerInterface;
 
 import java.sql.SQLException;
+import java.util.HashMap;
+import java.util.Map;
 
 public final strictfp class TimestampedGameSession {
 	private final static long JOIN_MAX_TIME = 3*60*1000;
@@ -261,9 +268,10 @@ public final strictfp class TimestampedGameSession {
 				return; // someone is still playing
 		}
 		long end_time = System.currentTimeMillis();
-		if (winning_teams == 0) {
+		if (winning_teams == 0) {			
 			MatchmakingServer.getLogger().info("Game " + database_id + ". No winning teams " + getParticipantStates());
 			DBInterface.endGame(this, end_time, -1);
+			SendHumansLoseToBotsDiscordEmbed();
 			game_ended = true;
 			return; // last players disconnected
 		}
@@ -359,5 +367,51 @@ public final strictfp class TimestampedGameSession {
 			if (client != null)
 				client.updateProfile();
 		}
+	}
+
+	/**
+	 * Sends a Discord embed message when humans lose to bots.
+	 */
+	private void SendHumansLoseToBotsDiscordEmbed() {
+		if(!DiscordBotService.getInstance().isInitialized())
+			return;
+		GamePlayer[] players = session.getPlayerInfo();
+		GameData data = DBInterface.getGame(database_id, true);
+		String game_name = data.getName();
+		String human_nicks = "";
+		
+		// Group all players by team
+		Map<Integer, String> teamPlayers = new HashMap<>();
+		
+		for (GamePlayer player : players) {
+			int team = player.getTeam();
+			
+			if (player.getPlayerType() == PlayerTypes.Human) {
+				human_nicks += player.getNick() + ", ";
+			}
+			
+			// Add player to their team's list
+			String currentTeamList = teamPlayers.getOrDefault(team, "");
+			if (!currentTeamList.isEmpty()) {
+				currentTeamList += ", ";
+			}
+			currentTeamList += player.getNick();
+			teamPlayers.put(team, currentTeamList);
+		}
+		
+		discord4j.core.spec.EmbedCreateSpec.Builder builder = EmbedCreateSpec.builder()
+				.title(game_name + " ended")
+				.description(human_nicks + " lost playing against AI");
+		
+		// Add fields for each team
+		for (Map.Entry<Integer, String> entry : teamPlayers.entrySet()) {
+			int teamId = entry.getKey();
+			String playerList = entry.getValue();
+			builder.addField("Team " + (teamId + 1), playerList, false);
+		}
+		
+		EmbedCreateSpec embed = builder.build();
+
+		((ChatRoom) ChatRoom.getChatRooms().values().iterator().next()).trySendDiscordEmbed(embed);
 	}
 }
