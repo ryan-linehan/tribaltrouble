@@ -2,7 +2,7 @@ package com.oddlabs.tt.form;
 
 import java.util.Locale;
 import java.util.ResourceBundle;
-
+import java.util.List;
 import com.oddlabs.tt.render.Cursor;
 
 import com.oddlabs.matchmaking.Game;
@@ -407,6 +407,24 @@ public abstract strictfp class AbstractOptionsMenu extends Form {
         }
     }
 
+    private final void fetchRefreshRates() {
+        // Clear items and listeners
+        pulldown_rr.clearItems();
+        pulldown_rr.listListeners();
+        int[] refreshRates = DisplayModel.getRefreshRates();
+        int selected_index = 0;
+        int curr_refreshrate = DisplayModel.getCurrentResolution().refreshRate();
+
+        for (int i = 0; i<refreshRates.length; i++) {
+            pulldown_rr.addItem(new PulldownItem(refreshRates[i] + " Hz"));
+            if (refreshRates[i] == curr_refreshrate)
+                selected_index = i;
+        }
+        //FIXME: Memory leak, index error.
+        //TODO: Remove/replace listener
+        pulldown_rr.addItemChosenListener(new RefreshrateListener(selected_index, refreshRates));
+    }
+
     private final Group CreateRefreshrateSelect() {
         Group refreshrate_group = new Group();
         Label label_rr = new Label("Refreshrate:", Skin.getSkin().getEditFont());
@@ -431,13 +449,13 @@ public abstract strictfp class AbstractOptionsMenu extends Form {
     }
 
     private final Group CreateDisplayApply() {
-        Group apply = new Group();
+        Group apply_group = new Group();
         HorizButton apply_btn = new HorizButton("Apply", 120);
         apply_btn.addMouseClickListener(new DisplayApplyListener());
-        apply.addChild(apply_btn);
+        apply_group.addChild(apply_btn);
         apply_btn.place();
-        apply.compileCanvas();
-        return apply;
+        apply_group.compileCanvas();
+        return apply_group;
     }
     
     private final Group CreateDisplaySettings() {
@@ -665,6 +683,7 @@ public abstract strictfp class AbstractOptionsMenu extends Form {
 		public final void rowChosen(Object o) {
 			mode = (DisplayModelItem)o;
 			DisplayModel.setCurrentResolution(mode);
+            fetchRefreshRates();
             //DisplayChangeForm display_change_form = new DisplayChangeForm(this);
 			//gui_root.addModalForm(display_change_form);
 		}
