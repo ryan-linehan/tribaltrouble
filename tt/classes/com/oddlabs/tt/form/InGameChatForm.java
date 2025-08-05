@@ -19,9 +19,12 @@ import com.oddlabs.tt.gui.RadioButtonGroup;
 import com.oddlabs.tt.delegate.SelectionDelegate;
 import com.oddlabs.tt.gui.Skin;
 import com.oddlabs.tt.gui.InfoPrinter;
+import com.oddlabs.tt.gui.KeyboardEvent;
 import com.oddlabs.tt.gui.TextBox;
 import com.oddlabs.tt.guievent.EnterListener;
+import com.oddlabs.tt.guievent.KeyListener;
 import com.oddlabs.tt.guievent.MouseClickListener;
+import com.oddlabs.tt.input.Keyboard;
 import com.oddlabs.tt.net.ChatCommand;
 import com.oddlabs.tt.net.PeerHub;
 import com.oddlabs.tt.util.Utils;
@@ -52,7 +55,7 @@ public final strictfp class InGameChatForm extends Form implements ChatListener 
 		chat_line = new EditLine(CHAT_WIDTH, 256);
 		addChild(chat_line);
 		chat_line.addEnterListener(new ChatListener());
-
+		chat_line.addKeyListener(new EscapeKeyListener());
 		HorizButton button_send = new HorizButton(Utils.getBundleString(bundle, "send"), BUTTON_WIDTH);
 		addChild(button_send);
 		button_send.addMouseClickListener(new SendListener());
@@ -116,6 +119,18 @@ public final strictfp class InGameChatForm extends Form implements ChatListener 
 
 	public void mouseMoved(int x, int y) {
 		((SelectionDelegate)getParent()).mouseMoved(x, y);
+	}
+
+	private final strictfp class EscapeKeyListener implements KeyListener {
+		public final void keyRepeat(KeyboardEvent event) {}
+		public final void keyPressed(KeyboardEvent event) {
+			switch (event.getKeyCode()) {
+				case Keyboard.KEY_ESCAPE:
+					cancel();
+					break;
+			}
+		}
+		public final void keyReleased(KeyboardEvent event) {}
 	}
 
 	private strictfp final class ChatListener implements EnterListener {
