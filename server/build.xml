@@ -13,9 +13,6 @@
 		<pathelement location="${commonstatic}" />
 		<pathelement location="i18n" />
 		<pathelement location="static" />
-		<fileset dir="../ivy_lib">
-			<include name="*.jar" />
-		</fileset>
 	</path>
 
 	<!-- Ivy resolve target to fetch dependencies -->
@@ -26,6 +23,14 @@
 	</target>
 
 	<target name="compiledeps" depends="compile-common">
+	</target>
+
+	<target name="compile" depends="init,compiledeps">
+		<javac debug="yes" source="${java_source_version}" target="${java_source_version}"
+			srcdir="classes" destdir="${build}/classes">
+			<classpath refid="_common.combined.compile.javasvn.classpath" />
+			<classpath refid="server.classpath" />
+		</javac>
 	</target>
 
 	<target name="bugreporter" depends="compile">
