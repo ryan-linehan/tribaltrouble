@@ -2,6 +2,7 @@ package com.oddlabs.matchmaking;
 
 import java.io.Serializable;
 
+/** Human ONLY participants in a game */
 public final strictfp class Participant implements Serializable {
 	private static final long serialVersionUID = -3344403341742210958L;
 

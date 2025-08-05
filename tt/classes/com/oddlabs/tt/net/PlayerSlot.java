@@ -1,6 +1,7 @@
 package com.oddlabs.tt.net;
 
 import com.oddlabs.tt.player.PlayerInfo;
+import com.oddlabs.matchmaking.PlayerTypes;
 import com.oddlabs.matchmaking.TunnelAddress;
 
 import java.io.Serializable;
@@ -82,6 +83,26 @@ public final strictfp class PlayerSlot implements Serializable {
 
 	public final int getAIDifficulty() {
 		return ai_difficulty;
+	}
+
+	public final PlayerTypes getPlayerType() {
+		switch (type) {
+			case HUMAN:
+				return PlayerTypes.Human;
+			case AI:
+				switch (ai_difficulty) {
+					case AI_EASY:
+						return PlayerTypes.AIEasy;
+					case AI_NORMAL:
+						return PlayerTypes.AINormal;
+					case AI_HARD:
+						return PlayerTypes.AIHard;
+					default:
+						return PlayerTypes.None;
+				}
+			default:
+				return PlayerTypes.None;
+		}
 	}
 
 	public final int getType() {
