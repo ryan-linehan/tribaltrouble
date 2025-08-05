@@ -213,6 +213,7 @@ public final strictfp class Client implements MatchmakingServerInterface, Connec
 		setGameSession(null);
 	}
 
+	/** Called from the 'host' client to the server to start the game */
 	public final void gameStartedNotify(GameSession game_session) {
 		if (game_session == null || game_session.getParticipants() == null || game_session.getParticipants().length == 0) {
 			MatchmakingServer.getLogger().warning("Invalid GameSession received from " + getUsername());
