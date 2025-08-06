@@ -97,7 +97,6 @@ public class DiscordBotService {
                     })
                     .doOnNext(guild -> System.out.printf("Found matching guild: %s%n", guild.getName()))
                     .flatMap(guild -> guild.getChannels())
-                    .take(1)
                     .subscribe(channel -> {
                         System.out.printf("  - %s (ID: %s, Type: %s)%n",
                                 channel.getName(),
