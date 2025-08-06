@@ -92,11 +92,10 @@ public class DiscordBotService {
     private void initTribalTroubleTextChannels(long serverId) {
         if (gateway != null) {
             gateway.getGuilds()
-                    .doOnNext(guild -> System.out.printf("Channels in guild: %s%n", guild.getName()))
-                    .filter(guild -> {
-                        System.out.printf("Checking guild ID: %s against server ID: %d%n", guild.getId().asString(), serverId);
+                    .filter(guild -> {                        
                         return guild.getId().equals(Snowflake.of(serverId));
                     })
+                    .doOnNext(guild -> System.out.printf("Found matching guild: %s%n", guild.getName()))
                     .flatMap(guild -> guild.getChannels())
                     .take(1)
                     .subscribe(channel -> {
