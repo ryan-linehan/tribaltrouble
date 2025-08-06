@@ -166,18 +166,27 @@ public final strictfp class ChatRoom {
      * tribal trouble chat room
      */
     public final void trySendDiscordMessage(String owner, String msg) {
-        // Send the message to the discord channel if one is setup for this chat room
-        if (this.discordChannel != null) {
-            if(!msg.startsWith("<"))
-                msg = formatChat(owner, msg);
-            this.discordChannel.createMessage(msg).retry(3).subscribe();
+        try {
+            // Send the message to the discord channel if one is setup for this chat room
+            if (this.discordChannel != null) {
+                if(!msg.startsWith("<"))
+                    msg = formatChat(owner, msg);
+                this.discordChannel.createMessage(msg).retry(3).subscribe();
+            }   
         }
+        catch (Exception e) {
+            System.err.println("Error sending discord message in chat room " + name + ": " + e.getMessage());
+        }        
     }
 
     public final void trySendDiscordEmbed(EmbedCreateSpec embed) {
-        // Send the embed to the discord channel if one is setup for this chat room
-        if (this.discordChannel != null) {
-            this.discordChannel.createMessage(embed).retry(3).subscribe();
+        try {
+            // Send the embed to the discord channel if one is setup for this chat room
+            if (this.discordChannel != null) {
+                this.discordChannel.createMessage(embed).retry(3).subscribe();
+            }   
+        } catch (Exception e) {
+            System.err.println("Error sending discord embed in chat room " + name + ": " + e.getMessage());            
         }
     }
 
