@@ -134,7 +134,7 @@ public final class DisplayModel {
 
         // Check if refresh rate matches
         for(int i = 0; i<items.size(); i++) {
-            if (curr_resolution.refreshRate() == available_resolutions[i].refreshRate())
+            if (curr_resolution.refreshRate() == items.get(i).refreshRate())
                 return 1;
         }
         
