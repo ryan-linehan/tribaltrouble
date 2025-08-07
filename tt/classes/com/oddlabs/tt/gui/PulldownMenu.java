@@ -117,18 +117,6 @@ public final strictfp class PulldownMenu extends Group {// GUIObject {
 		}
 	}
 
-	public final void clearListeners() {
-		for (int i = 0; i<chosen_listeners.size(); i++) {
-			removeItemChosenListener((ItemChosenListener)chosen_listeners.get(i));
-		}
-	}
-
-	public final void listListeners() {
-		for (int i = 0; i<chosen_listeners.size(); i++) {
-			System.out.println((ItemChosenListener)chosen_listeners.get(i));
-		}
-	}
-
 	public final void addItemChosenListener(ItemChosenListener listener) {
 		chosen_listeners.add(listener);
 	}

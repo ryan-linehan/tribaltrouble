@@ -413,7 +413,7 @@ public abstract strictfp class AbstractOptionsMenu extends Form {
     private final void fetchRefreshRates() {
         // Clear items
         pulldown_rr.clearItems();
-        pulldown_rr.listListeners();
+        
         int[] refreshRates = DisplayModel.getRefreshRates();
         int selected_index = 0;
         int curr_refreshrate = DisplayModel.getCurrentResolution().refreshRate();
@@ -449,7 +449,7 @@ public abstract strictfp class AbstractOptionsMenu extends Form {
         // Create refresh rate listener
         refrateListener = new RefreshrateListener(selected_index, refreshRates);
         pulldown_rr.addItemChosenListener(refrateListener);
-        
+
         refreshrate_group.addChild(pulldownbtn_rr);
         label_rr.place();
         pulldownbtn_rr.place(label_rr, BOTTOM_LEFT);
