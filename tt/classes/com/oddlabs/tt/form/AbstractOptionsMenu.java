@@ -407,8 +407,11 @@ public abstract strictfp class AbstractOptionsMenu extends Form {
         }
     }
 
+    // Remember refreshrate listener to be able to remove it
+    RefreshrateListener refrateListener;
+
     private final void fetchRefreshRates() {
-        // Clear items and listeners
+        // Clear items
         pulldown_rr.clearItems();
         pulldown_rr.listListeners();
         int[] refreshRates = DisplayModel.getRefreshRates();
@@ -420,9 +423,11 @@ public abstract strictfp class AbstractOptionsMenu extends Form {
             if (refreshRates[i] == curr_refreshrate)
                 selected_index = i;
         }
-        //FIXME: Memory leak, index error.
-        //TODO: Remove/replace listener
-        pulldown_rr.addItemChosenListener(new RefreshrateListener(selected_index, refreshRates));
+
+        // Remove refreshratelistener, recreate and attach.
+        pulldown_rr.removeItemChosenListener(refrateListener);
+        refrateListener = new RefreshrateListener(selected_index, refreshRates);
+        pulldown_rr.addItemChosenListener(refrateListener);
     }
 
     private final Group CreateRefreshrateSelect() {
@@ -440,7 +445,11 @@ public abstract strictfp class AbstractOptionsMenu extends Form {
                 selected_index = i;
         }
         PulldownButton pulldownbtn_rr = new PulldownButton(gui_root, pulldown_rr, 100);
-        pulldown_rr.addItemChosenListener(new RefreshrateListener(selected_index, refreshRates));
+
+        // Create refresh rate listener
+        refrateListener = new RefreshrateListener(selected_index, refreshRates);
+        pulldown_rr.addItemChosenListener(refrateListener);
+        
         refreshrate_group.addChild(pulldownbtn_rr);
         label_rr.place();
         pulldownbtn_rr.place(label_rr, BOTTOM_LEFT);
