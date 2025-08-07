@@ -413,7 +413,7 @@ public abstract strictfp class AbstractOptionsMenu extends Form {
     private final void fetchRefreshRates() {
         // Clear items
         pulldown_rr.clearItems();
-        
+
         int[] refreshRates = DisplayModel.getRefreshRates();
         int selected_index = 0;
         int curr_refreshrate = DisplayModel.getCurrentResolution().refreshRate();
@@ -691,6 +691,11 @@ public abstract strictfp class AbstractOptionsMenu extends Form {
 
 		public final void rowChosen(Object o) {
 			mode = (DisplayModelItem)o;
+
+            //Get current refresh rate, set it to chosen mode
+            DisplayModelItem curr_mode = DisplayModel.getCurrentResolution();
+            mode.setRefreshRate(curr_mode.refreshRate());
+
 			DisplayModel.setCurrentResolution(mode);
             fetchRefreshRates();
             //DisplayChangeForm display_change_form = new DisplayChangeForm(this);
@@ -713,9 +718,15 @@ public abstract strictfp class AbstractOptionsMenu extends Form {
         public RefreshrateListener(int index, int[] _refreshRates) {
             pulldown_rr.chooseItem(index);
             refreshRates = _refreshRates;
+
+            setRefreshRate(index);
         }
         public final void itemChosen(PulldownMenu menu, int item_index) {
-            int refreshRate = refreshRates[item_index];
+            setRefreshRate(item_index);
+        }
+
+        private final void setRefreshRate(int index) {
+            int refreshRate = refreshRates[index];
 
             DisplayModelItem curr_res = DisplayModel.getCurrentResolution();
             curr_res.setRefreshRate(refreshRate);
