@@ -62,9 +62,8 @@ public final strictfp class PulldownMenu extends Group {// GUIObject {
 			item.setPos(0, item_pos_count);
 			item_pos_count += item_height;
 		}
-		//FIXME: This is a hack and has to be handled properly.
-		//int min_height = StrictMath.max(getHeight(), item_pos_count + Skin.getSkin().getPulldownData().getPulldownTop().getHeight());
-		int min_height = 25*items.size();
+
+		int min_height = item_pos_count + Skin.getSkin().getPulldownData().getPulldownTop().getHeight();
 		super.setDim(min_width, min_height);
 	}
 
