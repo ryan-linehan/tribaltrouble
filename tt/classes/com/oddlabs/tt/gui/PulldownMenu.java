@@ -9,9 +9,9 @@ import com.oddlabs.tt.guievent.ItemChosenListener;
 import com.oddlabs.tt.guievent.MouseClickListener;
 
 public final strictfp class PulldownMenu extends Group {// GUIObject {
-	private final java.util.List chosen_listeners = new java.util.ArrayList();
+	private final List<ItemChosenListener> chosen_listeners = new ArrayList<ItemChosenListener>();
 
-	private final List items = new ArrayList();
+	private final List<PulldownItem> items = new ArrayList();
 	private int chosen_item_index = -1;
 	
 	public PulldownMenu() {
@@ -20,7 +20,7 @@ public final strictfp class PulldownMenu extends Group {// GUIObject {
 	}
 
 	public final PulldownItem getItem(int index) {
-		return (PulldownItem)items.get(index);
+		return items.get(index);
 	}
 
 	public final int getSize() {
@@ -62,12 +62,17 @@ public final strictfp class PulldownMenu extends Group {// GUIObject {
 			item.setPos(0, item_pos_count);
 			item_pos_count += item_height;
 		}
-		int min_height = StrictMath.max(height, item_pos_count + Skin.getSkin().getPulldownData().getPulldownTop().getHeight());
+
+		int min_height = item_pos_count + Skin.getSkin().getPulldownData().getPulldownTop().getHeight();
 		super.setDim(min_width, min_height);
 	}
 
 	public final int getChosenItemIndex() {
 		return chosen_item_index;
+	}
+	public final void clearItems() {
+		clearChildren();
+		items.clear();
 	}
 
 	public final void chooseItem(int index) {
