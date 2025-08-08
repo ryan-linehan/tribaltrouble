@@ -165,7 +165,7 @@ public final class MatchmakingServer implements ConnectionListenerInterface {
                 logger.info("No discord bot token found at TT_DISCORD_TOKEN environment variable, skipping Discord bot initialization.");
 
             } else if (serverIdAsString == null || serverIdAsString.isEmpty()) {
-                logger.info("No discord guild name found at TT_DISCORD_GUILD environment variable, skipping Discord bot initialization.");
+                logger.info("No discord guild name found at TT_SERVER_ID environment variable, skipping Discord bot initialization.");
             } else {
                 try {
                     long serverId = Long.parseLong(serverIdAsString);
