@@ -1,6 +1,5 @@
 package com.oddlabs.tt.render;
 
-
 import org.lwjgl.opengl.GL11;
 
 public final strictfp class GW {

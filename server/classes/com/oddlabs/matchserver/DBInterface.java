@@ -25,7 +25,7 @@ public final strictfp class DBInterface {
             PreparedStatement stmt =
                     DBUtils.createStatement(
                             "SELECT username FROM registrations R WHERE lower(R.username) ="
-                                + " lower(?)");
+                                    + " lower(?)");
             try {
                 stmt.setString(1, username);
                 ResultSet result = stmt.executeQuery();
@@ -51,7 +51,7 @@ public final strictfp class DBInterface {
             PreparedStatement stmt =
                     DBUtils.createStatement(
                             "INSERT INTO registrations (username, email, password) values (?, ?,"
-                                + " ?)");
+                                    + " ?)");
             try {
                 stmt.setString(1, login.getUsername());
                 stmt.setString(2, login_details.getEmail());
@@ -73,8 +73,8 @@ public final strictfp class DBInterface {
             PreparedStatement stmt =
                     DBUtils.createStatement(
                             "SELECT username, password FROM registrations R WHERE lower(R.username)"
-                                + " = lower(?) AND R.password = ? AND NOT R.disabled AND NOT"
-                                + " R.banned");
+                                    + " = lower(?) AND R.password = ? AND NOT R.disabled AND NOT"
+                                    + " R.banned");
             try {
                 stmt.setString(1, username);
                 stmt.setString(2, CryptUtils.digest(password));
@@ -100,7 +100,7 @@ public final strictfp class DBInterface {
             PreparedStatement stmt =
                     DBUtils.createStatement(
                             "SELECT nick, rating, wins, losses, invalid FROM profiles P,"
-                                + " registrations R WHERE P.reg_id = R.id AND R.username = ?");
+                                    + " registrations R WHERE P.reg_id = R.id AND R.username = ?");
             try {
                 stmt.setString(1, username);
                 ResultSet result = stmt.executeQuery();
@@ -138,7 +138,7 @@ public final strictfp class DBInterface {
             PreparedStatement stmt =
                     DBUtils.createStatement(
                             "SELECT rating, wins, losses, invalid FROM profiles P, registrations R"
-                                + " WHERE P.reg_id = R.id AND R.username = ? AND P.nick = ?");
+                                    + " WHERE P.reg_id = R.id AND R.username = ? AND P.nick = ?");
             try {
                 stmt.setString(1, username);
                 stmt.setString(2, nick);
@@ -167,7 +167,7 @@ public final strictfp class DBInterface {
             PreparedStatement stmt =
                     DBUtils.createStatement(
                             "UPDATE registrations R SET last_used_profile = ? WHERE R.username ="
-                                + " ?");
+                                    + " ?");
             try {
                 stmt.setString(1, nick);
                 stmt.setString(2, username);
@@ -263,7 +263,7 @@ public final strictfp class DBInterface {
             PreparedStatement stmt =
                     DBUtils.createStatement(
                             "INSERT INTO game_reports (game_id, tick, team1, team2, team3, team4,"
-                                + " team5, team6) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+                                    + " team5, team6) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
             try {
                 stmt.setInt(1, game_id);
                 stmt.setInt(2, tick);
@@ -339,7 +339,7 @@ public final strictfp class DBInterface {
                 PreparedStatement stmt =
                         DBUtils.createStatement(
                                 "INSERT INTO deleted_profiles (reg_id, nick, rating, wins, losses,"
-                                    + " invalid) VALUES (?, ?, ?, ?, ?, ?)");
+                                        + " invalid) VALUES (?, ?, ?, ?, ?, ?)");
                 try {
                     stmt.setInt(1, reg_id);
                     stmt.setString(2, profile.getNick());
@@ -499,7 +499,7 @@ public final strictfp class DBInterface {
             PreparedStatement stmt =
                     DBUtils.createStatement(
                             "SELECT nick, rating, wins, losses, invalid FROM profiles P WHERE"
-                                + " P.wins >= "
+                                    + " P.wins >= "
                                     + GameSession.MIN_WINS_FOR_RANKING
                                     + " ORDER BY rating DESC, (wins - losses) DESC, wins DESC LIMIT"
                                     + " ?");
@@ -614,7 +614,7 @@ public final strictfp class DBInterface {
             PreparedStatement stmt =
                     DBUtils.createStatement(
                             "UPDATE games G SET status = ? WHERE G.player1_name = ? AND G.status ="
-                                + " ?");
+                                    + " ?");
             try {
                 stmt.setString(1, "dropped");
                 stmt.setString(2, nick);
@@ -691,7 +691,7 @@ public final strictfp class DBInterface {
             PreparedStatement stmt =
                     DBUtils.createStatement(
                             "UPDATE games G SET G.time_stop = ?, G.status = ?, G.winner = ? WHERE"
-                                + " G.id = ?");
+                                    + " G.id = ?");
             try {
                 stmt.setTimestamp(1, new Timestamp(end_time));
                 stmt.setString(2, "completed");

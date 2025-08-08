@@ -1,7 +1,5 @@
 package com.oddlabs.tt.landscape;
 
-
-
 public final strictfp class LandscapeLeaf extends AbstractPatchGroup {
     private final float[] errors;
 

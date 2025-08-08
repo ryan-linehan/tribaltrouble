@@ -94,7 +94,7 @@ public final strictfp class Perlin {
             if (width == octave.width
                     && height
                             == octave.height) { // no interpolation needed when octave matches image
-                                                // size
+                // size
                 for (y_pixel = 0; y_pixel < height; y_pixel++) {
                     for (x_pixel = 0; x_pixel < width; x_pixel++) {
                         channel.putPixel(

@@ -835,7 +835,7 @@ public final strictfp class Landscape {
                                         Math.sqrt(
                                                 nx * nx + ny * ny
                                                         + nz2)); // Can use Math here - calculation
-                                                                 // is not game state affecting
+                // is not game state affecting
                 if (light > threshold) {
                     highlight.putPixel(x, y, light);
                     shadow.putPixel(x, y, threshold);

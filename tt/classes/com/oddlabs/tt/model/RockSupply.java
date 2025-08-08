@@ -1,6 +1,5 @@
 package com.oddlabs.tt.model;
 
-
 import com.oddlabs.tt.landscape.World;
 import com.oddlabs.tt.render.SpriteKey;
 

@@ -31,11 +31,8 @@ public final strictfp class GeneratorSonic extends TextureGenerator {
                             Tools.interpolateLinear(
                                     1f,
                                     0f,
-                                    (float)
-                                            Math.sqrt(
-                                                    2f
-                                                            * radius))); // can use Math here; not
-                                                                         // gamestate affecting
+                                    (float) Math.sqrt(2f * radius))); // can use Math here; not
+                    // gamestate affecting
                 }
             }
         }

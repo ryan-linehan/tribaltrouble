@@ -1,6 +1,5 @@
 package com.oddlabs.tt.landscape;
 
-
 import com.oddlabs.tt.util.StrictVector3f;
 
 import java.nio.ShortBuffer;

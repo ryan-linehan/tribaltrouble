@@ -1,7 +1,5 @@
 package com.oddlabs.tt.camera;
 
-
-
 import com.oddlabs.tt.util.StateChecksum;
 import com.oddlabs.tt.util.StrictMatrix4f;
 import com.oddlabs.tt.util.StrictVector3f;

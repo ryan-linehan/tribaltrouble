@@ -1,6 +1,5 @@
 package com.oddlabs.tt.landscape;
 
-
 import com.oddlabs.tt.animation.Animated;
 import com.oddlabs.tt.audio.AudioParameters;
 import com.oddlabs.tt.audio.AudioPlayer;

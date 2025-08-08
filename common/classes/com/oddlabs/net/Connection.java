@@ -315,7 +315,7 @@ public final strictfp class Connection extends AbstractConnection
                 throw (IOException) network.getDeterministic().log(exception);
             else success = network.getDeterministic().log(success);
             assert success; // finishConnect should always succeed (or throw), because we are called
-                            // on OP_CONNECT
+            // on OP_CONNECT
             int interest_ops;
             if (network.getDeterministic().isPlayback())
                 interest_ops = network.getDeterministic().log(-1);

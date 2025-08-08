@@ -28,9 +28,8 @@ public final strictfp class Ring {
                         (float)
                                 Math.sqrt(
                                         x_coord * x_coord
-                                                + y_coord
-                                                        * y_coord); // can use math here, not game
-                                                                    // state affecting
+                                                + y_coord * y_coord); // can use math here, not game
+                // state affecting
                 index = 0;
 
                 while (radius >= gradient_list[index][0] && index < index_max) {

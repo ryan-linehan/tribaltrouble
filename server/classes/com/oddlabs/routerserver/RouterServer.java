@@ -1,6 +1,5 @@
 package com.oddlabs.routerserver;
 
-
 import com.oddlabs.event.*;
 import com.oddlabs.net.NetworkSelector;
 import com.oddlabs.router.Router;

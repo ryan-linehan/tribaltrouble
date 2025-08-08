@@ -869,12 +869,12 @@ public final strictfp class Renderer {
                 if (!GL.getCapabilities().GL_ARB_multitexture) {
                     throw new Exception(
                             "Neither OpenGL 1.3 nor GL_ARB_multitexture is supported, one of which"
-                                + " is required for the game to run. Please upgrade your video"
-                                + " drivers and/or video card.");
+                                    + " is required for the game to run. Please upgrade your video"
+                                    + " drivers and/or video card.");
                 }
                 System.out.println(
                         "OpenGL 1.3 is not supported, using GL_ARB_multitexture and"
-                            + " GL_ARB_texture_compression instead");
+                                + " GL_ARB_texture_compression instead");
             } else {
                 System.out.println("OpenGL 1.3 is supported");
             }

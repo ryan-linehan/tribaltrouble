@@ -1,6 +1,5 @@
 package com.oddlabs.tt.render;
 
-
 final strictfp class Tree {
     private final SpriteList crown;
     private final SpriteList trunk;

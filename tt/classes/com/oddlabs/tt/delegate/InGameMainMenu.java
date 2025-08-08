@@ -1,6 +1,5 @@
 package com.oddlabs.tt.delegate;
 
-
 import com.oddlabs.tt.camera.Camera;
 import com.oddlabs.tt.form.InGameOptionsMenu;
 import com.oddlabs.tt.form.QuestionForm;

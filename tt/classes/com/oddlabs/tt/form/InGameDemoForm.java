@@ -1,6 +1,5 @@
 package com.oddlabs.tt.form;
 
-
 import com.oddlabs.tt.gui.GUIImage;
 import com.oddlabs.tt.viewer.WorldViewer;
 

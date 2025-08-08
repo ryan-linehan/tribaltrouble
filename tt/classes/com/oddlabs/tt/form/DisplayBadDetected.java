@@ -13,7 +13,7 @@ public final strictfp class DisplayBadDetected extends Form {
         String message =
                 String.format(
                         "Bad resolution or refresh rate was detected and automatically switched to"
-                            + " the best available.");
+                                + " the best available.");
 
         LabelBox info_label = new LabelBox(message, Skin.getSkin().getEditFont(), 500);
         addChild(info_label);

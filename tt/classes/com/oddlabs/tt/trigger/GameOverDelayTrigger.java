@@ -1,7 +1,5 @@
 package com.oddlabs.tt.trigger;
 
-
-
 import com.oddlabs.tt.animation.TimerAnimation;
 import com.oddlabs.tt.animation.Updatable;
 import com.oddlabs.tt.camera.Camera;

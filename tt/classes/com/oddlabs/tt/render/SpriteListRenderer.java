@@ -1,6 +1,5 @@
 package com.oddlabs.tt.render;
 
-
 import java.util.ArrayList;
 import java.util.List;
 

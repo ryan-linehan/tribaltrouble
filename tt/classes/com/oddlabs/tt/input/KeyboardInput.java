@@ -1,6 +1,5 @@
 package com.oddlabs.tt.input;
 
-
 import com.oddlabs.event.Deterministic;
 import com.oddlabs.tt.animation.AnimationManager;
 import com.oddlabs.tt.event.LocalEventQueue;

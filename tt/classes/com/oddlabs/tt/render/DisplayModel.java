@@ -161,7 +161,7 @@ public final class DisplayModel {
         if (items.size() < 1) {
             throw new RuntimeException(
                     "(selectBestRefreshrate) Couldn't get resolutions for current resolution:\n"
-                        + "Width: "
+                            + "Width: "
                             + resolution.width()
                             + "\nHeight: "
                             + resolution.height());

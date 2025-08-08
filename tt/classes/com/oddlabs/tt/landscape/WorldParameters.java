@@ -1,6 +1,5 @@
 package com.oddlabs.tt.landscape;
 
-
 public final strictfp class WorldParameters {
     private final String map_code;
     private final int initial_unit_count;

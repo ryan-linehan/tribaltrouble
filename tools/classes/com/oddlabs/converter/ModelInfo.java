@@ -1,6 +1,5 @@
 package com.oddlabs.converter;
 
-
 public final strictfp class ModelInfo {
     public final short[] indices;
     public final float[] normals;

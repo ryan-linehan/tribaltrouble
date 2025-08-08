@@ -1,6 +1,5 @@
 package com.oddlabs.tt.landscape;
 
-
 public final strictfp class TreeLeaf extends AbstractTreeGroup {
     private TreeSupply[] infos = new TreeSupply[0];
 

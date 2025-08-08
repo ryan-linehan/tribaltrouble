@@ -28,7 +28,7 @@ public final strictfp class PathFinder {
         //		Node current_region = UnitGrid.getGrid().getRegion(src_grid_x, src_grid_y);
         assert current_region
                 != null; // : "src_grid_x = " + src_grid_x + " | src_grid_y = " + src_grid_y + " |
-                         // occupant " + UnitGrid.getGrid().getOccupant(src_grid_x, src_grid_y);
+        // occupant " + UnitGrid.getGrid().getOccupant(src_grid_x, src_grid_y);
         return (Region) doFindPath(finder, current_region, unit_grid);
     }
 

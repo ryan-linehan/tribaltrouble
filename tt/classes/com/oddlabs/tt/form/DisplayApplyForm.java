@@ -22,12 +22,12 @@ public final strictfp class DisplayApplyForm extends Form {
         String message =
                 String.format(
                         "Changing resolution to:\n"
-                            + "Width: %d\n"
-                            + "Height: %d\n"
-                            + "Refresh rate: %d\n"
-                            + "Fullscreen: %s\n\n"
-                            + "Restart after applying and if you have issues, tell the"
-                            + " maintainers.",
+                                + "Width: %d\n"
+                                + "Height: %d\n"
+                                + "Refresh rate: %d\n"
+                                + "Fullscreen: %s\n\n"
+                                + "Restart after applying and if you have issues, tell the"
+                                + " maintainers.",
                         item.width(),
                         item.height(),
                         item.refreshRate(),

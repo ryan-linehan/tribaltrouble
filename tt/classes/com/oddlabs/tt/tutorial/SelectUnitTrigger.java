@@ -1,6 +1,5 @@
 package com.oddlabs.tt.tutorial;
 
-
 public final strictfp class SelectUnitTrigger extends TutorialTrigger {
     public SelectUnitTrigger() {
         super(.1f, 15f, "select_unit");
