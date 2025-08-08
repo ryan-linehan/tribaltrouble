@@ -12,6 +12,9 @@ public final class DisplayModel {
     private static DisplayModelItem curr_resolution;
     private static Boolean fullscreen;
 
+    // Check to see if resolution was changed at boot
+    private static Boolean bad_mode = false;
+
     public static void init() {
         fullscreen = Settings.getSettings().fullscreen;
 
@@ -35,7 +38,8 @@ public final class DisplayModel {
             default:
                 return;
         }
-
+        // Set bad resolution variable
+        bad_mode = true;
         // Apply to config
         saveToConfig();
     }
@@ -115,6 +119,13 @@ public final class DisplayModel {
         }
 
         return items;
+    }
+
+    public static Boolean getBadModeStatus() {
+        return bad_mode;
+    }
+    public static void setBadModeStatus(Boolean _bad_mode) {
+        bad_mode = _bad_mode;
     }
 
     /*

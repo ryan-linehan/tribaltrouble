@@ -706,9 +706,15 @@ public abstract strictfp class AbstractOptionsMenu extends Form {
 		}
 	}
 
-    private final strictfp class DisplayApplyListener implements MouseClickListener {
+    private final strictfp class DisplayApplyListener implements MouseClickListener, DoNowListener {
+        public final void doChange(boolean switch_now) {
+            if(switch_now)
+                DisplayModel.saveToConfig();
+		}
+
 		public final void mouseClicked(int button, int x, int y, int clicks) {
-			DisplayModel.saveToConfig();
+			DisplayApplyForm display_change_form = new DisplayApplyForm(this);
+		    gui_root.addModalForm(display_change_form);
 		}
 	}
 

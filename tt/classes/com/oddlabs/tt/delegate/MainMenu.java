@@ -46,6 +46,8 @@ import com.oddlabs.tt.global.Globals;
 import com.oddlabs.tt.trigger.GameOverTrigger;
 import com.oddlabs.net.NetworkSelector;
 
+import com.oddlabs.tt.render.DisplayModel;
+
 public final strictfp class MainMenu extends Menu {
 	public MainMenu(NetworkSelector network, GUIRoot gui_root, Camera camera) {
 		super(network, gui_root, camera);
@@ -94,6 +96,11 @@ public final strictfp class MainMenu extends Menu {
 		addExitButton();
 
 		addBuyButton();
+
+		if(DisplayModel.getBadModeStatus()) {
+			addChild(new DisplayBadDetected());
+			DisplayModel.setBadModeStatus(false);
+		}
 
 		if (Network.getMatchmakingClient().isConnected()) {
 			new SelectGameMenu(getNetwork(), getGUIRoot(), this);
