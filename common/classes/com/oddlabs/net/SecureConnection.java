@@ -1,5 +1,8 @@
 package com.oddlabs.net;
 
+import com.oddlabs.event.Deterministic;
+import com.oddlabs.util.KeyManager;
+
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.security.KeyPair;
@@ -14,136 +17,144 @@ import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.KeyAgreement;
 import javax.crypto.SealedObject;
 
-import com.oddlabs.util.KeyManager;
-import com.oddlabs.event.Deterministic;
+public final strictfp class SecureConnection extends AbstractConnection
+        implements SecureConnectionInterface {
+    private final ARMIInterfaceMethods interface_methods =
+            new ARMIInterfaceMethods(SecureConnectionInterface.class);
+    private final Deterministic deterministic;
+    private final AbstractConnection wrapped_connection;
+    private final SecureConnectionInterface secure_interface;
+    private final KeyAgreement key_agreement;
+    private final List event_backlog = new ArrayList();
+    private Cipher decrypt_cipher;
+    private Cipher encrypt_cipher;
 
-public final strictfp class SecureConnection extends AbstractConnection implements SecureConnectionInterface {
-	private final ARMIInterfaceMethods interface_methods = new ARMIInterfaceMethods(SecureConnectionInterface.class);
-	private final Deterministic deterministic;
-	private final AbstractConnection wrapped_connection;
-	private final SecureConnectionInterface secure_interface;
-	private final KeyAgreement key_agreement;
-	private final List event_backlog = new ArrayList();
-	private Cipher decrypt_cipher;
-	private Cipher encrypt_cipher;
+    public SecureConnection(
+            Deterministic deterministic,
+            AbstractConnection wrapped_conn,
+            AlgorithmParameterSpec param_spec) {
+        this.deterministic = deterministic;
+        setConnectionInterface(wrapped_conn.getConnectionInterface());
+        this.wrapped_connection = wrapped_conn;
+        wrapped_connection.setConnectionInterface(
+                new ConnectionInterface() {
+                    public void error(AbstractConnection conn, IOException e) {
+                        notifyError(e);
+                    }
 
-	public SecureConnection(Deterministic deterministic, AbstractConnection wrapped_conn, AlgorithmParameterSpec param_spec) {
-		this.deterministic = deterministic;
-		setConnectionInterface(wrapped_conn.getConnectionInterface());
-		this.wrapped_connection = wrapped_conn;
-		wrapped_connection.setConnectionInterface(new ConnectionInterface() {
-			public void error(AbstractConnection conn, IOException e) {
-				notifyError(e);
-			}
-			public void connected(AbstractConnection conn) {
-			}
-			public final void handle(Object sender, ARMIEvent event) {
-				processEvent(event);
-			}
-			public final void writeBufferDrained(AbstractConnection conn) {
-				SecureConnection.this.writeBufferDrained();
-			}
-		});
-		this.secure_interface = (SecureConnectionInterface)ARMIEvent.createProxy(wrapped_connection, SecureConnectionInterface.class);
-		if (param_spec != null) {
-			KeyPair key_pair = KeyManager.generateInitialKeyPair(param_spec);
-			this.key_agreement = KeyManager.generateAgreement(key_pair.getPrivate());
-			secure_interface.initAgreement(key_pair.getPublic().getEncoded());
-		} else
-			this.key_agreement = null;
-	}
+                    public void connected(AbstractConnection conn) {}
 
-	public final AbstractConnection getWrappedConnection() {
-		return wrapped_connection;
-	}
+                    public final void handle(Object sender, ARMIEvent event) {
+                        processEvent(event);
+                    }
 
-	private final SealedObject encrypt(ARMIEvent event) {
-		try {
-			return new SealedObject(event, encrypt_cipher);
-		} catch (IllegalBlockSizeException e) {
-			System.out.println("Exception: " + e);
-			throw new RuntimeException(e);
-		} catch (IOException e) {
-			System.out.println("Exception: " + e);
-			throw new RuntimeException(e);
-		}
-	}
+                    public final void writeBufferDrained(AbstractConnection conn) {
+                        SecureConnection.this.writeBufferDrained();
+                    }
+                });
+        this.secure_interface =
+                (SecureConnectionInterface)
+                        ARMIEvent.createProxy(wrapped_connection, SecureConnectionInterface.class);
+        if (param_spec != null) {
+            KeyPair key_pair = KeyManager.generateInitialKeyPair(param_spec);
+            this.key_agreement = KeyManager.generateAgreement(key_pair.getPrivate());
+            secure_interface.initAgreement(key_pair.getPublic().getEncoded());
+        } else this.key_agreement = null;
+    }
 
-	public final void initAgreement(byte[] public_key_encoded) {
-		if (isConnected())
-			return;
-		try {
-			KeyAgreement key_agreement = this.key_agreement;
-			PublicKey public_key = KeyManager.readPublicKey(public_key_encoded, KeyManager.AGREEMENT_ALGORITHM);
-			if (key_agreement == null) {
-				KeyPair key_pair = (KeyPair)deterministic.log(KeyManager.generateKeyPairFromKey(public_key));
-				key_agreement = KeyManager.generateAgreement(key_pair.getPrivate());
-				secure_interface.initAgreement(key_pair.getPublic().getEncoded());
-			}
-			decrypt_cipher = KeyManager.createCipher(Cipher.DECRYPT_MODE, key_agreement, public_key);
-			encrypt_cipher = KeyManager.createCipher(Cipher.ENCRYPT_MODE, key_agreement, public_key);
-			notifyConnected();
-			for (int i = 0; i < event_backlog.size(); i++) {
-				ARMIEvent event = (ARMIEvent)event_backlog.get(i);
-				tunnel(event);
-			}
-		} catch (IOException e) {
-			System.out.println("Exception: " + e);
-			notifyError(e);
-		} catch (GeneralSecurityException e) {
-			System.out.println("Exception: " + e);
-			notifyError(new IOException(e.getMessage()));
-		}
-	}
+    public final AbstractConnection getWrappedConnection() {
+        return wrapped_connection;
+    }
 
-	public final void tunnelEvent(SealedObject sealed_event) {
-		try {
-			if (decrypt_cipher == null)
-				throw new IOException("Illegal stream state, event received before key agreement");
-			ARMIEvent event = (ARMIEvent)sealed_event.getObject(decrypt_cipher);
-			receiveEvent(event);
-		} catch (BadPaddingException e) {
-			System.out.println("Exception: " + e);
-			notifyError(new IOException(e.getMessage()));
-		} catch (IllegalBlockSizeException e) {
-			System.out.println("Exception: " + e);
-			notifyError(new IOException(e.getMessage()));
-		} catch (ClassNotFoundException e) {
-			System.out.println("Exception: " + e);
-			notifyError(new IOException(e.getMessage()));
-		} catch (IOException e) {
-			System.out.println("Exception: " + e);
-			notifyError(e);
-		}
-	}
+    private final SealedObject encrypt(ARMIEvent event) {
+        try {
+            return new SealedObject(event, encrypt_cipher);
+        } catch (IllegalBlockSizeException e) {
+            System.out.println("Exception: " + e);
+            throw new RuntimeException(e);
+        } catch (IOException e) {
+            System.out.println("Exception: " + e);
+            throw new RuntimeException(e);
+        }
+    }
 
-	public final AbstractConnection getWrappedConnectionAndShutdown() {
-		wrapped_connection.setConnectionInterface(getConnectionInterface());
-		return wrapped_connection;
-	}
-	
-	protected final void doClose() {
-		wrapped_connection.close();
-	}
+    public final void initAgreement(byte[] public_key_encoded) {
+        if (isConnected()) return;
+        try {
+            KeyAgreement key_agreement = this.key_agreement;
+            PublicKey public_key =
+                    KeyManager.readPublicKey(public_key_encoded, KeyManager.AGREEMENT_ALGORITHM);
+            if (key_agreement == null) {
+                KeyPair key_pair =
+                        (KeyPair) deterministic.log(KeyManager.generateKeyPairFromKey(public_key));
+                key_agreement = KeyManager.generateAgreement(key_pair.getPrivate());
+                secure_interface.initAgreement(key_pair.getPublic().getEncoded());
+            }
+            decrypt_cipher =
+                    KeyManager.createCipher(Cipher.DECRYPT_MODE, key_agreement, public_key);
+            encrypt_cipher =
+                    KeyManager.createCipher(Cipher.ENCRYPT_MODE, key_agreement, public_key);
+            notifyConnected();
+            for (int i = 0; i < event_backlog.size(); i++) {
+                ARMIEvent event = (ARMIEvent) event_backlog.get(i);
+                tunnel(event);
+            }
+        } catch (IOException e) {
+            System.out.println("Exception: " + e);
+            notifyError(e);
+        } catch (GeneralSecurityException e) {
+            System.out.println("Exception: " + e);
+            notifyError(new IOException(e.getMessage()));
+        }
+    }
 
-	private final void tunnel(ARMIEvent event) {
-		secure_interface.tunnelEvent(encrypt(event));
-	}
+    public final void tunnelEvent(SealedObject sealed_event) {
+        try {
+            if (decrypt_cipher == null)
+                throw new IOException("Illegal stream state, event received before key agreement");
+            ARMIEvent event = (ARMIEvent) sealed_event.getObject(decrypt_cipher);
+            receiveEvent(event);
+        } catch (BadPaddingException e) {
+            System.out.println("Exception: " + e);
+            notifyError(new IOException(e.getMessage()));
+        } catch (IllegalBlockSizeException e) {
+            System.out.println("Exception: " + e);
+            notifyError(new IOException(e.getMessage()));
+        } catch (ClassNotFoundException e) {
+            System.out.println("Exception: " + e);
+            notifyError(new IOException(e.getMessage()));
+        } catch (IOException e) {
+            System.out.println("Exception: " + e);
+            notifyError(e);
+        }
+    }
 
-	private void processEvent(ARMIEvent event) {
-		try {
-			event.execute(interface_methods, this);
-		} catch (Exception e) {
-			System.out.println("Exception: " + e);
-			notifyError(new IOException(e.getMessage()));
-		}
-	}
-	
-	public final void handle(ARMIEvent event) {
-		if (encrypt_cipher == null)
-			event_backlog.add(event);
-		else {
-			tunnel(event);
-		}
-	}
+    public final AbstractConnection getWrappedConnectionAndShutdown() {
+        wrapped_connection.setConnectionInterface(getConnectionInterface());
+        return wrapped_connection;
+    }
+
+    protected final void doClose() {
+        wrapped_connection.close();
+    }
+
+    private final void tunnel(ARMIEvent event) {
+        secure_interface.tunnelEvent(encrypt(event));
+    }
+
+    private void processEvent(ARMIEvent event) {
+        try {
+            event.execute(interface_methods, this);
+        } catch (Exception e) {
+            System.out.println("Exception: " + e);
+            notifyError(new IOException(e.getMessage()));
+        }
+    }
+
+    public final void handle(ARMIEvent event) {
+        if (encrypt_cipher == null) event_backlog.add(event);
+        else {
+            tunnel(event);
+        }
+    }
 }

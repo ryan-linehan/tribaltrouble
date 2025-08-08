@@ -11,8 +11,7 @@ public final strictfp class PixelFormat {
     private boolean doubleBuffered = true;
     private boolean stereo = false;
 
-    public PixelFormat() {
-    }
+    public PixelFormat() {}
 
     public PixelFormat(int alpha, int depth, int stencil) {
         this.alphaBits = alpha;
@@ -153,4 +152,4 @@ public final strictfp class PixelFormat {
     public PixelFormat setStereo(boolean stereo) {
         return withStereo(stereo);
     }
-} 
+}

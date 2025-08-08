@@ -13,7 +13,7 @@ public class GamePlayer implements Serializable {
         _team = team;
         _race = race;
         _playerType = playerType;
-        if(_playerType != PlayerTypes.Human) {
+        if (_playerType != PlayerTypes.Human) {
             switch (_playerType) {
                 case AIEasy:
                     _nick = "AI Easy";

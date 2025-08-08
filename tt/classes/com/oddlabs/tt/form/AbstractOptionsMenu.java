@@ -1,10 +1,5 @@
 package com.oddlabs.tt.form;
 
-import java.util.Locale;
-import java.util.ResourceBundle;
-import java.util.List;
-import com.oddlabs.tt.render.Cursor;
-
 import com.oddlabs.matchmaking.Game;
 import com.oddlabs.tt.global.Globals;
 import com.oddlabs.tt.global.Settings;
@@ -12,6 +7,7 @@ import com.oddlabs.tt.gui.CancelListener;
 import com.oddlabs.tt.gui.CheckBox;
 import com.oddlabs.tt.gui.ColumnInfo;
 import com.oddlabs.tt.gui.DoNowListener;
+import com.oddlabs.tt.gui.EditLine;
 import com.oddlabs.tt.gui.Form;
 import com.oddlabs.tt.gui.GUIObject;
 import com.oddlabs.tt.gui.GUIRoot;
@@ -24,7 +20,6 @@ import com.oddlabs.tt.gui.LocalInput;
 import com.oddlabs.tt.gui.MultiColumnComboBox;
 import com.oddlabs.tt.gui.Panel;
 import com.oddlabs.tt.gui.PanelGroup;
-import com.oddlabs.tt.gui.Languages;
 import com.oddlabs.tt.gui.PulldownButton;
 import com.oddlabs.tt.gui.PulldownItem;
 import com.oddlabs.tt.gui.PulldownMenu;
@@ -38,27 +33,24 @@ import com.oddlabs.tt.guievent.ItemChosenListener;
 import com.oddlabs.tt.guievent.MouseClickListener;
 import com.oddlabs.tt.guievent.RowListener;
 import com.oddlabs.tt.guievent.ValueListener;
-import com.oddlabs.tt.landscape.World;
-import com.oddlabs.tt.net.PeerHub;
+import com.oddlabs.tt.render.DisplayModel;
+import com.oddlabs.tt.render.DisplayModelItem;
 import com.oddlabs.tt.render.Renderer;
 import com.oddlabs.tt.util.ServerMessageBundler;
 import com.oddlabs.tt.util.Utils;
-import com.oddlabs.tt.global.Settings;
-import com.oddlabs.tt.gui.Color;
-import com.oddlabs.tt.gui.EditLine;
 import com.oddlabs.util.Quad;
 
-import com.oddlabs.tt.render.DisplayModel;
-import com.oddlabs.tt.render.DisplayModelItem;
+import java.util.Locale;
+import java.util.ResourceBundle;
 
 public abstract strictfp class AbstractOptionsMenu extends Form {
 
-    private final static int BUTTON_WIDTH = 100;
-    private final static int MAX_VALUE = 20;
+    private static final int BUTTON_WIDTH = 100;
+    private static final int MAX_VALUE = 20;
 
-    private final static int SLIDER_WIDTH = 270;
+    private static final int SLIDER_WIDTH = 270;
 
-    private final static boolean TEMPORARILY_DISABLE_MUSIC_CONTROLS = false;
+    private static final boolean TEMPORARILY_DISABLE_MUSIC_CONTROLS = false;
     private final CheckBox cb_fullscreen;
 
     private final Slider slider_music;
@@ -75,7 +67,10 @@ public abstract strictfp class AbstractOptionsMenu extends Form {
     public AbstractOptionsMenu(GUIRoot gui_root) {
         super();
         this.gui_root = gui_root;
-        Label label_headline = new Label(Utils.getBundleString(bundle, "options_caption"), Skin.getSkin().getHeadlineFont());
+        Label label_headline =
+                new Label(
+                        Utils.getBundleString(bundle, "options_caption"),
+                        Skin.getSkin().getHeadlineFont());
         addChild(label_headline);
 
         Panel general = new Panel(Utils.getBundleString(bundle, "general_settings_caption"));
@@ -84,19 +79,31 @@ public abstract strictfp class AbstractOptionsMenu extends Form {
         Panel language = new Panel(Utils.getBundleString(bundle, "language_caption"));
         Panel report_bug = new Panel(Utils.getBundleString(bundle, "report_bug_caption"));
 
-        // Sound	
+        // Sound
         Group group_music = new Group();
         sound.addChild(group_music);
-        Label label_music_low = new Label(Utils.getBundleString(bundle, "low"), Skin.getSkin().getEditFont());
+        Label label_music_low =
+                new Label(Utils.getBundleString(bundle, "low"), Skin.getSkin().getEditFont());
         group_music.addChild(label_music_low);
-        Label label_music_high = new Label(Utils.getBundleString(bundle, "high"), Skin.getSkin().getEditFont());
+        Label label_music_high =
+                new Label(Utils.getBundleString(bundle, "high"), Skin.getSkin().getEditFont());
         group_music.addChild(label_music_high);
-        CheckBox cb_music = new CheckBox(Settings.getSettings().play_music, Utils.getBundleString(bundle, "music"));
+        CheckBox cb_music =
+                new CheckBox(
+                        Settings.getSettings().play_music, Utils.getBundleString(bundle, "music"));
         group_music.addChild(cb_music);
-        Label label_music = new Label(Utils.getBundleString(bundle, "music_volume"), Skin.getSkin().getEditFont());
+        Label label_music =
+                new Label(
+                        Utils.getBundleString(bundle, "music_volume"),
+                        Skin.getSkin().getEditFont());
         group_music.addChild(label_music);
         cb_music.addCheckBoxListener(new CBMusicListener());
-        slider_music = new Slider(SLIDER_WIDTH, 0, MAX_VALUE, (int) (Settings.getSettings().music_gain * (MAX_VALUE)));
+        slider_music =
+                new Slider(
+                        SLIDER_WIDTH,
+                        0,
+                        MAX_VALUE,
+                        (int) (Settings.getSettings().music_gain * (MAX_VALUE)));
         if (TEMPORARILY_DISABLE_MUSIC_CONTROLS) {
             slider_music.setDisabled(true);
         } else {
@@ -118,16 +125,29 @@ public abstract strictfp class AbstractOptionsMenu extends Form {
 
         Group group_sound = new Group();
         sound.addChild(group_sound);
-        Label label_sound_low = new Label(Utils.getBundleString(bundle, "low"), Skin.getSkin().getEditFont());
+        Label label_sound_low =
+                new Label(Utils.getBundleString(bundle, "low"), Skin.getSkin().getEditFont());
         group_sound.addChild(label_sound_low);
-        Label label_sound_high = new Label(Utils.getBundleString(bundle, "high"), Skin.getSkin().getEditFont());
+        Label label_sound_high =
+                new Label(Utils.getBundleString(bundle, "high"), Skin.getSkin().getEditFont());
         group_sound.addChild(label_sound_high);
-        CheckBox cb_sound = new CheckBox(Settings.getSettings().play_sfx, Utils.getBundleString(bundle, "sound_effects"));
+        CheckBox cb_sound =
+                new CheckBox(
+                        Settings.getSettings().play_sfx,
+                        Utils.getBundleString(bundle, "sound_effects"));
         group_sound.addChild(cb_sound);
-        Label label_sound = new Label(Utils.getBundleString(bundle, "sound_effects_volume"), Skin.getSkin().getEditFont());
+        Label label_sound =
+                new Label(
+                        Utils.getBundleString(bundle, "sound_effects_volume"),
+                        Skin.getSkin().getEditFont());
         group_sound.addChild(label_sound);
         cb_sound.addCheckBoxListener(new CBSFXListener());
-        slider_sound = new Slider(SLIDER_WIDTH, 0, MAX_VALUE, (int) (Settings.getSettings().sound_gain * (MAX_VALUE)));
+        slider_sound =
+                new Slider(
+                        SLIDER_WIDTH,
+                        0,
+                        MAX_VALUE,
+                        (int) (Settings.getSettings().sound_gain * (MAX_VALUE)));
         slider_sound.setDisabled(!cb_sound.isMarked());
         group_sound.addChild(slider_sound);
         slider_sound.addValueListener(new SliderSFXListener());
@@ -139,12 +159,14 @@ public abstract strictfp class AbstractOptionsMenu extends Form {
         group_sound.compileCanvas();
         group_sound.setDisabled(!LocalInput.alIsCreated());
 
-        
-
         // Invert camera
         Group group_invert_camera = new Group();
         general.addChild(group_invert_camera);
-        CheckBox cb_invert_camera = new CheckBox(Settings.getSettings().invert_camera_pitch, Utils.getBundleString(bundle, "invert_camera"), Utils.getBundleString(bundle, "invert_camera_tip"));
+        CheckBox cb_invert_camera =
+                new CheckBox(
+                        Settings.getSettings().invert_camera_pitch,
+                        Utils.getBundleString(bundle, "invert_camera"),
+                        Utils.getBundleString(bundle, "invert_camera_tip"));
         cb_invert_camera.addCheckBoxListener(new CBInvertCamera());
         group_invert_camera.addChild(cb_invert_camera);
         cb_invert_camera.place();
@@ -153,7 +175,12 @@ public abstract strictfp class AbstractOptionsMenu extends Form {
         // Aggressive units
         Group group_aggressive_units = new Group();
         general.addChild(group_aggressive_units);
-        CheckBox cb_aggressive_units = new CheckBox(Settings.getSettings().aggressive_units, Utils.getBundleString(bundle, "aggressive_units"), Utils.getBundleString(bundle, "aggressive_units_tip", new Object[]{"Ctrl-A"}));
+        CheckBox cb_aggressive_units =
+                new CheckBox(
+                        Settings.getSettings().aggressive_units,
+                        Utils.getBundleString(bundle, "aggressive_units"),
+                        Utils.getBundleString(
+                                bundle, "aggressive_units_tip", new Object[] {"Ctrl-A"}));
         cb_aggressive_units.addCheckBoxListener(new CBAggressiveUnits());
         group_aggressive_units.addChild(cb_aggressive_units);
         cb_aggressive_units.place();
@@ -162,7 +189,10 @@ public abstract strictfp class AbstractOptionsMenu extends Form {
         // gfx detail
         Group group_detail = new Group();
 
-        Label label_detail = new Label(Utils.getBundleString(bundle, "graphical_detail"), Skin.getSkin().getEditFont());
+        Label label_detail =
+                new Label(
+                        Utils.getBundleString(bundle, "graphical_detail"),
+                        Skin.getSkin().getEditFont());
         group_detail.addChild(label_detail);
 
         last_detail_value = Settings.getSettings().graphic_detail;
@@ -181,13 +211,25 @@ public abstract strictfp class AbstractOptionsMenu extends Form {
         // Mapmode delay
         Group group_mapmode = new Group();
         general.addChild(group_mapmode);
-        Label label_mapmode_headline = new Label(Utils.getBundleString(bundle, "map_mode_delay"), Skin.getSkin().getEditFont());
+        Label label_mapmode_headline =
+                new Label(
+                        Utils.getBundleString(bundle, "map_mode_delay"),
+                        Skin.getSkin().getEditFont());
         group_mapmode.addChild(label_mapmode_headline);
-        Label label_mapmode_none = new Label(Utils.getBundleString(bundle, "delay_none"), Skin.getSkin().getEditFont());
+        Label label_mapmode_none =
+                new Label(
+                        Utils.getBundleString(bundle, "delay_none"), Skin.getSkin().getEditFont());
         group_mapmode.addChild(label_mapmode_none);
-        Label label_mapmode_high = new Label(Utils.getBundleString(bundle, "delay_high"), Skin.getSkin().getEditFont());
+        Label label_mapmode_high =
+                new Label(
+                        Utils.getBundleString(bundle, "delay_high"), Skin.getSkin().getEditFont());
         group_mapmode.addChild(label_mapmode_high);
-        Slider slider_mapmode = new Slider(SLIDER_WIDTH, 0, MAX_VALUE, (int) (Settings.getSettings().mapmode_delay * (MAX_VALUE)));
+        Slider slider_mapmode =
+                new Slider(
+                        SLIDER_WIDTH,
+                        0,
+                        MAX_VALUE,
+                        (int) (Settings.getSettings().mapmode_delay * (MAX_VALUE)));
         group_mapmode.addChild(slider_mapmode);
         slider_mapmode.addValueListener(new SliderMapmodeListener());
         label_mapmode_headline.place();
@@ -199,13 +241,25 @@ public abstract strictfp class AbstractOptionsMenu extends Form {
         // Tooltip delay
         Group group_tooltip = new Group();
         general.addChild(group_tooltip);
-        Label label_tooltip_headline = new Label(Utils.getBundleString(bundle, "tool_tip_delay"), Skin.getSkin().getEditFont());
+        Label label_tooltip_headline =
+                new Label(
+                        Utils.getBundleString(bundle, "tool_tip_delay"),
+                        Skin.getSkin().getEditFont());
         group_tooltip.addChild(label_tooltip_headline);
-        Label label_tooltip_none = new Label(Utils.getBundleString(bundle, "delay_none"), Skin.getSkin().getEditFont());
+        Label label_tooltip_none =
+                new Label(
+                        Utils.getBundleString(bundle, "delay_none"), Skin.getSkin().getEditFont());
         group_tooltip.addChild(label_tooltip_none);
-        Label label_tooltip_high = new Label(Utils.getBundleString(bundle, "delay_high"), Skin.getSkin().getEditFont());
+        Label label_tooltip_high =
+                new Label(
+                        Utils.getBundleString(bundle, "delay_high"), Skin.getSkin().getEditFont());
         group_tooltip.addChild(label_tooltip_high);
-        Slider slider_tooltip = new Slider(SLIDER_WIDTH, 0, MAX_VALUE, (int) (Settings.getSettings().tooltip_delay * (MAX_VALUE)));
+        Slider slider_tooltip =
+                new Slider(
+                        SLIDER_WIDTH,
+                        0,
+                        MAX_VALUE,
+                        (int) (Settings.getSettings().tooltip_delay * (MAX_VALUE)));
         group_tooltip.addChild(slider_tooltip);
         slider_tooltip.addValueListener(new SliderTooltipListener());
         label_tooltip_headline.place();
@@ -217,14 +271,21 @@ public abstract strictfp class AbstractOptionsMenu extends Form {
         // Gamespeed
         Group group_gamespeed = new Group();
         general.addChild(group_gamespeed);
-        Label label_gamespeed = new Label(Utils.getBundleString(bundle, "gamespeed"), Skin.getSkin().getEditFont());
+        Label label_gamespeed =
+                new Label(Utils.getBundleString(bundle, "gamespeed"), Skin.getSkin().getEditFont());
         group_gamespeed.addChild(label_gamespeed);
         this.pm_gamespeed = new PulldownMenu();
-        pm_gamespeed.addItem(new PulldownItem(ServerMessageBundler.getGamespeedString(Game.GAMESPEED_PAUSE)));
-        pm_gamespeed.addItem(new PulldownItem(ServerMessageBundler.getGamespeedString(Game.GAMESPEED_SLOW)));
-        pm_gamespeed.addItem(new PulldownItem(ServerMessageBundler.getGamespeedString(Game.GAMESPEED_NORMAL)));
-        pm_gamespeed.addItem(new PulldownItem(ServerMessageBundler.getGamespeedString(Game.GAMESPEED_FAST)));
-        pm_gamespeed.addItem(new PulldownItem(ServerMessageBundler.getGamespeedString(Game.GAMESPEED_LUDICROUS)));
+        pm_gamespeed.addItem(
+                new PulldownItem(ServerMessageBundler.getGamespeedString(Game.GAMESPEED_PAUSE)));
+        pm_gamespeed.addItem(
+                new PulldownItem(ServerMessageBundler.getGamespeedString(Game.GAMESPEED_SLOW)));
+        pm_gamespeed.addItem(
+                new PulldownItem(ServerMessageBundler.getGamespeedString(Game.GAMESPEED_NORMAL)));
+        pm_gamespeed.addItem(
+                new PulldownItem(ServerMessageBundler.getGamespeedString(Game.GAMESPEED_FAST)));
+        pm_gamespeed.addItem(
+                new PulldownItem(
+                        ServerMessageBundler.getGamespeedString(Game.GAMESPEED_LUDICROUS)));
         PulldownButton pb_gamespeed = new PulldownButton(gui_root, pm_gamespeed, 150);
         pm_gamespeed.addItemChosenListener(new GamespeedListener());
         group_gamespeed.addChild(pb_gamespeed);
@@ -235,17 +296,25 @@ public abstract strictfp class AbstractOptionsMenu extends Form {
         // language
         Group language_group = new Group();
         language.addChild(language_group);
-        Label language_label = new Label(Utils.getBundleString(bundle, "language_label"), Skin.getSkin().getEditFont());
+        Label language_label =
+                new Label(
+                        Utils.getBundleString(bundle, "language_label"),
+                        Skin.getSkin().getEditFont());
         language_group.addChild(language_label);
 
-        ColumnInfo[] language_infos = new ColumnInfo[]{new ColumnInfo("", 300)};
+        ColumnInfo[] language_infos = new ColumnInfo[] {new ColumnInfo("", 300)};
         language_list_box = new MultiColumnComboBox(gui_root, language_infos, 200, false);
-//		addChild(language_list_box);
+        //		addChild(language_list_box);
 
         checkLanguage();
         Row current_row = null;
-        IconLabel label = new IconLabel(Skin.getSkin().getFlagDefault(), new Label(Utils.getBundleString(bundle, "system_default"), Skin.getSkin().getMultiColumnComboBoxData().getFont()));
-        Row row = new Row(new GUIObject[]{label}, Renderer.getRenderer().getDefaultLocale());
+        IconLabel label =
+                new IconLabel(
+                        Skin.getSkin().getFlagDefault(),
+                        new Label(
+                                Utils.getBundleString(bundle, "system_default"),
+                                Skin.getSkin().getMultiColumnComboBoxData().getFont()));
+        Row row = new Row(new GUIObject[] {label}, Renderer.getRenderer().getDefaultLocale());
         language_list_box.addRow(row);
         if (Settings.getSettings().language.equals("default")) {
             current_row = row;
@@ -253,8 +322,13 @@ public abstract strictfp class AbstractOptionsMenu extends Form {
         String[][] languages = gui_root.getGUI().getLanguages().getLanguages();
         Quad[] flags = gui_root.getGUI().getLanguages().getFlags();
         for (int i = 0; i < languages.length; i++) {
-            label = new IconLabel(flags[i], new Label(languages[i][1], Skin.getSkin().getMultiColumnComboBoxData().getFont()));
-            row = new Row(new GUIObject[]{label}, new Locale(languages[i][0]));
+            label =
+                    new IconLabel(
+                            flags[i],
+                            new Label(
+                                    languages[i][1],
+                                    Skin.getSkin().getMultiColumnComboBoxData().getFont()));
+            row = new Row(new GUIObject[] {label}, new Locale(languages[i][0]));
             language_list_box.addRow(row);
             if (languages[i][0].equals(Settings.getSettings().language)) {
                 current_row = row;
@@ -279,42 +353,48 @@ public abstract strictfp class AbstractOptionsMenu extends Form {
         report_bug.addChild(button_bug);
 
         // Buttons
-        HorizButton button_close = new HorizButton(Utils.getBundleString(bundle, "close"), BUTTON_WIDTH);
+        HorizButton button_close =
+                new HorizButton(Utils.getBundleString(bundle, "close"), BUTTON_WIDTH);
         button_close.addMouseClickListener(new CancelListener(this));
         addChild(button_close);
 
-        HorizButton button_about = new HorizButton(Utils.getBundleString(bundle, "about"), BUTTON_WIDTH);
+        HorizButton button_about =
+                new HorizButton(Utils.getBundleString(bundle, "about"), BUTTON_WIDTH);
         button_about.addMouseClickListener(new AboutListener());
         addChild(button_about);
 
-        //general panel
+        // general panel
         group_gamespeed.place();
         group_mapmode.place(group_gamespeed, BOTTOM_LEFT);
         group_tooltip.place(group_mapmode, BOTTOM_LEFT);
         group_invert_camera.place(group_tooltip, BOTTOM_LEFT);
         group_aggressive_units.place(group_invert_camera, BOTTOM_LEFT);
 
-		// TODO: Can we just determine if they're online or not in a game? I don't think it will matter
-		// if you're in single player and change this
-		// If you're in a game you might be online
+        // TODO: Can we just determine if they're online or not in a game? I don't think it will
+        // matter
+        // if you're in single player and change this
+        // If you're in a game you might be online
         if (!(this instanceof InGameOptionsMenu)) {
-			Group network_settings_group = CreateNetworkSettingsGroup();
-			network_settings_group.place(group_aggressive_units, BOTTOM_LEFT);
-        	general.addChild(network_settings_group);
+            Group network_settings_group = CreateNetworkSettingsGroup();
+            network_settings_group.place(group_aggressive_units, BOTTOM_LEFT);
+            general.addChild(network_settings_group);
         }
         general.compileCanvas();
 
-
         // Display and graphics
-        
+
         // Fullscreen
-		Group group_fullscreen = new Group();
-		display.addChild(group_fullscreen);
-        cb_fullscreen = new CheckBox(DisplayModel.inFullscreen(), Utils.getBundleString(bundle, "fullscreen"), Utils.getBundleString(bundle, "fullscreen_tip"));
-		cb_fullscreen.addCheckBoxListener(new CBFullscreen());
-		group_fullscreen.addChild(cb_fullscreen);
-		cb_fullscreen.place();
-		group_fullscreen.compileCanvas();
+        Group group_fullscreen = new Group();
+        display.addChild(group_fullscreen);
+        cb_fullscreen =
+                new CheckBox(
+                        DisplayModel.inFullscreen(),
+                        Utils.getBundleString(bundle, "fullscreen"),
+                        Utils.getBundleString(bundle, "fullscreen_tip"));
+        cb_fullscreen.addCheckBoxListener(new CBFullscreen());
+        group_fullscreen.addChild(cb_fullscreen);
+        cb_fullscreen.place();
+        group_fullscreen.compileCanvas();
 
         Group display_apply = CreateDisplayApply();
         display.addChild(display_apply);
@@ -331,7 +411,6 @@ public abstract strictfp class AbstractOptionsMenu extends Form {
         display_apply.place(display, BOTTOM_LEFT, 10);
         refreshrate_group.place(group_fullscreen, BOTTOM_LEFT);
         display.compileCanvas();
-        
 
         group_music.place();
         group_sound.place(group_music, BOTTOM_LEFT);
@@ -341,16 +420,16 @@ public abstract strictfp class AbstractOptionsMenu extends Form {
         language_group.place();
         language.compileCanvas();
 
-        //report bug
+        // report bug
         label_box.place();
         button_bug.place(label_box, BOTTOM_MID);
         report_bug.compileCanvas();
 
         Panel[] panels;
         if (Settings.getSettings().hide_bugreporter) {
-            panels = new Panel[]{general, display, sound, language};
+            panels = new Panel[] {general, display, sound, language};
         } else {
-            panels = new Panel[]{general, display, sound, language, report_bug};
+            panels = new Panel[] {general, display, sound, language, report_bug};
         }
 
         PanelGroup panel_group = new PanelGroup(panels, 0);
@@ -391,7 +470,8 @@ public abstract strictfp class AbstractOptionsMenu extends Form {
         if (last_detail_value != slider_value) {
             last_detail_value = slider_value;
             Settings.getSettings().graphic_detail = slider_value;
-            gui_root.addModalForm(new MessageForm(Utils.getBundleString(bundle, "change_next_run")));
+            gui_root.addModalForm(
+                    new MessageForm(Utils.getBundleString(bundle, "change_next_run")));
         }
     }
 
@@ -418,10 +498,9 @@ public abstract strictfp class AbstractOptionsMenu extends Form {
         int selected_index = 0;
         int curr_refreshrate = DisplayModel.getCurrentResolution().refreshRate();
 
-        for (int i = 0; i<refreshRates.length; i++) {
+        for (int i = 0; i < refreshRates.length; i++) {
             pulldown_rr.addItem(new PulldownItem(refreshRates[i] + " Hz"));
-            if (refreshRates[i] == curr_refreshrate)
-                selected_index = i;
+            if (refreshRates[i] == curr_refreshrate) selected_index = i;
         }
 
         // Remove refreshratelistener, recreate and attach.
@@ -438,11 +517,10 @@ public abstract strictfp class AbstractOptionsMenu extends Form {
         int selected_index = 0;
         int curr_refreshrate = DisplayModel.getCurrentResolution().refreshRate();
 
-        for (int i = 0; i<refreshRates.length; i++) {
+        for (int i = 0; i < refreshRates.length; i++) {
             pulldown_rr.addItem(new PulldownItem(refreshRates[i] + " Hz"));
-            
-            if (refreshRates[i] == curr_refreshrate)
-                selected_index = i;
+
+            if (refreshRates[i] == curr_refreshrate) selected_index = i;
         }
         PulldownButton pulldownbtn_rr = new PulldownButton(gui_root, pulldown_rr, 100);
 
@@ -466,65 +544,74 @@ public abstract strictfp class AbstractOptionsMenu extends Form {
         apply_group.compileCanvas();
         return apply_group;
     }
-    
+
     private final Group CreateDisplaySettings() {
         Group mode_group = new Group();
 
-		Label mode_label = new Label(Utils.getBundleString(bundle, "display_mode"), Skin.getSkin().getEditFont());
-		mode_group.addChild(mode_label);
+        Label mode_label =
+                new Label(
+                        Utils.getBundleString(bundle, "display_mode"),
+                        Skin.getSkin().getEditFont());
+        mode_group.addChild(mode_label);
 
-		ColumnInfo[] mode_infos = new ColumnInfo[]{new ColumnInfo("", 150)};
-		MultiColumnComboBox mode_list_box = new MultiColumnComboBox(gui_root, mode_infos, 200, false);
-		addChild(mode_list_box);
+        ColumnInfo[] mode_infos = new ColumnInfo[] {new ColumnInfo("", 150)};
+        MultiColumnComboBox mode_list_box =
+                new MultiColumnComboBox(gui_root, mode_infos, 200, false);
+        addChild(mode_list_box);
 
-		DisplayModelItem[] modes = DisplayModel.getUniqueResolutions();
-		DisplayModelItem current_mode = DisplayModel.getCurrentResolution();
+        DisplayModelItem[] modes = DisplayModel.getUniqueResolutions();
+        DisplayModelItem current_mode = DisplayModel.getCurrentResolution();
 
-		Row current_row = null;
+        Row current_row = null;
 
-		for (int i = 0; i < modes.length; i++) {
-            String mode_string = Integer.toString(modes[i].width()) + "x"+ Integer.toString(modes[i].height());
+        for (int i = 0; i < modes.length; i++) {
+            String mode_string =
+                    Integer.toString(modes[i].width()) + "x" + Integer.toString(modes[i].height());
 
-            Label label = new SortedLabel(mode_string, i, Skin.getSkin().getMultiColumnComboBoxData().getFont());
-            Row row = new Row(new GUIObject[]{label}, modes[i]);
+            Label label =
+                    new SortedLabel(
+                            mode_string, i, Skin.getSkin().getMultiColumnComboBoxData().getFont());
+            Row row = new Row(new GUIObject[] {label}, modes[i]);
             mode_list_box.addRow(row);
 
-            if (modes[i].resolution_equals(current_mode))
-                current_row = row;
-		}
-		if (current_row != null)
-			mode_list_box.selectRow(current_row);
+            if (modes[i].resolution_equals(current_mode)) current_row = row;
+        }
+        if (current_row != null) mode_list_box.selectRow(current_row);
 
-		mode_list_box.addRowListener(new DisplayModeListener());
-		mode_group.addChild(mode_list_box);
-		mode_label.place();
-		mode_list_box.place(mode_label, BOTTOM_LEFT);
+        mode_list_box.addRowListener(new DisplayModeListener());
+        mode_group.addChild(mode_list_box);
+        mode_label.place();
+        mode_list_box.place(mode_label, BOTTOM_LEFT);
         mode_group.compileCanvas();
         return mode_group;
     }
 
-	/** Creates the group that displalys the network setting controls in the options menu
-	 * @return the group containing the network settings controls to be added to the options menu
-	 */
+    /**
+     * Creates the group that displalys the network setting controls in the options menu
+     *
+     * @return the group containing the network settings controls to be added to the options menu
+     */
     private final Group CreateNetworkSettingsGroup() {
         Group group_network_settings = new Group();
-        Label multiplayerDomainLabel = new Label("Multiplayer Domain", Skin.getSkin().getEditFont(), 200);
-		Label updatedLabel = new Label("", Skin.getSkin().getEditFont(), 100);
-		updatedLabel.setColor(new float[]{0.298f, 0.686f, 0.314f, 1});
+        Label multiplayerDomainLabel =
+                new Label("Multiplayer Domain", Skin.getSkin().getEditFont(), 200);
+        Label updatedLabel = new Label("", Skin.getSkin().getEditFont(), 100);
+        updatedLabel.setColor(new float[] {0.298f, 0.686f, 0.314f, 1});
         EditLine multiplayerDomainBox = new EditLine(200, 250); // width 200, max length 250
-		multiplayerDomainBox.setPos(0,0);
-		multiplayerDomainBox.set(Settings.getSettings().getDomainName());
-		// TODO: Can if this doesn't work swap place and addChild
+        multiplayerDomainBox.setPos(0, 0);
+        multiplayerDomainBox.set(Settings.getSettings().getDomainName());
+        // TODO: Can if this doesn't work swap place and addChild
         group_network_settings.addChild(multiplayerDomainLabel);
         group_network_settings.addChild(multiplayerDomainBox);
-		group_network_settings.addChild(updatedLabel);
+        group_network_settings.addChild(updatedLabel);
 
         multiplayerDomainLabel.place();
         multiplayerDomainBox.place(multiplayerDomainLabel, BOTTOM_LEFT);
-		updatedLabel.place(multiplayerDomainBox, RIGHT_MID);
+        updatedLabel.place(multiplayerDomainBox, RIGHT_MID);
 
         HorizButton update_domain_btn = new HorizButton("Update", 130);
-        update_domain_btn.addMouseClickListener(new UpdateDomainListener(multiplayerDomainBox, updatedLabel));
+        update_domain_btn.addMouseClickListener(
+                new UpdateDomainListener(multiplayerDomainBox, updatedLabel));
         group_network_settings.addChild(update_domain_btn);
         update_domain_btn.place(multiplayerDomainBox, BOTTOM_LEFT);
 
@@ -549,40 +636,41 @@ public abstract strictfp class AbstractOptionsMenu extends Form {
         }
     }
 
-	private final strictfp class UpdateDomainListener implements MouseClickListener {
+    private final strictfp class UpdateDomainListener implements MouseClickListener {
 
-		private final EditLine multiplayerDomainBox;
-		private final Label updateLabel;
+        private final EditLine multiplayerDomainBox;
+        private final Label updateLabel;
 
-		public UpdateDomainListener(EditLine multiplayerDomainBox, Label updateLabel) {
-			this.multiplayerDomainBox = multiplayerDomainBox;
-			this.updateLabel = updateLabel;
-		}
+        public UpdateDomainListener(EditLine multiplayerDomainBox, Label updateLabel) {
+            this.multiplayerDomainBox = multiplayerDomainBox;
+            this.updateLabel = updateLabel;
+        }
 
-		public final void mouseClicked(int button, int x, int y, int clicks) {
-			String domain = multiplayerDomainBox.getContents();
-			if (domain.length() > 0) {
-				Settings.getSettings().setDomain(domain);
-				// I don't think there is currently a way to hide the label so I'm just setting the text empty
-				// TOOD: A timer to reset this text eventually?
-				updateLabel.set("Updated!");				
-			}
-		}
-	}
+        public final void mouseClicked(int button, int x, int y, int clicks) {
+            String domain = multiplayerDomainBox.getContents();
+            if (domain.length() > 0) {
+                Settings.getSettings().setDomain(domain);
+                // I don't think there is currently a way to hide the label so I'm just setting the
+                // text empty
+                // TOOD: A timer to reset this text eventually?
+                updateLabel.set("Updated!");
+            }
+        }
+    }
 
-	private final strictfp class ResetDomainListener implements MouseClickListener {
+    private final strictfp class ResetDomainListener implements MouseClickListener {
 
-		private final EditLine multiplayerDomainBox;
+        private final EditLine multiplayerDomainBox;
 
-		public ResetDomainListener(EditLine multiplayerDomainBox) {
-			this.multiplayerDomainBox = multiplayerDomainBox;
-		}
+        public ResetDomainListener(EditLine multiplayerDomainBox) {
+            this.multiplayerDomainBox = multiplayerDomainBox;
+        }
 
-		public final void mouseClicked(int button, int x, int y, int clicks) {
-			multiplayerDomainBox.set(new Settings().getDomainName());
-			Settings.getSettings().setDomain(multiplayerDomainBox.getContents());
-		}
-	}
+        public final void mouseClicked(int button, int x, int y, int clicks) {
+            multiplayerDomainBox.set(new Settings().getDomainName());
+            Settings.getSettings().setDomain(multiplayerDomainBox.getContents());
+        }
+    }
 
     private final strictfp class SliderMusicListener implements ValueListener {
 
@@ -645,11 +733,11 @@ public abstract strictfp class AbstractOptionsMenu extends Form {
             } else {
                 Settings.getSettings().language = locale.getLanguage();
             }
-            gui_root.addModalForm(new MessageForm(Utils.getBundleString(bundle, "language_change_next_run")));
+            gui_root.addModalForm(
+                    new MessageForm(Utils.getBundleString(bundle, "language_change_next_run")));
         }
 
-        public final void rowDoubleClicked(Object o) {
-        }
+        public final void rowDoubleClicked(Object o) {}
     }
 
     private final strictfp class GamespeedListener implements ItemChosenListener {
@@ -674,49 +762,44 @@ public abstract strictfp class AbstractOptionsMenu extends Form {
     }
 
     private final strictfp class CBFullscreen implements CheckBoxListener, DoNowListener {
-		public final void doChange(boolean switch_now) {
+        public final void doChange(boolean switch_now) {}
 
-		}
-
-		public final void checked(boolean marked) {
+        public final void checked(boolean marked) {
             DisplayModel.setFullscreen(marked);
-		}
-	}
+        }
+    }
 
     private final strictfp class DisplayModeListener implements RowListener, DoNowListener {
-		private DisplayModelItem mode;
-		
-		public final void doChange(boolean switch_now) {
-		}
+        private DisplayModelItem mode;
 
-		public final void rowChosen(Object o) {
-			mode = (DisplayModelItem)o;
+        public final void doChange(boolean switch_now) {}
 
-            //Get current refresh rate, set it to chosen mode
+        public final void rowChosen(Object o) {
+            mode = (DisplayModelItem) o;
+
+            // Get current refresh rate, set it to chosen mode
             DisplayModelItem curr_mode = DisplayModel.getCurrentResolution();
             mode.setRefreshRate(curr_mode.refreshRate());
 
-			DisplayModel.setCurrentResolution(mode);
+            DisplayModel.setCurrentResolution(mode);
             fetchRefreshRates();
-            //DisplayChangeForm display_change_form = new DisplayChangeForm(this);
-			//gui_root.addModalForm(display_change_form);
-		}
-		
-		public final void rowDoubleClicked(Object o) {
-		}
-	}
+            // DisplayChangeForm display_change_form = new DisplayChangeForm(this);
+            // gui_root.addModalForm(display_change_form);
+        }
+
+        public final void rowDoubleClicked(Object o) {}
+    }
 
     private final strictfp class DisplayApplyListener implements MouseClickListener, DoNowListener {
         public final void doChange(boolean switch_now) {
-            if(switch_now)
-                DisplayModel.saveToConfig();
-		}
+            if (switch_now) DisplayModel.saveToConfig();
+        }
 
-		public final void mouseClicked(int button, int x, int y, int clicks) {
-			DisplayApplyForm display_change_form = new DisplayApplyForm(this);
-		    gui_root.addModalForm(display_change_form);
-		}
-	}
+        public final void mouseClicked(int button, int x, int y, int clicks) {
+            DisplayApplyForm display_change_form = new DisplayApplyForm(this);
+            gui_root.addModalForm(display_change_form);
+        }
+    }
 
     private final strictfp class RefreshrateListener implements ItemChosenListener {
         private int[] refreshRates;
@@ -727,6 +810,7 @@ public abstract strictfp class AbstractOptionsMenu extends Form {
 
             setRefreshRate(index);
         }
+
         public final void itemChosen(PulldownMenu menu, int item_index) {
             setRefreshRate(item_index);
         }
