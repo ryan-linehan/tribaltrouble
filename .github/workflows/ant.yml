@@ -22,14 +22,11 @@ jobs:
       with:
         java-version: '21'
         distribution: 'temurin'
-    - name: Auto-Format
-      run: ci/auto_format.sh
-      shell: bash
-    - name: Fail if not formatted
+    - name: Check Format
       run: |
+        ci/auto_format.sh
         git diff --cached --quiet
         RET=$?
-        echo "Should have returned $RET"
         exit $RET
       shell: bash
 
