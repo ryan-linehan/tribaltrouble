@@ -12,13 +12,17 @@ public final strictfp class GameSession implements Serializable {
 	public final static int LOSE = 1;
 
 	private final int session_id;
+	/** Human participants in the game */
 	private final Participant[] participants;
+	/** All participants in the game including AI */
+	private final GamePlayer[] playerInfo;
 	private final boolean rated;
 
-	public GameSession(int session_id, Participant[] participants, boolean rated) {
+	public GameSession(int session_id, Participant[] participants, boolean rated, GamePlayer[] playerInfo) {
 		this.session_id = session_id;
 		this.participants = participants;
 		this.rated = rated;
+		this.playerInfo = playerInfo;
 	}
 
 	private final boolean validateTeams() {
@@ -56,8 +60,19 @@ public final strictfp class GameSession implements Serializable {
 		return session_id;
 	}
 	
+	/*
+	 * Gets only the human participants of the game session
+	 */
 	public final Participant[] getParticipants() {
 		return participants;
+	}
+
+	/**
+	 * Gets the player info for each player slot in the game session (including AI players).
+	 * @return the player info
+	 */
+	public final GamePlayer[] getPlayerInfo() {
+		return playerInfo;
 	}
 
 	public final boolean isRated() {
