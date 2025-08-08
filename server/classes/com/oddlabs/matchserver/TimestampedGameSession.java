@@ -3,6 +3,7 @@ package com.oddlabs.matchserver;
 import com.oddlabs.matchmaking.GameSession;
 import com.oddlabs.matchmaking.Participant;
 import com.oddlabs.matchmaking.MatchmakingServerInterface;
+import java.util.HashSet;
 import java.io.File;
 import java.io.FileWriter;
 
@@ -49,6 +50,7 @@ public final strictfp class TimestampedGameSession {
 
     private File spectator_file;
     private FileWriter spectator_file_writer;
+    private HashSet info_written;
 	
 	public TimestampedGameSession(GameSession session, int database_id) {
 		this.session = session;
@@ -61,6 +63,7 @@ public final strictfp class TimestampedGameSession {
 		for (int i = 0; i < num_participants; i++)
 			nicks += session.getParticipants()[i].getNick() + " ";
 		MatchmakingServer.getLogger().info("Game " + database_id + " created. [" + nicks + "] " + getParticipantStates());
+        info_written = new HashSet();
         try {
             spectator_file = new File("/var/games/" + database_id);
             spectator_file_writer = new FileWriter(spectator_file);
@@ -158,8 +161,11 @@ public final strictfp class TimestampedGameSession {
 
     public final void updateSpectatorInfo(int tick, String info) {
         try {
-            spectator_file_writer.write(info);
-            spectator_file_writer.flush();
+            if (!info_written.contains(tick)) {
+                spectator_file_writer.write(info);
+                spectator_file_writer.flush();
+                info_written.add(tick);
+            }
         } catch (Exception e) {
             System.out.println("Exception during writing spectator file: " + e);
         }

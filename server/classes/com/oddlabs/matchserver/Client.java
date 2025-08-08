@@ -178,7 +178,7 @@ public final strictfp class Client implements MatchmakingServerInterface, Connec
 	}
 
     public final void updateSpectatorInfo(int tick, String info) {
-    	if (getGameSession() == null || tick < 0)
+    	if (getGameSession() == null)
 			return;
         getGameSession().updateSpectatorInfo(tick, info);
     }

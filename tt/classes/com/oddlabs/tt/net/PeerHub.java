@@ -372,7 +372,7 @@ public final strictfp class PeerHub implements Animated, RouterHandler {
             }
             rows_sent++;
             info += "\n";
-		    Network.getMatchmakingClient().getInterface().updateSpectatorInfo(0, info);
+		    Network.getMatchmakingClient().getInterface().updateSpectatorInfo(-rows_sent, info);
         } else {
             sent_map = true;
         }
@@ -387,7 +387,7 @@ public final strictfp class PeerHub implements Animated, RouterHandler {
             info += pos[0] + " " + pos[1] + " ";
         }
         info += "\n";
-		Network.getMatchmakingClient().getInterface().updateSpectatorInfo(0, info);
+		Network.getMatchmakingClient().getInterface().updateSpectatorInfo(-10000, info);
         sent_trees = true;
     }
 
@@ -405,7 +405,7 @@ public final strictfp class PeerHub implements Animated, RouterHandler {
             info += "COLOR " + color[0] + " " + color[1] + " " + color[2] + " ";
         }
         info += "\n";
-		Network.getMatchmakingClient().getInterface().updateSpectatorInfo(0, info);
+		Network.getMatchmakingClient().getInterface().updateSpectatorInfo(-10001, info);
         sent_init_info = true;
     }
 
