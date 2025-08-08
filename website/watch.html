@@ -161,6 +161,7 @@
 
         var curr_tick_index = 0;
         var biggest_tick = 0;
+        var jump_to_end = false;
 
         var baseMapBuf;
         var treeBuf;
@@ -195,6 +196,7 @@
 
         nextButton.addEventListener("click", function () {
             nextTick();
+            jump_to_end = false;
         });
 
         prevButton.addEventListener("click", function () {
@@ -205,11 +207,13 @@
             timeCursor.style.width = (curr_tick_index * 100.0 / biggest_tick) + "%";
             timeDisplay.innerHTML = ticks[curr_tick_index] + " / " + biggest_tick;
             renderTick(ticks[curr_tick_index]);
+            jump_to_end = false;
         });
 
         timeline.addEventListener("mousedown", function (event) {
             const closestIndex = Math.round(ticks.length * (event.clientX / timeline.clientWidth));
             curr_tick_index = closestIndex;
+            jump_to_end = false;
         });
 
         function compileShader(source, type) {
@@ -464,6 +468,7 @@
                 curr_tick_index++;
                 if (curr_tick_index >= ticks.length) {
                     curr_tick_index = ticks.length - 1;
+                    jump_to_end = true;
                     if (!ended) {
                         pullMoreData();
                     }
@@ -490,6 +495,7 @@
                 for (var i = 0; i < rows.length; i++) {
                     parseRow(rows[i]);
                 }
+                curr_tick_index = ticks.length - 1;
             }
         }
 
@@ -497,6 +503,7 @@
             const tokens = text.split(" ");
             if (tokens[0] == "END") {
                 ended = true;
+                jump_to_end = false;
             }
             else if (tokens[0] == "I") {
                 var name = "", race, color, team;
