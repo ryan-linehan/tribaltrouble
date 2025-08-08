@@ -314,7 +314,7 @@
             var index = 0;
             for (var row = 0; row < size - 1; row++) {
                 for (var col = 0; col < size; col++) {
-                    var x = col * step - 1.0;
+                    var x = 1.0 - col * step;
                     var y0 = 1.0 - step * row;
                     var y1 = y0 - step;
                     var prow = Math.max(0, row - 1);
@@ -346,7 +346,7 @@
             const vertices = new Float32Array(size * 4 * 6);
             var index = 0;
             for (var t = 0; t < size; t++) {
-                const x = (trees[t][0] / map_size) * 2.0 - 1.0;
+                const x = 1.0 - (trees[t][0] / map_size) * 2.0;
                 const y = 1.0 - (trees[t][1] / map_size) * 2.0;
                 const x0 = x - tree_size;
                 const y0 = y - tree_size;
@@ -446,7 +446,7 @@
                 const unit = info[i];
                 const pinfo = players[unit[2]];
                 const color = pinfo[3];
-                const x = (unit[0] / map_size) * 2.0 - 1.0;
+                const x = 1.0 - (unit[0] / map_size) * 2.0;
                 const y = 1.0 - (unit[1] / map_size) * 2.0;
                 const s = unit[3];
                 gl.uniform3f(u_loc, x, y, s);
