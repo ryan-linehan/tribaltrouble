@@ -51,11 +51,6 @@
             position: absolute;
         }
 
-        #timeline:hover {
-            margin-top: 5px;
-            margin-bottom: 5px;
-        }
-
         #time-cursor {
             height: 5px;
             width: 1px;
@@ -108,6 +103,7 @@
         var aspect = 1.0;
         var dragging = false;
         var mouseLastX, mouseLastY;
+        var fetch_lock = false;
 
         canvas.addEventListener("wheel", function (event) {
             event.preventDefault();
@@ -488,6 +484,7 @@
         function parseRows(text) {
             if (text.length == 0) {
                 buferring = true;
+                fetch_lock = false;
             } else {
                 buffering = false;
                 byte_offset += text.length;
@@ -495,7 +492,10 @@
                 for (var i = 0; i < rows.length; i++) {
                     parseRow(rows[i]);
                 }
-                curr_tick_index = ticks.length - 1;
+                fetch_lock = false;
+                if (jump_to_end) {
+                    curr_tick_index = ticks.length - 1;
+                }
             }
         }
 
@@ -551,6 +551,7 @@
                 }
             } else {
                 const tick = parseInt(tokens[0]);
+                if (isNaN(tick)) return;
                 var state = [];
                 ticks.push(tick);
                 biggest_tick = Math.max(tick, biggest_tick);
@@ -590,7 +591,10 @@
         }
 
         function pullMoreData() {
-            fetch('stream.php?gid=' + gameId + '&offset=' + byte_offset).then(res => res.text()).then(res => parseRows(res));
+            if (!fetch_lock) {
+                fetch_lock = true;
+                fetch('stream.php?gid=' + gameId + '&offset=' + byte_offset).then(res => res.text()).then(res => parseRows(res));
+            }
         }
 
         pullMoreData();
