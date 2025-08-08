@@ -23,7 +23,7 @@ jobs:
         java-version: '21'
         distribution: 'temurin'
     - name: Auto-Format
-      run: ci/auto-format.sh
+      run: ci/auto_format.sh
     - name: Fail if not formatted
       run: git diff --cached --quiet
 
