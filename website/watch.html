@@ -1,4 +1,3 @@
-
 <head>
     <style>
         body {
@@ -51,11 +50,12 @@
             background-color: black;
             position: absolute;
         }
+
         #timeline:hover {
             margin-top: 5px;
             margin-bottom: 5px;
         }
-        
+
         #time-cursor {
             height: 5px;
             width: 1px;
@@ -63,7 +63,7 @@
             border-radius: 5px;
             left: 0px;
             background-color: red;
-            -webkit-box-shadow: 0px 0px 8px 3px #99F; 
+            -webkit-box-shadow: 0px 0px 8px 3px #99F;
             box-shadow: 0px 0px 8px 3px #99F;
         }
 
@@ -76,7 +76,6 @@
             position: absolute;
             text-shadow: 2px 2px #000;
         }
-
     </style>
 
 </head>
@@ -103,14 +102,14 @@
         const canvas = document.getElementById('canvas-map');
         const timeCursor = document.getElementById('time-cursor');
         const gl = canvas.getContext('webgl');
-        
+
         var offset = [0.0, 0.0];
         var scale = 1.0;
         var aspect = 1.0;
         var dragging = false;
         var mouseLastX, mouseLastY;
 
-        canvas.addEventListener("wheel", function(event) {
+        canvas.addEventListener("wheel", function (event) {
             event.preventDefault();
             const old = scale;
             scale *= 1.0 - event.deltaY * 0.0003;
@@ -120,15 +119,15 @@
             offset[1] = offset[1] / (old / scale);
             renderTick(ticks[curr_tick_index]);
         }, { passive: false });
-        
-        canvas.addEventListener("mousedown", function(event) {
+
+        canvas.addEventListener("mousedown", function (event) {
             if (!map_complete) return;
             dragging = true;
             mouseLastX = event.clientX;
             mouseLastY = event.clientY;
         });
 
-        canvas.addEventListener("mousemove", function(event) {
+        canvas.addEventListener("mousemove", function (event) {
             if (!dragging) return;
             var dx = event.clientX - mouseLastX;
             var dy = event.clientY - mouseLastY;
@@ -141,15 +140,15 @@
             renderTick(ticks[curr_tick_index]);
         });
 
-        canvas.addEventListener("mouseup", function(event) {
+        canvas.addEventListener("mouseup", function (event) {
             dragging = false;
         });
 
-        document.addEventListener("mouseup", function() {
+        document.addEventListener("mouseup", function () {
             dragging = false;
         });
 
-    	var state_per_tick = {};
+        var state_per_tick = {};
 
         var ticks = [];
         var trees = [];
@@ -177,7 +176,7 @@
         const timeDisplay = document.getElementById("time-display");
         const timeline = document.getElementById("timeline");
 
-        pauseButton.addEventListener("click", function() {
+        pauseButton.addEventListener("click", function () {
             isPaused = true;
             pauseButton.style.display = 'none';
             playButton.style.display = 'block';
@@ -185,7 +184,7 @@
             prevButton.style.display = 'block';
         });
 
-        playButton.addEventListener("click", function() {
+        playButton.addEventListener("click", function () {
             isPaused = false;
             pauseButton.style.display = 'block';
             playButton.style.display = 'none';
@@ -194,11 +193,11 @@
             nextTick();
         });
 
-        nextButton.addEventListener("click", function() {
+        nextButton.addEventListener("click", function () {
             nextTick();
         });
 
-        prevButton.addEventListener("click", function() {
+        prevButton.addEventListener("click", function () {
             curr_tick_index--;
             if (curr_tick_index < 0) {
                 curr_tick_index = 0;
@@ -207,8 +206,8 @@
             timeDisplay.innerHTML = ticks[curr_tick_index] + " / " + biggest_tick;
             renderTick(ticks[curr_tick_index]);
         });
-        
-        timeline.addEventListener("mousedown", function(event) {
+
+        timeline.addEventListener("mousedown", function (event) {
             const closestIndex = Math.round(ticks.length * (event.clientX / timeline.clientWidth));
             curr_tick_index = closestIndex;
         });
@@ -367,8 +366,8 @@
             return vertexBuffer;
         }
 
-	function makeUnitBaseBuf() {
-	    const uv = new Float32Array(8);
+        function makeUnitBaseBuf() {
+            const uv = new Float32Array(8);
             const map_size = map.length;
             const s = 1.0 / map_size;
             uv[0] = -s; uv[1] = +s;
@@ -379,14 +378,14 @@
             gl.bindBuffer(gl.ARRAY_BUFFER, uvBuffer);
             gl.bufferData(gl.ARRAY_BUFFER, uv, gl.STATIC_DRAW);
             return uvBuffer;
-	}
+        }
 
-	var uvBuf;
+        var uvBuf;
 
         function createMapBuffer() {
             baseMapBuf = makeBaseMapVertices();
             treeBuf = makeTreeVertices();
-	    uvBuf = makeUnitBaseBuf();
+            uvBuf = makeUnitBaseBuf();
         }
 
         function doScreenVars(prog) {
@@ -430,7 +429,7 @@
             const info = state_per_tick[tick];
 
             gl.useProgram(unitProg);
-	        gl.bindBuffer(gl.ARRAY_BUFFER, uvBuf);
+            gl.bindBuffer(gl.ARRAY_BUFFER, uvBuf);
             const v_uv = gl.getAttribLocation(unitProg, 'v_uv');
             gl.enableVertexAttribArray(v_uv);
             gl.vertexAttribPointer(v_uv, 2, gl.FLOAT, false, 0, 0);
@@ -438,7 +437,7 @@
             const u_grid_unit_size = gl.getUniformLocation(unitProg, "u_grid_unit_size");
             const unitSize = 1.0 / map.length;
             gl.uniform1f(u_grid_unit_size, unitSize);
-            
+
             const u_loc = gl.getUniformLocation(unitProg, "u_loc");
             const u_color = gl.getUniformLocation(unitProg, "u_color");
 
