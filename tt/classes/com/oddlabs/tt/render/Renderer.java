@@ -133,6 +133,7 @@ import com.oddlabs.tt.util.StrictVector4f;
 import com.oddlabs.tt.util.Utils;
 import com.oddlabs.tt.vbo.VBO;
 import com.oddlabs.updater.UpdateInfo;
+import com.oddlabs.tt.render.DisplayModel;
 
 import java.util.Map;
 import java.util.HashMap;
@@ -342,6 +343,7 @@ public final strictfp class Renderer {
         GUI gui = new GUI(languages);
 
         GlobalsInit.init();
+        DisplayModel.init();
         LocalInput.init();
 
         long startup_timei = System.currentTimeMillis() - start_time;

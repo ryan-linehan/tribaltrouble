@@ -221,13 +221,4 @@ public final strictfp class LocalInput {
 		return Globals.VIEW_MIN/(getUnitsPerPixel()*Globals.ERROR_TOLERANCE);
 	}
 
-	public static void switchMode(GLFWVidMode mode) {
-		Settings.getSettings().new_view_width = mode.width();
-		Settings.getSettings().new_view_height = mode.height();
-		Settings.getSettings().new_view_freq = mode.refreshRate();
-		Settings.getSettings().view_width = mode.width();
-		Settings.getSettings().view_height = mode.height();
-		Settings.getSettings().view_freq = mode.refreshRate();
-		Settings.getSettings().save();
-	}
 }
