@@ -24,8 +24,13 @@ jobs:
         distribution: 'temurin'
     - name: Auto-Format
       run: ci/auto_format.sh
+      shell: bash
     - name: Fail if not formatted
-      run: git diff --cached --quiet
+      run: |
+        git diff --cached --quiet
+        RET=$?
+        exit $RET
+      shell: bash
 
   build-linux:
 
