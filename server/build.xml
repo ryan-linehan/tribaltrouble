@@ -78,6 +78,9 @@
 			<classpath refid="common.classes.classpath" />
 
 			<jvmarg value="-Djdk.crypto.KeyAgreement.legacyKDF=true" />
+			<!-- Memory allocation settings optimized for 1GB server -->
+			<jvmarg value="-Xms128m" />
+			<jvmarg value="-Xmx512m" />
 		</java>
 	</target>
 
