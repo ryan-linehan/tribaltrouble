@@ -6,7 +6,7 @@
 ![License](https://img.shields.io/badge/license-GPLv2-orange.svg)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Build Status](https://github.com/RcubDev/limbo_console_sharp/actions/workflows/build-and-publish.yaml/badge.svg)](https://github.com//OmarAMokhtar/tribaltrouble)
-![Tribal Trouble](https://dcbadge.limes.pink/api/server/https://discord.gg/j8PZyGBZt5?style=flat)
+[![](https://dcbadge.limes.pink/api/server/https://discord.gg/j8PZyGBZt5?style=flat)](https://discord.gg/j8PZyGBZt5?style=flat)
 
 Tribal Trouble is a realtime strategy game released by Oddlabs in 2004. In 2014 the source was released under GPL2 license.
 
