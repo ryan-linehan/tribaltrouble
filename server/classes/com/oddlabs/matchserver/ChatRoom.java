@@ -283,9 +283,8 @@ public final strictfp class ChatRoom {
                 .ifPresent(
                         member -> {
                             String displayName =
-                                    member
-                                            .getDisplayName(); // This gets nickname or username if
-                                                               // no nickname
+                                    member.getDisplayName(); // This gets nickname or username if
+                            // no nickname
                             String author = "@" + displayName;
 
                             System.out.println(
