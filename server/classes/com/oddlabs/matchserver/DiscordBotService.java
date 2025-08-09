@@ -29,6 +29,8 @@ public class DiscordBotService {
     public DiscordBotService() {}
 
     public void initialize(String token, long serverId) {
+        if(isInitialized)
+            return;
         DiscordClient client = DiscordClient.create(token);
 
         Mono<Void> login =
@@ -58,7 +60,7 @@ public class DiscordBotService {
     /** Sets up event handlers for the Discord bot */
     private void setupEventHandlers(long serverId) {
         initTribalTroubleTextChannels(serverId);
-        gateway.on(ReadyEvent.class, this::handleReady).subscribe();
+        gateway.on(ReadyEvent.class, this::handleReady).take(1).subscribe();
     }
 
     public GatewayDiscordClient getGateway() {
@@ -84,6 +86,7 @@ public class DiscordBotService {
      */
     private void initTribalTroubleTextChannels(long serverId) {
         if (gateway != null) {
+            message_channels.clear(); // Clear before repopulating
             gateway.getGuilds()
                     .filter(
                             guild -> {
