@@ -1,4 +1,5 @@
 <?php
+
 $id = $_GET['gid'];
 $offset = $_GET['offset'];
 $name = "/var/games/$id";
@@ -13,4 +14,3 @@ if ($offset < $size) {
     echo $data;
 }
 fclose($file);
-?>

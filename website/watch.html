@@ -105,7 +105,7 @@
         var mouseLastX, mouseLastY;
         var fetch_lock = false;
 
-        canvas.addEventListener("wheel", function (event) {
+        canvas.addEventListener("wheel", function(event) {
             event.preventDefault();
             const old = scale;
             scale *= 1.0 - event.deltaY * 0.0003;
@@ -114,16 +114,18 @@
             offset[0] = offset[0] / (old / scale);
             offset[1] = offset[1] / (old / scale);
             renderTick(ticks[curr_tick_index]);
-        }, { passive: false });
+        }, {
+            passive: false
+        });
 
-        canvas.addEventListener("mousedown", function (event) {
+        canvas.addEventListener("mousedown", function(event) {
             if (!map_complete) return;
             dragging = true;
             mouseLastX = event.clientX;
             mouseLastY = event.clientY;
         });
 
-        canvas.addEventListener("mousemove", function (event) {
+        canvas.addEventListener("mousemove", function(event) {
             if (!dragging) return;
             var dx = event.clientX - mouseLastX;
             var dy = event.clientY - mouseLastY;
@@ -136,11 +138,11 @@
             renderTick(ticks[curr_tick_index]);
         });
 
-        canvas.addEventListener("mouseup", function (event) {
+        canvas.addEventListener("mouseup", function(event) {
             dragging = false;
         });
 
-        document.addEventListener("mouseup", function () {
+        document.addEventListener("mouseup", function() {
             dragging = false;
         });
 
@@ -173,7 +175,7 @@
         const timeDisplay = document.getElementById("time-display");
         const timeline = document.getElementById("timeline");
 
-        pauseButton.addEventListener("click", function () {
+        pauseButton.addEventListener("click", function() {
             isPaused = true;
             pauseButton.style.display = 'none';
             playButton.style.display = 'block';
@@ -181,7 +183,7 @@
             prevButton.style.display = 'block';
         });
 
-        playButton.addEventListener("click", function () {
+        playButton.addEventListener("click", function() {
             isPaused = false;
             pauseButton.style.display = 'block';
             playButton.style.display = 'none';
@@ -190,12 +192,12 @@
             nextTick();
         });
 
-        nextButton.addEventListener("click", function () {
+        nextButton.addEventListener("click", function() {
             nextTick();
             jump_to_end = false;
         });
 
-        prevButton.addEventListener("click", function () {
+        prevButton.addEventListener("click", function() {
             curr_tick_index--;
             if (curr_tick_index < 0) {
                 curr_tick_index = 0;
@@ -206,7 +208,7 @@
             jump_to_end = false;
         });
 
-        timeline.addEventListener("mousedown", function (event) {
+        timeline.addEventListener("mousedown", function(event) {
             const closestIndex = Math.round(ticks.length * (event.clientX / timeline.clientWidth));
             curr_tick_index = closestIndex;
             jump_to_end = false;
@@ -352,13 +354,31 @@
                 const y0 = y - tree_size;
                 const x1 = x + tree_size;
                 const y1 = y + tree_size;
-                vertices[index++] = x0; vertices[index++] = y0; vertices[index++] = 0.0; vertices[index++] = 0.0;
-                vertices[index++] = x0; vertices[index++] = y1; vertices[index++] = 0.0; vertices[index++] = 1.0;
-                vertices[index++] = x1; vertices[index++] = y1; vertices[index++] = 1.0; vertices[index++] = 1.0;
+                vertices[index++] = x0;
+                vertices[index++] = y0;
+                vertices[index++] = 0.0;
+                vertices[index++] = 0.0;
+                vertices[index++] = x0;
+                vertices[index++] = y1;
+                vertices[index++] = 0.0;
+                vertices[index++] = 1.0;
+                vertices[index++] = x1;
+                vertices[index++] = y1;
+                vertices[index++] = 1.0;
+                vertices[index++] = 1.0;
 
-                vertices[index++] = x0; vertices[index++] = y0; vertices[index++] = 0.0; vertices[index++] = 0.0;
-                vertices[index++] = x1; vertices[index++] = y1; vertices[index++] = 1.0; vertices[index++] = 1.0;
-                vertices[index++] = x1; vertices[index++] = y0; vertices[index++] = 1.0; vertices[index++] = 0.0;
+                vertices[index++] = x0;
+                vertices[index++] = y0;
+                vertices[index++] = 0.0;
+                vertices[index++] = 0.0;
+                vertices[index++] = x1;
+                vertices[index++] = y1;
+                vertices[index++] = 1.0;
+                vertices[index++] = 1.0;
+                vertices[index++] = x1;
+                vertices[index++] = y0;
+                vertices[index++] = 1.0;
+                vertices[index++] = 0.0;
             }
             const vertexBuffer = gl.createBuffer();
             gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
@@ -370,10 +390,14 @@
             const uv = new Float32Array(8);
             const map_size = map.length;
             const s = 1.0 / map_size;
-            uv[0] = -s; uv[1] = +s;
-            uv[2] = -s; uv[3] = -s;
-            uv[4] = +s; uv[5] = +s;
-            uv[6] = +s; uv[7] = -s;
+            uv[0] = -s;
+            uv[1] = +s;
+            uv[2] = -s;
+            uv[3] = -s;
+            uv[4] = +s;
+            uv[5] = +s;
+            uv[6] = +s;
+            uv[7] = -s;
             const uvBuffer = gl.createBuffer();
             gl.bindBuffer(gl.ARRAY_BUFFER, uvBuffer);
             gl.bufferData(gl.ARRAY_BUFFER, uv, gl.STATIC_DRAW);
@@ -504,9 +528,9 @@
             if (tokens[0] == "END") {
                 ended = true;
                 jump_to_end = false;
-            }
-            else if (tokens[0] == "I") {
-                var name = "", race, color, team;
+            } else if (tokens[0] == "I") {
+                var name = "",
+                    race, color, team;
                 var t = 1;
                 while (t < tokens.length) {
                     if (tokens[t] == "NAME") {
@@ -531,8 +555,7 @@
                 if (name != "") {
                     players.push([name, race, team, color]);
                 }
-            }
-            else if (tokens[0] == "M") {
+            } else if (tokens[0] == "M") {
                 var map_row = [];
                 for (var t = 2; t < tokens.length; t++) {
                     const h = parseFloat(tokens[t]);
@@ -598,7 +621,6 @@
         }
 
         pullMoreData();
-
     </script>
 
 </body>
