@@ -1,83 +1,87 @@
 package com.oddlabs.net;
 
+import com.oddlabs.event.Deterministic;
+
 import java.io.IOException;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.HashMap;
-
-import com.oddlabs.event.Deterministic;
 
 public final strictfp class NetworkSelector {
-	private final static long PING_TIMEOUT = 4*60*1000;
-	private final static long PING_DELAY = PING_TIMEOUT/2;
-	
-	private final MonotoneTimeManager time_manager;
-	private int current_handler_id;
-	private final Map handler_map = new HashMap();
-	private TaskThread task_thread;
-	private Selector selector;
-	private final List ping_connections = new LinkedList();
-	private final List ping_timeouts = new LinkedList();
+    private static final long PING_TIMEOUT = 4 * 60 * 1000;
+    private static final long PING_DELAY = PING_TIMEOUT / 2;
 
-	private final Deterministic deterministic;
+    private final MonotoneTimeManager time_manager;
+    private int current_handler_id;
+    private final Map handler_map = new HashMap();
+    private TaskThread task_thread;
+    private Selector selector;
+    private final List ping_connections = new LinkedList();
+    private final List ping_timeouts = new LinkedList();
 
-	public NetworkSelector(final Deterministic deterministic) {
-		this(deterministic, new TimeManager() {
-			public final long getMillis() {
-				return deterministic.log(System.currentTimeMillis());
-			}
-		});
-	}
+    private final Deterministic deterministic;
 
-	public NetworkSelector(Deterministic deterministic, TimeManager time_manager) {
-		this.deterministic = deterministic;
-		this.time_manager = new MonotoneTimeManager(time_manager);
-	}
+    public NetworkSelector(final Deterministic deterministic) {
+        this(
+                deterministic,
+                new TimeManager() {
+                    public final long getMillis() {
+                        return deterministic.log(System.currentTimeMillis());
+                    }
+                });
+    }
 
-	public final Deterministic getDeterministic() {
-		return deterministic;
-	}
+    public NetworkSelector(Deterministic deterministic, TimeManager time_manager) {
+        this.deterministic = deterministic;
+        this.time_manager = new MonotoneTimeManager(time_manager);
+    }
 
-	final void asyncConnect(String dns_name, int port, Connection conn) {
-		try {
-			initSelector();
-		} catch (IOException e) {
-			System.out.println("Exception: " + e);
-			throw new RuntimeException(e);
-		}
-		DNSTask task = new DNSTask(dns_name, port, conn);
-		getTaskThread().addTask(task);
-	}
+    public final Deterministic getDeterministic() {
+        return deterministic;
+    }
 
-	public final TaskThread getTaskThread() {
-		if (task_thread == null) {
-			task_thread = new TaskThread(deterministic, new Runnable() {
-				public final void run() {
-					selector.wakeup();
-				}
-			});
-		}
-		return task_thread;
-	}
+    final void asyncConnect(String dns_name, int port, Connection conn) {
+        try {
+            initSelector();
+        } catch (IOException e) {
+            System.out.println("Exception: " + e);
+            throw new RuntimeException(e);
+        }
+        DNSTask task = new DNSTask(dns_name, port, conn);
+        getTaskThread().addTask(task);
+    }
 
-	public final void initSelector() throws IOException {
-		if (selector == null)
-			selector = Selector.open();
-	}
+    public final TaskThread getTaskThread() {
+        if (task_thread == null) {
+            task_thread =
+                    new TaskThread(
+                            deterministic,
+                            new Runnable() {
+                                public final void run() {
+                                    selector.wakeup();
+                                }
+                            });
+        }
+        return task_thread;
+    }
 
-	final Selector getSelector() {
-		try {
-			initSelector();
-		} catch (IOException e) {
-			System.out.println("Exception: " + e);
-			throw new RuntimeException(e);
-		}
-		return selector;
-	}
+    public final void initSelector() throws IOException {
+        if (selector == null) selector = Selector.open();
+    }
+
+    final Selector getSelector() {
+        try {
+            initSelector();
+        } catch (IOException e) {
+            System.out.println("Exception: " + e);
+            throw new RuntimeException(e);
+        }
+        return selector;
+    }
 
 	final void unregisterForPinging(Connection conn) {
 		TimedConnection unregister_key = new TimedConnection(-1, conn);
@@ -154,67 +158,62 @@ public final strictfp class NetworkSelector {
 		tickBlocking(0);
 	}
 
-	public final void tick() {
-		try {
-			processTasks();
-			processPings(time_manager.getMillis());
-			if (deterministic.log(selector != null && selector.selectNow() > 0))
-				doTick();
-		} catch (IOException e) {
-			System.out.println("Exception: " + e);
-			throw new RuntimeException(e);
-		}
-	}
+    public final void tick() {
+        try {
+            processTasks();
+            processPings(time_manager.getMillis());
+            if (deterministic.log(selector != null && selector.selectNow() > 0)) doTick();
+        } catch (IOException e) {
+            System.out.println("Exception: " + e);
+            throw new RuntimeException(e);
+        }
+    }
 
-	public final MonotoneTimeManager getTimeManager() {
-		return time_manager;
-	}
+    public final MonotoneTimeManager getTimeManager() {
+        return time_manager;
+    }
 
-	final void cancelKey(SelectionKey key, Handler handler) {
-		Object handler_key = null;
-		if (!deterministic.isPlayback()) {
-			handler_key = key.attachment();
-			key.cancel();
-		}
-		handler_key = deterministic.log(handler_key);
-		handler_map.remove(handler_key);
-	}
+    final void cancelKey(SelectionKey key, Handler handler) {
+        Object handler_key = null;
+        if (!deterministic.isPlayback()) {
+            handler_key = key.attachment();
+            key.cancel();
+        }
+        handler_key = deterministic.log(handler_key);
+        handler_map.remove(handler_key);
+    }
 
-	final void attachToKey(SelectionKey key, Handler handler) {
-		Object handler_key = null;
-		if (!deterministic.isPlayback()) {
-			handler_key = new Integer(current_handler_id++);
-			key.attach(handler_key);
-		}
-		handler_key = deterministic.log(handler_key);
-		handler_map.put(handler_key, handler);
-	}
+    final void attachToKey(SelectionKey key, Handler handler) {
+        Object handler_key = null;
+        if (!deterministic.isPlayback()) {
+            handler_key = new Integer(current_handler_id++);
+            key.attach(handler_key);
+        }
+        handler_key = deterministic.log(handler_key);
+        handler_map.put(handler_key, handler);
+    }
 
-	private final void doTick() throws IOException {
-		Iterator selected_keys = null;
-		if (!deterministic.isPlayback())
-			selected_keys = selector.selectedKeys().iterator();
-		while (deterministic.log(deterministic.isPlayback() || selected_keys.hasNext())) {
-			SelectionKey key;
-			if (!deterministic.isPlayback()) {
-				key = (SelectionKey)selected_keys.next();
-				selected_keys.remove();
-			} else
-				key = null;
-			if (deterministic.log(deterministic.isPlayback() || !key.isValid()))
-				continue;
-			Object handler_key = null;
-			if (!deterministic.isPlayback())
-				handler_key = key.attachment();
-			handler_key = deterministic.log(handler_key);
-			Handler handler = (Handler)handler_map.get(handler_key);
-			try {
-				handler.handle();
-			} catch (IOException e) {
-				System.out.println("Exception: " + e);
-				handler.handleError(e);
-				cancelKey(key, handler);
-			}
-		}
-	}
+    private final void doTick() throws IOException {
+        Iterator selected_keys = null;
+        if (!deterministic.isPlayback()) selected_keys = selector.selectedKeys().iterator();
+        while (deterministic.log(deterministic.isPlayback() || selected_keys.hasNext())) {
+            SelectionKey key;
+            if (!deterministic.isPlayback()) {
+                key = (SelectionKey) selected_keys.next();
+                selected_keys.remove();
+            } else key = null;
+            if (deterministic.log(deterministic.isPlayback() || !key.isValid())) continue;
+            Object handler_key = null;
+            if (!deterministic.isPlayback()) handler_key = key.attachment();
+            handler_key = deterministic.log(handler_key);
+            Handler handler = (Handler) handler_map.get(handler_key);
+            try {
+                handler.handle();
+            } catch (IOException e) {
+                System.out.println("Exception: " + e);
+                handler.handleError(e);
+                cancelKey(key, handler);
+            }
+        }
+    }
 }

@@ -1,157 +1,120 @@
 package com.oddlabs.tt.render;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.OutputStream;
-import java.io.PrintStream;
-import java.net.URL;
-import java.nio.FloatBuffer;
-import java.nio.IntBuffer;
-import java.nio.ByteBuffer;
-import java.util.Locale;
-import java.util.ResourceBundle;
-import java.util.prefs.Preferences;
-import java.util.zip.GZIPInputStream;
-import javax.swing.JOptionPane;
-import javax.swing.UIManager;
-import java.rmi.server.UID;
-import java.net.URLEncoder;
-import java.io.UnsupportedEncodingException;
-
-import org.lwjgl.system.Platform;
-import org.lwjgl.BufferUtils;
-import org.lwjgl.openal.AL;
-import org.lwjgl.openal.AL10;
-import org.lwjgl.opengl.ARBMultisample;
-import com.oddlabs.tt.render.Display;
-import org.lwjgl.opengl.GL11;
-import org.lwjgl.opengl.GL13;
-import org.lwjgl.opengl.GL;
-import com.oddlabs.tt.input.Keyboard;
-
-import static org.lwjgl.openal.ALC10.*;
 import static org.lwjgl.openal.AL10.*;
 import static org.lwjgl.openal.ALC.*;
+import static org.lwjgl.openal.ALC10.*;
 import static org.lwjgl.system.MemoryUtil.*;
-import org.lwjgl.openal.AL;
-import org.lwjgl.openal.ALC;
-import org.lwjgl.openal.ALCapabilities;
-import org.lwjgl.openal.ALCCapabilities;
 
-import com.oddlabs.net.NetworkSelector;
-import com.oddlabs.regclient.RegistrationClient;
-import com.oddlabs.regclient.TotalgamingRegistrationClient;
-import com.oddlabs.regclient.ReflexiveRegistrationClient;
-import com.oddlabs.regclient.TrymediaRegistrationClient;
-import com.oddlabs.net.TaskThread;
-import com.oddlabs.tt.util.Target;
-import com.oddlabs.tt.Main;
-import com.oddlabs.tt.bugclient.BugClientWindow;
-import com.oddlabs.tt.landscape.NotificationListener;
 import com.oddlabs.event.Deterministic;
-import com.oddlabs.tt.viewer.Cheat;
+import com.oddlabs.http.HttpRequestParameters;
+import com.oddlabs.matchmaking.Game;
+import com.oddlabs.net.NetworkSelector;
+import com.oddlabs.net.TaskThread;
+import com.oddlabs.net.TimeManager;
+import com.oddlabs.regclient.RegistrationClient;
+import com.oddlabs.tt.Main;
 import com.oddlabs.tt.animation.AnimationManager;
 import com.oddlabs.tt.animation.TimerAnimation;
 import com.oddlabs.tt.animation.Updatable;
-import com.oddlabs.tt.audio.AudioManager;
-import com.oddlabs.tt.audio.AudioPlayer;
 import com.oddlabs.tt.audio.AbstractAudioPlayer;
+import com.oddlabs.tt.audio.AudioManager;
 import com.oddlabs.tt.audio.AudioParameters;
+import com.oddlabs.tt.audio.AudioPlayer;
 import com.oddlabs.tt.camera.CameraState;
 import com.oddlabs.tt.camera.MenuCamera;
-import com.oddlabs.tt.event.LocalEventQueue;
-import com.oddlabs.tt.render.RenderQueues;
-import com.oddlabs.tt.form.WelcomeForm;
 import com.oddlabs.tt.delegate.MainMenu;
-import com.oddlabs.tt.form.MessageForm;
-import com.oddlabs.tt.form.OptionsMenu;
-import com.oddlabs.tt.form.ProgressForm;
-import com.oddlabs.tt.form.LoadCallback;
 import com.oddlabs.tt.delegate.QuitScreen;
-import com.oddlabs.tt.form.WarningForm;
+import com.oddlabs.tt.event.LocalEventQueue;
+import com.oddlabs.tt.form.LoadCallback;
+import com.oddlabs.tt.form.MessageForm;
+import com.oddlabs.tt.form.ProgressForm;
 import com.oddlabs.tt.global.Globals;
 import com.oddlabs.tt.global.GlobalsInit;
 import com.oddlabs.tt.global.Settings;
-import com.oddlabs.tt.gui.Languages;
 import com.oddlabs.tt.gui.CounterLabel;
-import com.oddlabs.tt.gui.Fadable;
-import com.oddlabs.tt.gui.GUIRoot;
 import com.oddlabs.tt.gui.GUI;
+import com.oddlabs.tt.gui.GUIRoot;
 import com.oddlabs.tt.gui.Label;
+import com.oddlabs.tt.gui.Languages;
 import com.oddlabs.tt.gui.LocalInput;
 import com.oddlabs.tt.gui.Skin;
 import com.oddlabs.tt.guievent.MouseClickListener;
-import com.oddlabs.tt.input.KeyboardInput;
-import com.oddlabs.tt.landscape.AbstractTreeGroup;
-import com.oddlabs.tt.landscape.WorldParameters;
-import com.oddlabs.matchmaking.Game;
-import com.oddlabs.http.HttpRequestParameters;
-import com.oddlabs.tt.landscape.World;
-import com.oddlabs.tt.model.AbstractElementNode;
-import com.oddlabs.tt.model.Building;
-import com.oddlabs.tt.model.Selectable;
-import com.oddlabs.tt.render.LandscapeRenderer;
 import com.oddlabs.tt.landscape.LandscapeResources;
-import com.oddlabs.net.TimeManager;
-import com.oddlabs.tt.net.Network;
-import com.oddlabs.tt.net.PlayerSlot;
+import com.oddlabs.tt.landscape.NotificationListener;
+import com.oddlabs.tt.landscape.TreeSupply;
+import com.oddlabs.tt.landscape.World;
+import com.oddlabs.tt.landscape.WorldParameters;
+import com.oddlabs.tt.model.Selectable;
 import com.oddlabs.tt.player.Player;
 import com.oddlabs.tt.player.PlayerInfo;
-import com.oddlabs.tt.player.UnitInfo;
-import com.oddlabs.tt.particle.Emitter;
-import com.oddlabs.tt.particle.Lightning;
-import com.oddlabs.tt.pathfinder.UnitGrid;
 import com.oddlabs.tt.procedural.Landscape;
-import com.oddlabs.tt.player.campaign.CampaignState;
-import com.oddlabs.tt.resource.GLImage;
-import com.oddlabs.tt.resource.WorldInfo;
-import com.oddlabs.tt.resource.GLIntImage;
 import com.oddlabs.tt.resource.IslandGenerator;
-import com.oddlabs.tt.resource.WorldGenerator;
 import com.oddlabs.tt.resource.NativeResource;
-import com.oddlabs.tt.scenery.Sky;
-import com.oddlabs.tt.scenery.Water;
+import com.oddlabs.tt.resource.WorldGenerator;
+import com.oddlabs.tt.resource.WorldInfo;
+import com.oddlabs.tt.util.BackBufferRenderer;
 import com.oddlabs.tt.util.GLState;
 import com.oddlabs.tt.util.GLStateStack;
 import com.oddlabs.tt.util.GLUtils;
 import com.oddlabs.tt.util.LoggerOutputStream;
-import com.oddlabs.tt.util.BackBufferRenderer;
 import com.oddlabs.tt.util.StatCounter;
 import com.oddlabs.tt.util.StrictGLU;
-import com.oddlabs.tt.viewer.AmbientAudio;
 import com.oddlabs.tt.util.StrictMatrix4f;
-import com.oddlabs.tt.landscape.TreeSupply;
-import com.oddlabs.tt.viewer.Selection;
-import com.oddlabs.tt.util.StrictVector4f;
+import com.oddlabs.tt.util.Target;
 import com.oddlabs.tt.util.Utils;
 import com.oddlabs.tt.vbo.VBO;
+import com.oddlabs.tt.viewer.AmbientAudio;
+import com.oddlabs.tt.viewer.Cheat;
+import com.oddlabs.tt.viewer.Selection;
 import com.oddlabs.updater.UpdateInfo;
 
-import java.util.Map;
+import org.lwjgl.BufferUtils;
+import org.lwjgl.openal.AL;
+import org.lwjgl.openal.AL10;
+import org.lwjgl.openal.ALCCapabilities;
+import org.lwjgl.openal.ALCapabilities;
+import org.lwjgl.opengl.ARBMultisample;
+import org.lwjgl.opengl.GL;
+import org.lwjgl.opengl.GL11;
+import org.lwjgl.opengl.GL13;
+import org.lwjgl.system.Platform;
+
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.PrintStream;
+import java.net.URLEncoder;
+import java.nio.ByteBuffer;
+import java.nio.FloatBuffer;
+import java.nio.IntBuffer;
+import java.rmi.server.UID;
 import java.util.HashMap;
+import java.util.Locale;
+import java.util.Map;
+import java.util.ResourceBundle;
+import java.util.prefs.Preferences;
+
+import javax.swing.JOptionPane;
+import javax.swing.UIManager;
 
 public final strictfp class Renderer {
 
-    private final static FloatBuffer matrix_buf = BufferUtils.createFloatBuffer(16);
+    private static final FloatBuffer matrix_buf = BufferUtils.createFloatBuffer(16);
 
     private static GLStateStack display_state_stack = new GLStateStack();
 
-    private final static Renderer renderer_instance = new Renderer();
-    private final static StatCounter fps = new StatCounter(10);
+    private static final Renderer renderer_instance = new Renderer();
+    private static final StatCounter fps = new StatCounter(10);
     private static int num_triangles_rendered;
 
     private static RegistrationClient registration_client;
 
     private static boolean grab_frames = false;
 
-    private final Locale default_locale = new Locale(Locale.getDefault().getLanguage(), Locale.getDefault().getCountry(), "default");
+    private final Locale default_locale =
+            new Locale(
+                    Locale.getDefault().getLanguage(), Locale.getDefault().getCountry(), "default");
     private final StrictMatrix4f proj = new StrictMatrix4f();
 
     private static AbstractAudioPlayer music;
@@ -169,16 +132,16 @@ public final strictfp class Renderer {
     private boolean movie_recording_started = false;
     private AmbientAudio ambient;
 
-    public final static float getFPS() {
+    public static final float getFPS() {
         return fps.getAveragePerUpdate();
     }
 
-    public final static boolean isRegistered() {
+    public static final boolean isRegistered() {
         return true;
-        //return registration_client.isRegistered();
+        // return registration_client.isRegistered();
     }
 
-    public final static void makeCurrent() {
+    public static final void makeCurrent() {
         try {
             Display.makeCurrent();
             GLStateStack.setCurrent(display_state_stack);
@@ -187,11 +150,16 @@ public final strictfp class Renderer {
         }
     }
 
-    public final static void runGame(boolean grab_frames, boolean eventload, boolean zipped, boolean silent, UpdateInfo update_info) {
+    public static final void runGame(
+            boolean grab_frames,
+            boolean eventload,
+            boolean zipped,
+            boolean silent,
+            UpdateInfo update_info) {
         renderer_instance.run(grab_frames, eventload, zipped, silent, update_info);
     }
 
-    public final static Renderer getRenderer() {
+    public static final Renderer getRenderer() {
         return renderer_instance;
     }
 
@@ -219,18 +187,19 @@ public final strictfp class Renderer {
     }
 
     public static void multProjection(StrictMatrix4f matrix) {
-        StrictGLU.gluPerspective(matrix,
+        StrictGLU.gluPerspective(
+                matrix,
                 Globals.FOV,
                 LocalInput.getViewAspect(),
                 Globals.VIEW_MIN,
                 Globals.VIEW_MAX);
     }
 
-    public final static void registerTrianglesRendered(int count) {
+    public static final void registerTrianglesRendered(int count) {
         num_triangles_rendered += count;
     }
 
-    public final static int getTrianglesRendered() {
+    public static final int getTrianglesRendered() {
         return num_triangles_rendered;
     }
 
@@ -242,7 +211,7 @@ public final strictfp class Renderer {
         gui.render(ambient, frustum_state);
     }
 
-    public final static void shutdownWithQuitScreen(GUIRoot gui_root) {
+    public static final void shutdownWithQuitScreen(GUIRoot gui_root) {
         if (!isRegistered()) {
             new QuitScreen(gui_root, gui_root.getDelegate().getCamera());
         } else {
@@ -250,7 +219,7 @@ public final strictfp class Renderer {
         }
     }
 
-    public final static void shutdown() {
+    public static final void shutdown() {
         finished = true;
     }
 
@@ -258,7 +227,7 @@ public final strictfp class Renderer {
         return finished;
     }
 
-    private final static void deleteLog(File log) {
+    private static final void deleteLog(File log) {
         for (int i = 0; i < com.oddlabs.util.Utils.LOG_FILES.length; i++) {
             File log_file = new File(log, com.oddlabs.util.Utils.LOG_FILES[i]);
             log_file.delete();
@@ -266,7 +235,7 @@ public final strictfp class Renderer {
         log.delete();
     }
 
-    private final static void deleteOldLogs(File last_log_dir, File new_log_dir, File logs_dir) {
+    private static final void deleteOldLogs(File last_log_dir, File new_log_dir, File logs_dir) {
         File[] logs = logs_dir.listFiles();
         if (logs == null) {
             return;
@@ -281,7 +250,12 @@ public final strictfp class Renderer {
         }
     }
 
-    private final void run(boolean grab_frames, boolean eventload, boolean zipped, boolean silent, UpdateInfo update_info) {
+    private final void run(
+            boolean grab_frames,
+            boolean eventload,
+            boolean zipped,
+            boolean silent,
+            UpdateInfo update_info) {
         Renderer.grab_frames = grab_frames;
         long start_time = System.currentTimeMillis();
         boolean first_frame = true;
@@ -295,11 +269,14 @@ public final strictfp class Renderer {
         } else {
             platform_dir = "";
         }
-        String game_dir_path = System.getProperty("user.home") + File.separator + platform_dir + Globals.GAME_NAME;
+        String game_dir_path =
+                System.getProperty("user.home") + File.separator + platform_dir + Globals.GAME_NAME;
         File game_dir = new File(game_dir_path);
         Settings settings = Settings.getSettings();
 
-        readOrSetPreference(Globals.AFFILIATE_ID_KEY, settings.affiliate_id); // setting affiliate id in preferences
+        readOrSetPreference(
+                Globals.AFFILIATE_ID_KEY,
+                settings.affiliate_id); // setting affiliate id in preferences
 
         File event_logs_dir = new File(game_dir, "logs");
         File event_log_dir = new File(event_logs_dir, Long.toString(System.currentTimeMillis()));
@@ -319,11 +296,14 @@ public final strictfp class Renderer {
 
         LocalInput _ = new LocalInput();
 
-        NetworkSelector network = new NetworkSelector(LocalEventQueue.getQueue().getDeterministic(), new TimeManager() {
-            public final long getMillis() {
-                return LocalEventQueue.getQueue().getMillis();
-            }
-        });
+        NetworkSelector network =
+                new NetworkSelector(
+                        LocalEventQueue.getQueue().getDeterministic(),
+                        new TimeManager() {
+                            public final long getMillis() {
+                                return LocalEventQueue.getQueue().getMillis();
+                            }
+                        });
 
         LocalInput.settings(update_info, game_dir, event_log_dir, settings);
         try {
@@ -342,6 +322,7 @@ public final strictfp class Renderer {
         GUI gui = new GUI(languages);
 
         GlobalsInit.init();
+        DisplayModel.init();
         LocalInput.init();
 
         long startup_timei = System.currentTimeMillis() - start_time;
@@ -368,7 +349,8 @@ public final strictfp class Renderer {
                 display(gui);
                 if (first_frame) {
                     long startup_time = System.currentTimeMillis() - start_time;
-                    System.out.println("First frame rendered after " + startup_time + " milliseconds");
+                    System.out.println(
+                            "First frame rendered after " + startup_time + " milliseconds");
                     first_frame = false;
                 }
                 if (grab_frames && movie_recording_started) {
@@ -383,8 +365,10 @@ public final strictfp class Renderer {
     }
 
     /**
-     * Checks if the registration file exists in the game directory, and if not, tries to find it in the working directory.
-     * If it still doesn't exist, it will try to find it in the /app directory
+     * Checks if the registration file exists in the game directory, and if not, tries to find it in
+     * the working directory. If it still doesn't exist, it will try to find it in the /app
+     * directory
+     *
      * @param game_dir The game directory where the registration file is expected to be
      */
     private File setupRegistrationFile(File game_dir) {
@@ -399,8 +383,10 @@ public final strictfp class Renderer {
 
             // With windows, the working directory is above, so check it in /app
             if (!registration_file.exists()) {
-                System.out.println("Registration file not found, trying from windows working directory.");
-                registration_file = new File(System.getProperty("user.dir") + "/app", Globals.REG_FILE_NAME);
+                System.out.println(
+                        "Registration file not found, trying from windows working directory.");
+                registration_file =
+                        new File(System.getProperty("user.dir") + "/app", Globals.REG_FILE_NAME);
             }
         }
         if (!registration_file.exists()) {
@@ -411,6 +397,7 @@ public final strictfp class Renderer {
 
     /**
      * Sets the language for the game and loads the corresponding language files
+     *
      * @param deterministic The deterministic object
      */
     private Languages setupLanguages(Deterministic deterministic) {
@@ -429,7 +416,9 @@ public final strictfp class Renderer {
     }
 
     /**
-     * Sets up the bug reporter if the game has crashed and the user has not hidden the bug reporter via the settings file
+     * Sets up the bug reporter if the game has crashed and the user has not hidden the bug reporter
+     * via the settings file
+     *
      * @param deterministic The deterministic object used to allow playback of events
      * @return The directory where the last event log is stored
      */
@@ -441,8 +430,10 @@ public final strictfp class Renderer {
             System.out.println("Event log dir: " + last_event_log_dir);
             try {
                 // TODO: Fix this eventually? And update bug reporter to work / submit issue?
-                // For some reason the bug client window will never pop up and the game won't launch do to this
-                // URL url = new URL("https://" + settings.getBugreportAddress() + "/reportbug.php");
+                // For some reason the bug client window will never pop up and the game won't launch
+                // do to this
+                // URL url = new URL("https://" + settings.getBugreportAddress() +
+                // "/reportbug.php");
                 // BugClientWindow.showReporter(url, settings.last_revision, last_event_log_dir);
                 System.out.println("Bug reporter completed");
             } catch (Exception e) {
@@ -454,38 +445,55 @@ public final strictfp class Renderer {
     }
 
     /**
-     * Cleans up old log files from the last launch of the game unless developer mode is enabled or a log file is being played back.
+     * Cleans up old log files from the last launch of the game unless developer mode is enabled or
+     * a log file is being played back.
+     *
      * @param deterministic The deterministic object used to allow playback of events
      * @param last_event_log_dir The directory where the last event log is stored
      * @param event_log_dir The directory where the current event log is stored
      * @param event_logs_dir The directory where all event logs are stored
      */
-    private void cleanLogs(Deterministic deterministic, File last_event_log_dir, File event_log_dir, File event_logs_dir) {
+    private void cleanLogs(
+            Deterministic deterministic,
+            File last_event_log_dir,
+            File event_log_dir,
+            File event_logs_dir) {
         if (!Settings.getSettings().inDeveloperMode() && !deterministic.isPlayback()) {
             deleteOldLogs(last_event_log_dir, event_log_dir, event_logs_dir);
         }
     }
 
-    /** 
+    /**
      * Sets up steaming event logging to the event_log_dir.
-     * 
+     *
      * @param event_log_dir The directory where the event log files will be written.
-     * @param silent If true, the standard output and error streams will not be redirected to the log files.
+     * @param silent If true, the standard output and error streams will not be redirected to the
+     *     log files.
      */
     private void setupEventLogging(File event_log_dir, boolean silent) {
-        if (LocalEventQueue.getQueue().getDeterministic() == null && Settings.getSettings().save_event_log) {
+        if (LocalEventQueue.getQueue().getDeterministic() == null
+                && Settings.getSettings().save_event_log) {
             event_log_dir.mkdirs();
             System.out.println("Writing log files in " + event_log_dir);
-            LocalEventQueue.getQueue().setEventsLogged(new File(event_log_dir + File.separator + com.oddlabs.util.Utils.EVENT_LOG));
+            LocalEventQueue.getQueue()
+                    .setEventsLogged(
+                            new File(
+                                    event_log_dir
+                                            + File.separator
+                                            + com.oddlabs.util.Utils.EVENT_LOG));
 
             try {
-                OutputStream std_err_file = new FileOutputStream(new File(event_log_dir, com.oddlabs.util.Utils.STD_ERR));
-                OutputStream std_out_file = new FileOutputStream(new File(event_log_dir, com.oddlabs.util.Utils.STD_OUT));
+                OutputStream std_err_file =
+                        new FileOutputStream(
+                                new File(event_log_dir, com.oddlabs.util.Utils.STD_ERR));
+                OutputStream std_out_file =
+                        new FileOutputStream(
+                                new File(event_log_dir, com.oddlabs.util.Utils.STD_OUT));
                 OutputStream new_err;
                 OutputStream new_out;
                 if (!silent) {
-                    new_err = new LoggerOutputStream(new OutputStream[]{System.err, std_err_file});
-                    new_out = new LoggerOutputStream(new OutputStream[]{System.out, std_out_file});
+                    new_err = new LoggerOutputStream(new OutputStream[] {System.err, std_err_file});
+                    new_out = new LoggerOutputStream(new OutputStream[] {System.out, std_out_file});
                 } else {
                     new_err = std_err_file;
                     new_out = std_out_file;
@@ -493,31 +501,33 @@ public final strictfp class Renderer {
                 System.setErr(new PrintStream(new_err));
                 System.setOut(new PrintStream(new_out));
             } catch (IOException e) {
-                System.err.println("Failed to setup logging to " + event_log_dir + " exception: " + e);
+                System.err.println(
+                        "Failed to setup logging to " + event_log_dir + " exception: " + e);
             }
         }
     }
 
-    /** 
+    /**
      * Setups up deterministic logging for events.
+     *
      * @param eventload If true, the events will be loaded from a file.
      * @param zipped If true, the event log file path will be treated as a .gz file
      */
-    private void setupLoadEvents(boolean eventload, boolean zipped) {    
+    private void setupLoadEvents(boolean eventload, boolean zipped) {
         if (eventload || grab_frames) {
-            String last_event_log_path = Settings.getSettings().last_event_log_dir + File.separator + "event.log";
+            String last_event_log_path =
+                    Settings.getSettings().last_event_log_dir + File.separator + "event.log";
             if (zipped) {
                 last_event_log_path += ".gz";
             }
             System.out.println("last_event_log_path = " + last_event_log_path);
             // Only use when anal debugging
-//			ChecksumLogger.initLogging();
+            //			ChecksumLogger.initLogging();
             LocalEventQueue.getQueue().loadEvents(new File(last_event_log_path), zipped);
         }
     }
-    /**
-     * Creates a http request to the registration server with the current affiliate ID
-     */
+
+    /** Creates a http request to the registration server with the current affiliate ID */
     private final HttpRequestParameters createRegistrationParameters() {
         String affiliate_id = "";
         try {
@@ -528,14 +538,18 @@ public final strictfp class Renderer {
         Map parameters = new HashMap();
         parameters.put("current_affiliate_id", Settings.getSettings().affiliate_id);
         parameters.put("affiliate_id", affiliate_id);
-        return new HttpRequestParameters("https://" + Settings.getSettings().getRegistrationAddress() + "/oddlabs/registration", parameters);
+        return new HttpRequestParameters(
+                "https://"
+                        + Settings.getSettings().getRegistrationAddress()
+                        + "/oddlabs/registration",
+                parameters);
     }
 
     public final Locale getDefaultLocale() {
         return default_locale;
     }
 
-    private final static void failedOpenGL(Exception e) {
+    private static final void failedOpenGL(Exception e) {
         e.printStackTrace();
         try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
@@ -546,7 +560,13 @@ public final strictfp class Renderer {
         ResourceBundle bundle = ResourceBundle.getBundle(Renderer.class.getName());
         String title = Utils.getBundleString(bundle, "error_title");
         String message = Utils.getBundleString(bundle, "opengl_error_message");
-        int choice = JOptionPane.showConfirmDialog(null, message, title, JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+        int choice =
+                JOptionPane.showConfirmDialog(
+                        null,
+                        message,
+                        title,
+                        JOptionPane.YES_NO_OPTION,
+                        JOptionPane.WARNING_MESSAGE);
 
         if (choice == JOptionPane.YES_OPTION) {
             String new_uid = (new UID()).toString();
@@ -559,14 +579,24 @@ public final strictfp class Renderer {
             long total_mem = Runtime.getRuntime().maxMemory();
 
             try {
-                String url = "http://" + Settings.getSettings().getDomainName() + "/driversupport.php?"
-                        + "uid=" + URLEncoder.encode(uid, "UTF-8")
-                        + "&raw_os=" + URLEncoder.encode(os_name, "UTF-8")
-                        + "&os_version=" + URLEncoder.encode(os_version, "UTF-8")
-                        + "&arch=" + URLEncoder.encode(os_arch, "UTF-8")
-                        + "&java_version=" + URLEncoder.encode(java_version, "UTF-8")
-                        + "&java_vendor=" + URLEncoder.encode(java_vendor, "UTF-8")
-                        + "&total_mem=" + URLEncoder.encode("" + total_mem, "UTF-8");
+                String url =
+                        "http://"
+                                + Settings.getSettings().getDomainName()
+                                + "/driversupport.php?"
+                                + "uid="
+                                + URLEncoder.encode(uid, "UTF-8")
+                                + "&raw_os="
+                                + URLEncoder.encode(os_name, "UTF-8")
+                                + "&os_version="
+                                + URLEncoder.encode(os_version, "UTF-8")
+                                + "&arch="
+                                + URLEncoder.encode(os_arch, "UTF-8")
+                                + "&java_version="
+                                + URLEncoder.encode(java_version, "UTF-8")
+                                + "&java_vendor="
+                                + URLEncoder.encode(java_vendor, "UTF-8")
+                                + "&total_mem="
+                                + URLEncoder.encode("" + total_mem, "UTF-8");
                 // Sys.openURL(url);
             } catch (java.io.UnsupportedEncodingException uee) {
                 uee.printStackTrace();
@@ -607,84 +637,127 @@ public final strictfp class Renderer {
         }
     }
 
-    public final static void startMenu(NetworkSelector network, GUI gui) {
+    public static final void startMenu(NetworkSelector network, GUI gui) {
         setupMainMenu(network, gui, false);
     }
 
-    private static void setupMainMenu(final NetworkSelector network, GUI gui, final boolean first_progress) {
-        final WorldGenerator generator = new IslandGenerator(256, Landscape.NATIVE, Globals.LANDSCAPE_HILLS, Globals.LANDSCAPE_VEGETATION, Globals.LANDSCAPE_RESOURCES, Globals.LANDSCAPE_SEED);
-        ProgressForm.setProgressForm(network, gui, new LoadCallback() {
-            public final UIRenderer load(GUIRoot gui_root) {
-                return finishMainMenu(network, gui_root, first_progress, generator);
-            }
-        }, first_progress);
+    private static void setupMainMenu(
+            final NetworkSelector network, GUI gui, final boolean first_progress) {
+        final WorldGenerator generator =
+                new IslandGenerator(
+                        256,
+                        Landscape.NATIVE,
+                        Globals.LANDSCAPE_HILLS,
+                        Globals.LANDSCAPE_VEGETATION,
+                        Globals.LANDSCAPE_RESOURCES,
+                        Globals.LANDSCAPE_SEED);
+        ProgressForm.setProgressForm(
+                network,
+                gui,
+                new LoadCallback() {
+                    public final UIRenderer load(GUIRoot gui_root) {
+                        return finishMainMenu(network, gui_root, first_progress, generator);
+                    }
+                },
+                first_progress);
     }
 
-    private static UIRenderer finishMainMenu(NetworkSelector network, GUIRoot gui_root, boolean first_progress, WorldGenerator generator) {
+    private static UIRenderer finishMainMenu(
+            NetworkSelector network,
+            GUIRoot gui_root,
+            boolean first_progress,
+            WorldGenerator generator) {
         AnimationManager.freezeTime();
         PlayerInfo player_info = new PlayerInfo(0, 0, "");
         RenderQueues render_queues = new RenderQueues();
         LandscapeResources landscape_resources = World.loadCommon(render_queues);
-        WorldParameters world_params = new WorldParameters(Game.GAMESPEED_NORMAL, "", 2, Player.DEFAULT_MAX_UNIT_COUNT);
-        PlayerInfo[] players = new PlayerInfo[]{player_info};
-        WorldInfo world_info = generator.generate(players.length, world_params.getInitialUnitCount(), 0f);
-        World world = World.newWorld(AudioManager.getManager(), landscape_resources, null, LandscapeResources.loadTreeLowDetails(), new NotificationListener() {
-            public final void gamespeedChanged(int speed) {
-            }
+        WorldParameters world_params =
+                new WorldParameters(Game.GAMESPEED_NORMAL, "", 2, Player.DEFAULT_MAX_UNIT_COUNT);
+        PlayerInfo[] players = new PlayerInfo[] {player_info};
+        WorldInfo world_info =
+                generator.generate(players.length, world_params.getInitialUnitCount(), 0f);
+        World world =
+                World.newWorld(
+                        AudioManager.getManager(),
+                        landscape_resources,
+                        null,
+                        LandscapeResources.loadTreeLowDetails(),
+                        new NotificationListener() {
+                            public final void gamespeedChanged(int speed) {}
 
-            public final void playerGamespeedChanged() {
-            }
+                            public final void playerGamespeedChanged() {}
 
-            public final void newAttackNotification(Selectable target) {
-            }
+                            public final void newAttackNotification(Selectable target) {}
 
-            public final void newSelectableNotification(Selectable target) {
-            }
+                            public final void newSelectableNotification(Selectable target) {}
 
-            public final void registerTarget(Target target) {
-            }
+                            public final void registerTarget(Target target) {}
 
-            public final void unregisterTarget(Target target) {
-            }
+                            public final void unregisterTarget(Target target) {}
 
-            public final void updateTreeLowDetail(StrictMatrix4f matrix, TreeSupply tree) {
-            }
+                            public final void updateTreeLowDetail(
+                                    StrictMatrix4f matrix, TreeSupply tree) {}
 
-            public final void patchesEdited(int patch_x0, int patch_y0, int patch_x1, int patch_y1) {
-            }
-        }, world_params, world_info, generator.getTerrainType(), players, new float[][]{Player.COLORS[0]});
+                            public final void patchesEdited(
+                                    int patch_x0, int patch_y0, int patch_x1, int patch_y1) {}
+                        },
+                        world_params,
+                        world_info,
+                        generator.getTerrainType(),
+                        players,
+                        new float[][] {Player.COLORS[0]});
         AnimationManager manager = new AnimationManager();
-        LandscapeRenderer landscape_renderer = new LandscapeRenderer(world, world_info, gui_root, manager);
+        LandscapeRenderer landscape_renderer =
+                new LandscapeRenderer(world, world_info, gui_root, manager);
         Player local_player = world.getPlayers()[0];
         Selection selection = new Selection(local_player);
-        UIRenderer renderer = new DefaultRenderer(new Cheat(), local_player, render_queues, generator.getTerrainType(), world_info, landscape_renderer, new Picker(manager, local_player, render_queues, landscape_renderer, selection), selection, generator);
+        UIRenderer renderer =
+                new DefaultRenderer(
+                        new Cheat(),
+                        local_player,
+                        render_queues,
+                        generator.getTerrainType(),
+                        world_info,
+                        landscape_renderer,
+                        new Picker(
+                                manager,
+                                local_player,
+                                render_queues,
+                                landscape_renderer,
+                                selection),
+                        selection,
+                        generator);
         setMusicPath("/music/menu.ogg", 0f);
         MainMenu main_menu = new MainMenu(network, gui_root, new MenuCamera(world, manager));
         gui_root.pushDelegate(main_menu);
         /*
-		if (first_progress && Settings.getSettings().warning_no_sound && !LocalInput.alIsCreated()) {
-			ResourceBundle bundle = ResourceBundle.getBundle(Renderer.class.getName());
-			gui_root.addModalForm(new WarningForm(Utils.getBundleString(bundle, "sound_not_available_caption"), Utils.getBundleString(bundle, "sound_not_available_message")));
-		}*/
+        if (first_progress && Settings.getSettings().warning_no_sound && !LocalInput.alIsCreated()) {
+        	ResourceBundle bundle = ResourceBundle.getBundle(Renderer.class.getName());
+        	gui_root.addModalForm(new WarningForm(Utils.getBundleString(bundle, "sound_not_available_caption"), Utils.getBundleString(bundle, "sound_not_available_message")));
+        }*/
         if (!initNetwork(network)) {
-//		if (true) {
+            //		if (true) {
             ResourceBundle bundle = ResourceBundle.getBundle(Renderer.class.getName());
-            gui_root.addModalForm(new MessageForm(Utils.getBundleString(bundle, "network_not_available_caption"),
-                    Utils.getBundleString(bundle, "network_not_available_message"),
-                    Utils.getBundleString(bundle, "quit"),
-                    new MouseClickListener() {
-                public final void mouseClicked(int button, int x, int y, int clicks) {
-                    shutdown();
-                }
-            }));
+            gui_root.addModalForm(
+                    new MessageForm(
+                            Utils.getBundleString(bundle, "network_not_available_caption"),
+                            Utils.getBundleString(bundle, "network_not_available_message"),
+                            Utils.getBundleString(bundle, "quit"),
+                            new MouseClickListener() {
+                                public final void mouseClicked(
+                                        int button, int x, int y, int clicks) {
+                                    shutdown();
+                                }
+                            }));
         }
-        // We'll leave out the reporting, since checksum errors can happen when a peer is disconnected halway through it's EOT
+        // We'll leave out the reporting, since checksum errors can happen when a peer is
+        // disconnected halway through it's EOT
         // broadcast
         /*		if (Globals.checksum_error_in_last_game) {
-				Globals.checksum_error_in_last_game = false;
-				ResourceBundle bundle = ResourceBundle.getBundle(Renderer.class.getName());
-				GUIRoot.getGUIRoot().addModalForm(new QuestionForm(Utils.getBundleString(bundle, "checksum_error_message"), new BugReportListener()));
-				}*/
+        Globals.checksum_error_in_last_game = false;
+        ResourceBundle bundle = ResourceBundle.getBundle(Renderer.class.getName());
+        GUIRoot.getGUIRoot().addModalForm(new QuestionForm(Utils.getBundleString(bundle, "checksum_error_message"), new BugReportListener()));
+        }*/
         return renderer;
     }
 
@@ -713,16 +786,16 @@ public final strictfp class Renderer {
         System.out.println("Cleanup complete. Exiting");
     }
 
-    public final static void resetInput() {
+    public static final void resetInput() {
         LocalInput.resetKeys();
     }
 
-    private final static void destroyNative() {
-        //destroyAL();
+    private static final void destroyNative() {
+        // destroyAL();
         Display.destroy();
     }
 
-    public final static void dumpWindowInfo() {
+    public static final void dumpWindowInfo() {
         int r = GLUtils.getGLInteger(GL11.GL_RED_BITS);
         int g = GLUtils.getGLInteger(GL11.GL_GREEN_BITS);
         int b = GLUtils.getGLInteger(GL11.GL_BLUE_BITS);
@@ -735,7 +808,23 @@ public final strictfp class Renderer {
             sample_buffers = GLUtils.getGLInteger(ARBMultisample.GL_SAMPLE_BUFFERS_ARB);
             samples = GLUtils.getGLInteger(ARBMultisample.GL_SAMPLES_ARB);
         }
-        System.out.println("r = " + r + " | g = " + g + " | b = " + b + " | a = " + a + " | depth = " + depth + " | stencil = " + stencil + " | sample_buffers = " + sample_buffers + " | samples = " + samples);
+        System.out.println(
+                "r = "
+                        + r
+                        + " | g = "
+                        + g
+                        + " | b = "
+                        + b
+                        + " | a = "
+                        + a
+                        + " | depth = "
+                        + depth
+                        + " | stencil = "
+                        + stencil
+                        + " | sample_buffers = "
+                        + sample_buffers
+                        + " | samples = "
+                        + samples);
     }
 
     private final void initNative(boolean crashed, NetworkSelector network) throws Exception {
@@ -753,7 +842,7 @@ public final strictfp class Renderer {
         System.out.println("total_mem = '" + total_mem + "'");
 
         try {
-            //AL.create(null, -1, -1, false);
+            // AL.create(null, -1, -1, false);
             initAL();
         } catch (Exception e) {
             System.err.println("Could not create sound system: " + e);
@@ -769,7 +858,8 @@ public final strictfp class Renderer {
         String extensions = GL11.glGetString(GL11.GL_EXTENSIONS);
         System.out.println("GL extensions: '" + extensions + "'");
 
-        if (GLUtils.isIntelGMA950() || !Settings.getSettings().useTextureCompression()) {  // Intel mac mini hack
+        if (GLUtils.isIntelGMA950()
+                || !Settings.getSettings().useTextureCompression()) { // Intel mac mini hack
             Globals.disableTextureCompression();
         }
 
@@ -777,17 +867,22 @@ public final strictfp class Renderer {
         try {
             if (!GL.getCapabilities().OpenGL13) {
                 if (!GL.getCapabilities().GL_ARB_multitexture) {
-                    throw new Exception("Neither OpenGL 1.3 nor GL_ARB_multitexture is supported, one of which is required for the game to run. Please upgrade your video drivers and/or video card.");
+                    throw new Exception(
+                            "Neither OpenGL 1.3 nor GL_ARB_multitexture is supported, one of which"
+                                    + " is required for the game to run. Please upgrade your video"
+                                    + " drivers and/or video card.");
                 }
-                System.out.println("OpenGL 1.3 is not supported, using GL_ARB_multitexture and GL_ARB_texture_compression instead");
+                System.out.println(
+                        "OpenGL 1.3 is not supported, using GL_ARB_multitexture and"
+                                + " GL_ARB_texture_compression instead");
             } else {
                 System.out.println("OpenGL 1.3 is supported");
             }
-//			int num_tex_units = GLUtils.getGLInteger(GL13.GL_MAX_TEXTURE_UNITS);
-//			if (num_tex_units < 2)
-//				throw new Exception("Number of texture units " + num_tex_units + " < 2");
+            //			int num_tex_units = GLUtils.getGLInteger(GL13.GL_MAX_TEXTURE_UNITS);
+            //			if (num_tex_units < 2)
+            //				throw new Exception("Number of texture units " + num_tex_units + " < 2");
         } catch (Exception e) {
-            //destroyAL();
+            // destroyAL();
             e.printStackTrace();
             System.out.println("Got exception: " + e);
             Display.destroy();
@@ -804,9 +899,10 @@ public final strictfp class Renderer {
         System.out.println("vbo = " + Settings.getSettings().useVBO());
         System.out.println("pbuffer = " + Settings.getSettings().usePbuffer());
         System.out.println("fbo = " + Settings.getSettings().useFBO());
-        System.out.println("use_texture_compression = " + Settings.getSettings().useTextureCompression());
+        System.out.println(
+                "use_texture_compression = " + Settings.getSettings().useTextureCompression());
         /*if (Settings.getSettings().vsync)
-			Display.setVSyncEnabled(true);*/
+        Display.setVSyncEnabled(true);*/
         initGL();
         initVisibleGL();
     }
@@ -847,11 +943,26 @@ public final strictfp class Renderer {
         }
     }
 
-    private final static void initMusicPlayer() {
-        music = AudioManager.getManager().newAudio(new AudioParameters(music_path, 0f, 0f, 0f, AudioPlayer.AUDIO_RANK_MUSIC, AudioPlayer.AUDIO_DISTANCE_MUSIC, Settings.getSettings().music_gain, 1f, 1f, true, true, true));
+    private static final void initMusicPlayer() {
+        music =
+                AudioManager.getManager()
+                        .newAudio(
+                                new AudioParameters(
+                                        music_path,
+                                        0f,
+                                        0f,
+                                        0f,
+                                        AudioPlayer.AUDIO_RANK_MUSIC,
+                                        AudioPlayer.AUDIO_DISTANCE_MUSIC,
+                                        Settings.getSettings().music_gain,
+                                        1f,
+                                        1f,
+                                        true,
+                                        true,
+                                        true));
     }
 
-    public final static void setMusicPath(String music_path, float delay) {
+    public static final void setMusicPath(String music_path, float delay) {
         if (Display.isALCreated()) {
             if (music != null && Settings.getSettings().play_music) {
                 music.stop(2.5f, Settings.getSettings().music_gain);
@@ -867,7 +978,7 @@ public final strictfp class Renderer {
         }
     }
 
-    private final static class MusicTimer implements Updatable {
+    private static final class MusicTimer implements Updatable {
 
         public final void update(Object anim) {
             if (music_timer != null) {
@@ -880,11 +991,11 @@ public final strictfp class Renderer {
         }
     }
 
-    public final static AbstractAudioPlayer getMusicPlayer() {
+    public static final AbstractAudioPlayer getMusicPlayer() {
         return music;
     }
 
-    private final static void destroyAL() {
+    private static final void destroyAL() {
         if (Display.isALCreated()) {
             AudioManager.getManager().destroy();
             // AL.destroy();
@@ -916,7 +1027,7 @@ public final strictfp class Renderer {
         //	Display.update();
     }
 
-    public final static void initGL() {
+    public static final void initGL() {
         VBO.releaseAll();
         GL11.glFrontFace(GL11.GL_CCW);
         GL11.glCullFace(GL11.GL_BACK);
@@ -935,7 +1046,7 @@ public final strictfp class Renderer {
         GL11.glEnable(GL11.GL_DEPTH_TEST);
         GL11.glDepthFunc(GL11.GL_LEQUAL);
         GL11.glShadeModel(GL11.GL_SMOOTH);
-//		GL11.glAlphaFunc(GL11.GL_GREATER, Globals.ALPHA_CUTOFF);
+        //		GL11.glAlphaFunc(GL11.GL_GREATER, Globals.ALPHA_CUTOFF);
         // Setup landscape texture coordinate gen
         GL11.glTexGeni(GL11.GL_S, GL11.GL_TEXTURE_GEN_MODE, GL11.GL_OBJECT_LINEAR);
         GL11.glTexGeni(GL11.GL_T, GL11.GL_TEXTURE_GEN_MODE, GL11.GL_OBJECT_LINEAR);
@@ -955,9 +1066,9 @@ public final strictfp class Renderer {
         GL11.glClearDepth(1.0);
     }
 
-    public final static void clearScreen() {
+    public static final void clearScreen() {
         GL11.glClearColor(0f, 0f, 0f, 0f);
         GL11.glClear(GL11.GL_COLOR_BUFFER_BIT);
-        //GL11.glClearColor(1f, 0f, 1f, 0f);
+        // GL11.glClearColor(1f, 0f, 1f, 0f);
     }
 }

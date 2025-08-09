@@ -163,7 +163,7 @@
 		<if>
 			<isset property="macosx.firstthread" />
 			<then>
-				<java fork="yes" classname="${main_class}">
+				<java fork="true" classname="${main_class}">
 					<classpath refid="_common.combined.run.classpath" />
 
 					<jvmarg value="-ea" />
@@ -179,7 +179,7 @@
 				</java>
 			</then>
 			<else>
-				<java fork="yes" classname="${main_class}">
+				<java fork="true" classname="${main_class}">
 					<classpath refid="_common.combined.run.classpath" />
 
 					<jvmarg value="-ea" />

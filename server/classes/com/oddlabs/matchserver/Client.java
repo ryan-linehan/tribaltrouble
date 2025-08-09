@@ -1,34 +1,29 @@
 package com.oddlabs.matchserver;
 
-import com.oddlabs.util.KeyManager;
-import com.oddlabs.net.AbstractConnection;
-import com.oddlabs.net.ARMIEvent;
-import com.oddlabs.net.HostSequenceID;
-import com.oddlabs.net.ConnectionInterface;
-import com.oddlabs.net.AbstractConnection;
-import com.oddlabs.net.IllegalARMIEventException;
-import com.oddlabs.net.ARMIInterfaceMethods;
-import com.oddlabs.matchmaking.MatchmakingServerInterface;
-import com.oddlabs.matchmaking.MatchmakingServerLoginInterface;
-import com.oddlabs.matchmaking.MatchmakingClientInterface;
-import com.oddlabs.matchmaking.TunnelAddress;
-import com.oddlabs.matchmaking.GameHost;
-import com.oddlabs.matchmaking.RankingEntry;
-import com.oddlabs.matchmaking.Game;
 import com.oddlabs.matchmaking.ChatRoomEntry;
-import com.oddlabs.matchmaking.Participant;
+import com.oddlabs.matchmaking.Game;
+import com.oddlabs.matchmaking.GameHost;
 import com.oddlabs.matchmaking.GameSession;
+import com.oddlabs.matchmaking.MatchmakingClientInterface;
+import com.oddlabs.matchmaking.MatchmakingServerInterface;
+import com.oddlabs.matchmaking.Participant;
 import com.oddlabs.matchmaking.Profile;
-import com.oddlabs.matchmaking.Login;
+import com.oddlabs.matchmaking.RankingEntry;
+import com.oddlabs.net.ARMIEvent;
+import com.oddlabs.net.ARMIInterfaceMethods;
+import com.oddlabs.net.AbstractConnection;
+import com.oddlabs.net.ConnectionInterface;
+import com.oddlabs.net.HostSequenceID;
+import com.oddlabs.net.IllegalARMIEventException;
 
 import java.io.IOException;
-import java.util.Map;
-import java.util.Set;
+import java.net.InetAddress;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Random;
-import java.net.InetAddress;
+import java.util.Set;
 
 public final strictfp class Client implements MatchmakingServerInterface, ConnectionInterface {
 
@@ -36,6 +31,7 @@ public final strictfp class Client implements MatchmakingServerInterface, Connec
     private final static Set game_hosts = new HashSet();
     private final static Map active_clients = new HashMap();
 
+    private static int current_random_seed = 1;
     private static int current_random_seed = 1;
 
     private final ARMIInterfaceMethods interface_methods = new ARMIInterfaceMethods(MatchmakingServerInterface.class);
@@ -57,6 +53,9 @@ public final strictfp class Client implements MatchmakingServerInterface, Connec
     private final boolean guest;
     private Profile active_profile;
 
+    private Game current_game;
+    private TimestampedGameSession current_session;
+    private ChatRoom current_room;
     private Game current_game;
     private TimestampedGameSession current_session;
     private ChatRoom current_room;
@@ -114,7 +113,18 @@ public final strictfp class Client implements MatchmakingServerInterface, Connec
                 client_interface.createProfileError(e.getErrorCode());
                 return;
             }
+            try {
+                Authenticator.checkUsername(nick);
+            } catch (InvalidUsernameException e) {
+                System.out.println("Exception: " + e);
+                client_interface.createProfileError(e.getErrorCode());
+                return;
+            }
 
+            if (nick.toLowerCase().startsWith("guest")) {
+                client_interface.createProfileError(MatchmakingClientInterface.PROFILE_ERROR_GUEST);
+                return;
+            }
             if (nick.toLowerCase().startsWith("guest")) {
                 client_interface.createProfileError(MatchmakingClientInterface.PROFILE_ERROR_GUEST);
                 return;
@@ -125,6 +135,10 @@ public final strictfp class Client implements MatchmakingServerInterface, Connec
                 return;
             }
 
+            DBInterface.createProfile(username, nick);
+            client_interface.createProfileSuccess();
+        }
+    }
             DBInterface.createProfile(username, nick);
             client_interface.createProfileSuccess();
         }
@@ -141,6 +155,11 @@ public final strictfp class Client implements MatchmakingServerInterface, Connec
             DBInterface.deleteProfile(username, nick);
         }
     }
+    public final void deleteProfile(String nick) {
+        if (!guest) {
+            DBInterface.deleteProfile(username, nick);
+        }
+    }
 
     public final void updateProfile() {
         if (!guest) {
@@ -150,6 +169,24 @@ public final strictfp class Client implements MatchmakingServerInterface, Connec
         }
     }
 
+    private final void updateProfile(String nick) {
+        if (!guest) {
+            Profile profile = DBInterface.getProfile(username, nick, revision);
+            if (profile != null) {
+                updateProfile(profile);
+                DBInterface.setLastUsedProfile(username, nick);
+            }
+        }
+    }
+
+    private final void updateProfile(Profile profile) {
+        active_profile = profile;
+        client_interface.updateProfile(active_profile);
+    }
+
+    public final Profile getProfile() {
+        return active_profile;
+    }
     private final void updateProfile(String nick) {
         if (!guest) {
             Profile profile = DBInterface.getProfile(username, nick, revision);
@@ -218,53 +255,91 @@ public final strictfp class Client implements MatchmakingServerInterface, Connec
         setGameSession(null);
     }
 
-	/** Called from the 'host' client to the server to start the game */
-	public final void gameStartedNotify(GameSession game_session) {
-		if (game_session == null || game_session.getParticipants() == null || game_session.getParticipants().length == 0) {
-			MatchmakingServer.getLogger().warning("Invalid GameSession received from " + getUsername());
-			return;
-		}
-		Participant[] participants = game_session.getParticipants();
-		int database_id = -1;
-		for (int i = 0; i < participants.length; i++) {
-			Client client = server.getClientFromID(participants[i].getMatchID());
-			if (client == null) {
-				MatchmakingServer.getLogger().warning("Invalid participant in GameSession from " + getUsername());
-				break;
-			}
-			Profile p = client.getProfile();
-			if (p == null || !p.getNick().equals(participants[i].getNick())) {
-				MatchmakingServer.getLogger().warning("Invalid nickparticipant in GameSession from " + getUsername() + " or " + client.getUsername() + " has given wrong nick");
-				break;
-			}
-			if (i == 0)
-				database_id = client.getCurrentGame().getDatabaseID();
-			// Check if one of the others already established the session
-			TimestampedGameSession client_session = client.getGameSession();
-			if (client_session != null && client_session.getSession().getID() == game_session.getID()) {
-				// If the session ids match, it must be the same game
-				if (!client_session.getSession().equals(game_session)) {
-					MatchmakingServer.getLogger().warning("GameSession from " + getUsername() + " does not match the one from " + client.getUsername());
-					break;
-				}
-				if (!client_session.join(server, this)) {
-					MatchmakingServer.getLogger().warning(getUsername() + " joined session " + Integer.toHexString(game_session.getID()) + " too late or seat already taken");
-					break;
-				}
-				MatchmakingServer.getLogger().info("GameSession " + Integer.toHexString(game_session.getID()) + " joined by " + getUsername());
-				setGameSession(client_session);
-				return;
-			}
-		}
-		MatchmakingServer.getLogger().info("Game " + database_id + ": New GameSession " + Integer.toHexString(game_session.getID()) + " started by " + getUsername());
-		TimestampedGameSession new_session = new TimestampedGameSession(game_session, database_id);
-		if (new_session.join(server, this)) {
-			setGameSession(new_session);
-			DBInterface.startGame(new_session, server);
-		} else {
-			MatchmakingServer.getLogger().warning("Game " + database_id + ": " + getUsername() + " could not join own game");
-		}
-	}
+    /** Called from the 'host' client to the server to start the game */
+    public final void gameStartedNotify(GameSession game_session) {
+        if (game_session == null
+                || game_session.getParticipants() == null
+                || game_session.getParticipants().length == 0) {
+            MatchmakingServer.getLogger()
+                    .warning("Invalid GameSession received from " + getUsername());
+            return;
+        }
+        Participant[] participants = game_session.getParticipants();
+        int database_id = -1;
+        for (int i = 0; i < participants.length; i++) {
+            Client client = server.getClientFromID(participants[i].getMatchID());
+            if (client == null) {
+                MatchmakingServer.getLogger()
+                        .warning("Invalid participant in GameSession from " + getUsername());
+                break;
+            }
+            Profile p = client.getProfile();
+            if (p == null || !p.getNick().equals(participants[i].getNick())) {
+                MatchmakingServer.getLogger()
+                        .warning(
+                                "Invalid nickparticipant in GameSession from "
+                                        + getUsername()
+                                        + " or "
+                                        + client.getUsername()
+                                        + " has given wrong nick");
+                break;
+            }
+            if (i == 0) database_id = client.getCurrentGame().getDatabaseID();
+            // Check if one of the others already established the session
+            TimestampedGameSession client_session = client.getGameSession();
+            if (client_session != null
+                    && client_session.getSession().getID() == game_session.getID()) {
+                // If the session ids match, it must be the same game
+                if (!client_session.getSession().equals(game_session)) {
+                    MatchmakingServer.getLogger()
+                            .warning(
+                                    "GameSession from "
+                                            + getUsername()
+                                            + " does not match the one from "
+                                            + client.getUsername());
+                    break;
+                }
+                if (!client_session.join(server, this)) {
+                    MatchmakingServer.getLogger()
+                            .warning(
+                                    getUsername()
+                                            + " joined session "
+                                            + Integer.toHexString(game_session.getID())
+                                            + " too late or seat already taken");
+                    break;
+                }
+                MatchmakingServer.getLogger()
+                        .info(
+                                "GameSession "
+                                        + Integer.toHexString(game_session.getID())
+                                        + " joined by "
+                                        + getUsername());
+                setGameSession(client_session);
+                return;
+            }
+        }
+        MatchmakingServer.getLogger()
+                .info(
+                        "Game "
+                                + database_id
+                                + ": New GameSession "
+                                + Integer.toHexString(game_session.getID())
+                                + " started by "
+                                + getUsername());
+        TimestampedGameSession new_session = new TimestampedGameSession(game_session, database_id);
+        if (new_session.join(server, this)) {
+            setGameSession(new_session);
+            DBInterface.startGame(new_session, server);
+        } else {
+            MatchmakingServer.getLogger()
+                    .warning(
+                            "Game "
+                                    + database_id
+                                    + ": "
+                                    + getUsername()
+                                    + " could not join own game");
+        }
+    }
 
     private final void setGameSession(TimestampedGameSession t) {
         if (t != null && current_session != null) {
@@ -298,11 +373,39 @@ public final strictfp class Client implements MatchmakingServerInterface, Connec
             error(e);
         }
     }
+    private final TimestampedGameSession getGameSession() {
+        return current_session;
+    }
+
+    public final boolean isPlaying() {
+        return current_session != null;
+    }
+
+    public final void handle(Object sender, ARMIEvent event) {
+        try {
+            event.execute(interface_methods, this);
+        } catch (IllegalARMIEventException e) {
+            System.out.println("Exception: " + e);
+            error(e);
+        }
+    }
 
     public final String getUsername() {
         return username;
     }
+    public final String getUsername() {
+        return username;
+    }
 
+    public final void error(AbstractConnection conn, IOException e) {
+        error(e);
+    }
+
+    private final void error(Exception e) {
+        MatchmakingServer.getLogger().info(username + " logged out. Caused by: " + e.getMessage());
+        MatchmakingServer.getLogger().throwing("Client", "error", e);
+        close();
+    }
     public final void error(AbstractConnection conn, IOException e) {
         error(e);
     }
@@ -319,7 +422,17 @@ public final strictfp class Client implements MatchmakingServerInterface, Connec
     public final int getHostID() {
         return host_id;
     }
+    public final int getHostID() {
+        return host_id;
+    }
 
+    private final Game getCurrentGame() {
+        return current_game;
+    }
+
+    public final InetAddress getRemoteAddress() {
+        return remote_address;
+    }
     private final Game getCurrentGame() {
         return current_game;
     }
@@ -456,6 +569,16 @@ public final strictfp class Client implements MatchmakingServerInterface, Connec
             active_profile = null;
         }
     }
+    private final void closeProfile() {
+        gameLostNotify();
+        leaveRoom();
+        unregisterGame();
+        if (active_profile != null) {
+            active_clients.remove(active_profile.getNick().toLowerCase());
+            DBInterface.profileOffline(active_profile.getNick());
+            active_profile = null;
+        }
+    }
 
     private final void tunnelOpened(HostSequenceID address_to, InetAddress inet_address_to, InetAddress local_inet_address_to, Profile profile, Client remote_client) {
         tunnels.put(address_to, remote_client);
@@ -526,6 +649,9 @@ public final strictfp class Client implements MatchmakingServerInterface, Connec
         }
     }
 
+    public final MatchmakingClientInterface getClientInterface() {
+        return client_interface;
+    }
     public final MatchmakingClientInterface getClientInterface() {
         return client_interface;
     }
@@ -606,6 +732,12 @@ public final strictfp class Client implements MatchmakingServerInterface, Connec
         }
     }
 
+    public final void leaveRoom() {
+        if (current_room != null) {
+            current_room.leave(this);
+            current_room = null;
+        }
+    }
     public final void leaveRoom() {
         if (current_room != null) {
             current_room.leave(this);

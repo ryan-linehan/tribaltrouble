@@ -1,0 +1,238 @@
+<html>
+
+<head>
+    <style>
+        body {
+            background-image: url("background.png");
+            background-repeat: no-repeat;
+            background-size: cover;
+            background-color: rgba(255, 255, 255, 0.2);
+            background-blend-mode: lighten;
+            font-family: Tahoma, "Trebuchet MS", sans-serif;
+            text-shadow: 1px 1px #ddda;
+            cursor: url("cursor.png"), auto;
+            font-size: 20px;
+        }
+
+        .nav_button {
+            background-image: linear-gradient(to bottom right,
+                    #fdf7c0b0,
+                    #e0d784b0);
+            text-align: center;
+            vertical-align: center;
+            width: 25%;
+            height: 50px;
+            border-radius: 7px;
+            border: none;
+        }
+
+        .nav_button:hover {
+            background-image: linear-gradient(to bottom right, #fdf7c0, #e0d784);
+            font-weight: bold;
+        }
+
+        .nav_table {
+            width: 60%;
+            right: 10px;
+            top: 10px;
+            position: fixed;
+        }
+
+        .title {
+            width: 300px;
+        }
+
+        #download {
+            display: none;
+        }
+
+        #scores {
+            display: none;
+        }
+
+        #contribute {
+            display: none;
+        }
+
+        .content {
+            margin-top: 40px;
+            border-radius: 15px;
+            border: inset 2px;
+            padding: 10px;
+            margin-left: 10px;
+            margin-right: 10px;
+            -webkit-backdrop-filter: blur(7px);
+            backdrop-filter: blur(7px);
+            background: #fffa;
+            vertical-align: center;
+            min-height: 50%;
+        }
+
+        .tableheader {
+            background: #99f9;
+            padding: 2px;
+            width: 200px;
+            padding-left: 5px;
+            font-weight: bold;
+        }
+
+        .pname,
+        .pscore {
+            padding: 2px;
+            padding-left: 5px;
+            background: #99f2;
+        }
+
+        .link_button {
+            text-align: center;
+            vertical-align: center;
+            width: 50px;
+            height: 50px;
+            border-radius: 7px;
+            border: none;
+            z-index: 10;
+        }
+
+        .link_table {
+            width: 210px;
+            right: 10px;
+            bottom: 10px;
+            position: fixed;
+            z-index: 10;
+        }
+    </style>
+
+    <script>
+        function showAbout() {
+            const about = document.getElementById("about");
+            const download = document.getElementById("download");
+            const scores = document.getElementById("scores");
+            const contribute = document.getElementById("contribute");
+            about.style.display = "block";
+            download.style.display = "none";
+            scores.style.display = "none";
+            contribute.style.display = "none";
+        }
+
+        function showDownload() {
+            const about = document.getElementById("about");
+            const download = document.getElementById("download");
+            const scores = document.getElementById("scores");
+            const contribute = document.getElementById("contribute");
+            about.style.display = "none";
+            download.style.display = "block";
+            scores.style.display = "none";
+            contribute.style.display = "none";
+        }
+
+        function showContribute() {
+            const about = document.getElementById("about");
+            const download = document.getElementById("download");
+            const scores = document.getElementById("scores");
+            const contribute = document.getElementById("contribute");
+            about.style.display = "none";
+            download.style.display = "none";
+            scores.style.display = "none";
+            contribute.style.display = "block";
+        }
+
+        function showScores() {
+            const about = document.getElementById("about");
+            const download = document.getElementById("download");
+            const scores = document.getElementById("scores");
+            const contribute = document.getElementById("contribute");
+            const scoresTable = document.getElementById("scorestable");
+            fetch("highscores.php")
+                .then((res) => res.text())
+                .then((res) => (scorestable.innerHTML = res));
+            about.style.display = "none";
+            download.style.display = "none";
+            scores.style.display = "block";
+            contribute.style.display = "none";
+        }
+    </script>
+</head>
+
+<body>
+    <img src="title.png" class="title" />
+    <table class="nav_table">
+        <tr>
+            <td class="nav_button" onclick="showAbout()">About</td>
+            <td class="nav_button" onclick="showDownload()">Download</td>
+            <td class="nav_button" onclick="showScores()">Highscores</td>
+            <td class="nav_button" onclick="showContribute()">Contribute</td>
+        </tr>
+    </table>
+
+    <table class="link_table">
+        <tr>
+            <td class="link_button">
+                <a href="https://github.com/OmarAMokhtar/tribaltrouble" target="new">
+                    <img src="github.png" width="100" height="100" />
+                </a>
+            </td>
+            <td class="link_button">
+                <a href="https://discord.gg/j8PZyGBZt5" target="new">
+                    <img src="discord.png" width="100" height="100" />
+                </a>
+            </td>
+        </tr>
+    </table>
+
+    <div id="about" class="content">
+        <h2>About</h2>
+        Tribal Trouble is a realtime strategy game released by Oddlabs in 2004. In
+        2014 the source was released under GPL2 license.<br /><br />
+        <i><b>Disclaimer:</b> This copy of Tribal Trouble is a derived work by an
+            opensource community based on the original Oddlabs version. It aims to
+            revive the original game and provide more playable features in the
+            future. The current maintainers for this version has no affiliation with
+            Oddlabs.</i><br /><br />
+
+        This is what remained of the original website:
+        <a href="https://web.archive.org/web/20070729233824/http://tribaltrouble.com" target="new">Archived version</a><br /><br />
+    </div>
+
+    <div id="download" class="content">
+        <h2>Download binaries</h2>
+        <h3>Experimental version:</h3>
+        <a href="https://github.com/OmarAMokhtar/tribaltrouble/actions/runs/16608140811/artifacts/3643456050">Linux</a>
+        <a href="https://github.com/OmarAMokhtar/tribaltrouble/actions/runs/16608140811/artifacts/3643459142">Windows</a>
+        <a href="https://github.com/OmarAMokhtar/tribaltrouble/actions/runs/16608140811/artifacts/3643473672">Mac x86</a>
+        <a href="https://github.com/OmarAMokhtar/tribaltrouble/actions/runs/16608140811/artifacts/3643455527">Mac ARM</a>
+        <h3>Legacy version:</h3>
+        <a href="TribalTrouble-x86_64.AppImage">Linux</a>
+        <a href="TribalTroubleWindows.zip">Windows</a>
+        <h2>Building from source</h2>
+        Clone this
+        <a href="https://github.com/OmarAMokhtar/tribaltrouble">github repository</a>
+        and follow the build instructions in the README file.
+    </div>
+
+    <div id="scores" class="content">
+        <h2>Current highscores</h2>
+
+        <div id="scorestable"></div>
+    </div>
+
+    <div id="contribute" class="content">
+        <h2>Contribute</h2>
+
+        Everybody is welcome to maintain and contribute. There's still a lot of
+        work to be done.<br /><br />
+
+        This is the fork used at the moment if you want to get familiar with the
+        source code:
+        <a href="https://github.com/OmarAMokhtar/tribaltrouble" target="new"><img width="20" height="20" src="github.png" /> Github repository</a>
+        <br /><br />
+        The current maintainers on github:<br />
+        <a href="https://github.com/OmarAMokhtar" target="new">OmarAMokhtar</a><br />
+        <a href="https://github.com/Merikrotti" target="new">Merikrotti</a><br />
+        <a href="https://github.com/ryan-linehan" target="new">Ryan-Linehan</a><br />
+        <br />
+        Join our discussion on discord!
+        <a href="https://discord.gg/j8PZyGBZt5" target="new"><img width="20" height="20" src="discord.png" /> Discord server</a>
+    </div>
+</body>
+
+</html>

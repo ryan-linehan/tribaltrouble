@@ -1,24 +1,23 @@
 package com.oddlabs.tt.gui;
 
-import com.oddlabs.tt.event.LocalEventQueue;
-import java.util.ArrayList;
-import java.util.List;
-import java.awt.datatransfer.Clipboard;
-import java.awt.datatransfer.StringSelection;
-import java.awt.Toolkit;
-import com.oddlabs.tt.input.Keyboard;
 import com.oddlabs.tt.font.Index;
 import com.oddlabs.tt.font.TextLineRenderer;
 import com.oddlabs.tt.guievent.EnterListener;
+import com.oddlabs.tt.input.Keyboard;
+
+import java.awt.Toolkit;
+import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.DataFlavor;
+import java.awt.datatransfer.StringSelection;
 import java.awt.datatransfer.UnsupportedFlavorException;
 import java.io.IOException;
-import javax.swing.plaf.basic.BasicSplitPaneUI;
+import java.util.ArrayList;
+import java.util.List;
 
 public strictfp class EditLine extends TextField {
 
-    public final static int RIGHT_ALIGNED = 1;
-    public final static int LEFT_ALIGNED = 2;
+    public static final int RIGHT_ALIGNED = 1;
+    public static final int LEFT_ALIGNED = 2;
     private int selectionStart = -1;
     private int selectionEnd = -1;
     private final List enter_listeners = new ArrayList();
@@ -54,7 +53,8 @@ public strictfp class EditLine extends TextField {
         return GUIRoot.CURSOR_TEXT;
     }
 
-    protected void renderGeometry(float clip_left, float clip_right, float clip_bottom, float clip_top) {
+    protected void renderGeometry(
+            float clip_left, float clip_right, float clip_bottom, float clip_top) {
         Box edit_box = Skin.getSkin().getEditBox();
         if (isDisabled()) {
             edit_box.render(0, 0, getWidth(), getHeight(), Skin.DISABLED);
@@ -62,33 +62,79 @@ public strictfp class EditLine extends TextField {
             edit_box.render(0, 0, getWidth(), getHeight(), Skin.NORMAL);
         }
         int render_index = isActive() ? index : -1;
-        renderText(text_renderer, edit_box.getLeftOffset(), edit_box.getBottomOffset(), offset_x, clip_left, clip_right, clip_bottom, clip_top, render_index);
+        renderText(
+                text_renderer,
+                edit_box.getLeftOffset(),
+                edit_box.getBottomOffset(),
+                offset_x,
+                clip_left,
+                clip_right,
+                clip_bottom,
+                clip_top,
+                render_index);
     }
 
-    protected void renderText(TextLineRenderer text_renderer, int x, int y, int offset_x, float clip_left, float clip_right, float clip_bottom, float clip_top, int render_index) {
+    protected void renderText(
+            TextLineRenderer text_renderer,
+            int x,
+            int y,
+            int offset_x,
+            float clip_left,
+            float clip_right,
+            float clip_bottom,
+            float clip_top,
+            int render_index) {
         clip_left = StrictMath.max(clip_left, x);
         clip_right = StrictMath.min(clip_right, x + max_text_width);
-        text_renderer.render(x, y, offset_x, clip_left, clip_right, clip_bottom, clip_top, getText(), render_index);
-        renderHighlight(text_renderer, x, y, offset_x, clip_left, clip_right, clip_bottom, clip_top);
+        text_renderer.render(
+                x,
+                y,
+                offset_x,
+                clip_left,
+                clip_right,
+                clip_bottom,
+                clip_top,
+                getText(),
+                render_index);
+        renderHighlight(
+                text_renderer, x, y, offset_x, clip_left, clip_right, clip_bottom, clip_top);
     }
 
     /**
-     * Renders the text highlight for the selected text by using the
-     * selectionStart and selectionEnd values.
+     * Renders the text highlight for the selected text by using the selectionStart and selectionEnd
+     * values.
      *
-     * @param text_renderer The text line renderer - to calculate the highlight
-     * positions.
+     * @param text_renderer The text line renderer - to calculate the highlight positions.
      * @param x The x position.
      * @param y The y position.
      * @param offset_x The x offset for highlight to start in the box
      */
-    private void renderHighlight(TextLineRenderer text_renderer, int x, int y, int offset_x, float clip_left, float clip_right, float clip_bottom, float clip_top) {
+    private void renderHighlight(
+            TextLineRenderer text_renderer,
+            int x,
+            int y,
+            int offset_x,
+            float clip_left,
+            float clip_right,
+            float clip_bottom,
+            float clip_top) {
         if (selectionStart != -1 && selectionEnd != -1 && selectionStart != selectionEnd) {
-            int selStartX = text_renderer.getIndexRenderX(x, y, offset_x, getText(), selectionStart);
+            int selStartX =
+                    text_renderer.getIndexRenderX(x, y, offset_x, getText(), selectionStart);
             int selEndX = text_renderer.getIndexRenderX(x, y, offset_x, getText(), selectionEnd);
             int highlightLeft = Math.min(selStartX, selEndX);
             int highlightRight = Math.max(selStartX, selEndX);
-            Skin.getSkin().getEditBox().renderHighlight(highlightLeft, y, highlightRight - highlightLeft, getFont().getHeight(), clip_left, clip_right, clip_bottom, clip_top);
+            Skin.getSkin()
+                    .getEditBox()
+                    .renderHighlight(
+                            highlightLeft,
+                            y,
+                            highlightRight - highlightLeft,
+                            getFont().getHeight(),
+                            clip_left,
+                            clip_right,
+                            clip_bottom,
+                            clip_top);
         }
     }
 
@@ -191,16 +237,20 @@ public strictfp class EditLine extends TextField {
     }
 
     public final boolean isAllowed(char ch) {
-        return super.isAllowed(ch) && getFont().getQuad(ch) != null && (allowed_chars == null || allowed_chars.indexOf(ch) != -1);
+        return super.isAllowed(ch)
+                && getFont().getQuad(ch) != null
+                && (allowed_chars == null || allowed_chars.indexOf(ch) != -1);
     }
 
     private final void correctOffsetX() {
         Box edit_box = Skin.getSkin().getEditBox();
-        int index_render_x = text_renderer.getIndexRenderX(edit_box.getLeftOffset(),
-                edit_box.getBottomOffset(),
-                offset_x,
-                getText(),
-                index);
+        int index_render_x =
+                text_renderer.getIndexRenderX(
+                        edit_box.getLeftOffset(),
+                        edit_box.getBottomOffset(),
+                        offset_x,
+                        getText(),
+                        index);
 
         int max_x = computeMaxX();
         if (index_render_x > max_x) {
@@ -212,16 +262,16 @@ public strictfp class EditLine extends TextField {
 
     private final int computeMaxX() {
         Box edit_box = Skin.getSkin().getEditBox();
-        return getWidth() - edit_box.getRightOffset() - Index.INDEX_WIDTH/* - getFont().getXBorder()/2*/;
+        return getWidth()
+                - edit_box.getRightOffset()
+                - Index.INDEX_WIDTH /* - getFont().getXBorder()/2*/;
     }
 
     public final int getIndex() {
         return index;
     }
 
-    /**
-     * Sets the index aka the cursor position to the given value
-     */
+    /** Sets the index aka the cursor position to the given value */
     public final void setIndex(int index) {
         this.index = index;
     }
@@ -252,11 +302,9 @@ public strictfp class EditLine extends TextField {
         }
     }
 
-    protected final void mouseEntered() {
-    }
+    protected final void mouseEntered() {}
 
-    protected final void mouseExited() {
-    }
+    protected final void mouseExited() {}
 
     protected final void mousePressed(int button, int x, int y) {
         if (button == LocalInput.LEFT_BUTTON) {
@@ -266,11 +314,13 @@ public strictfp class EditLine extends TextField {
             }
 
             Box edit_box = Skin.getSkin().getEditBox();
-            index = text_renderer.jumpDirect(edit_box.getLeftOffset() + offset_x,
-                    edit_box.getBottomOffset(),
-                    x,
-                    getText(),
-                    index);
+            index =
+                    text_renderer.jumpDirect(
+                            edit_box.getLeftOffset() + offset_x,
+                            edit_box.getBottomOffset(),
+                            x,
+                            getText(),
+                            index);
         }
     }
 
@@ -285,8 +335,7 @@ public strictfp class EditLine extends TextField {
         }
     }
 
-    protected void enterPressed(CharSequence text) {
-    }
+    protected void enterPressed(CharSequence text) {}
 
     public final void addEnterListener(EnterListener listener) {
         enter_listeners.add(listener);
@@ -308,15 +357,19 @@ public strictfp class EditLine extends TextField {
             setIndex(selectionEnd);
             correctOffsetX();
             return true;
-        } else if (!LocalInput.isShiftDownCurrently() && LocalInput.isControlDownCurrently() && event.getKeyCode() == Keyboard.KEY_LEFT) {
+        } else if (!LocalInput.isShiftDownCurrently()
+                && LocalInput.isControlDownCurrently()
+                && event.getKeyCode() == Keyboard.KEY_LEFT) {
             String contents = getContents();
             if (getIndex() == 0) {
                 return true;
             }
-            boolean isCursorAtStartOfSelection = getIndex() <= selectionStart || selectionStart == -1;
+            boolean isCursorAtStartOfSelection =
+                    getIndex() <= selectionStart || selectionStart == -1;
             int startingIndex = getIndex();
 
-            // When cursor is not at the start of the word we will start at the current word for the next selection
+            // When cursor is not at the start of the word we will start at the current word for the
+            // next selection
             if (!isCursorAtStartOfSelection) {
                 startingIndex = selectionStart;
             }
@@ -345,13 +398,16 @@ public strictfp class EditLine extends TextField {
                 selectionStart = -1;
                 selectionEnd = -1;
             }
-        } else if (!LocalInput.isShiftDownCurrently() && LocalInput.isControlDownCurrently() && event.getKeyCode() == Keyboard.KEY_RIGHT) {
+        } else if (!LocalInput.isShiftDownCurrently()
+                && LocalInput.isControlDownCurrently()
+                && event.getKeyCode() == Keyboard.KEY_RIGHT) {
             String contents = getContents();
             if (getIndex() == contents.length()) {
                 return true;
             }
 
-            boolean isCursorAtStartOfSelection = getIndex() <= selectionStart || selectionStart == -1;
+            boolean isCursorAtStartOfSelection =
+                    getIndex() <= selectionStart || selectionStart == -1;
             int startingIndex = getIndex() - 1;
             if (!isCursorAtStartOfSelection) {
                 startingIndex = selectionEnd;
@@ -397,7 +453,7 @@ public strictfp class EditLine extends TextField {
             // If we cannot access the clipboard, we just return
             System.err.println("Error accessing clipboard: " + e.getMessage());
             return;
-        }        
+        }
 
         if (clipboard != null && !clipboard.isEmpty()) {
             for (char item : clipboard.toCharArray()) {
@@ -409,7 +465,11 @@ public strictfp class EditLine extends TextField {
             if (selectionStart != -1 && selectionEnd != -1 && selectionStart != selectionEnd) {
                 // delete the selected text first
                 String beforeReplace = getContents().substring(0, selectionStart);
-                String afterReplace = getContents().substring(beforeReplace.length() + (selectionEnd - selectionStart), getContents().length());
+                String afterReplace =
+                        getContents()
+                                .substring(
+                                        beforeReplace.length() + (selectionEnd - selectionStart),
+                                        getContents().length());
                 String newContent = beforeReplace + clipboard + afterReplace;
                 if (newContent.length() > max_chars) {
                     return;
@@ -446,14 +506,18 @@ public strictfp class EditLine extends TextField {
     private void cutSelectionToClipboard() {
         if (selectionStart != -1 && selectionEnd != -1 && selectionStart != selectionEnd) {
             String selectedText = getContents().substring(selectionStart, selectionEnd);
-            
+
             Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
             StringSelection selection = new StringSelection(selectedText);
             clipboard.setContents(selection, null);
 
             // Remove the selected text from the EditLine
             String beforeReplace = getContents().substring(0, selectionStart);
-            String afterReplace = getContents().substring(beforeReplace.length() + (selectionEnd - selectionStart), getContents().length());
+            String afterReplace =
+                    getContents()
+                            .substring(
+                                    beforeReplace.length() + (selectionEnd - selectionStart),
+                                    getContents().length());
             String newContent = beforeReplace + afterReplace;
             set(newContent);
             setIndex(beforeReplace.length());
@@ -464,12 +528,15 @@ public strictfp class EditLine extends TextField {
     }
 
     private boolean doShiftModifier(KeyboardEvent event) {
-        if (LocalInput.isShiftDownCurrently() && LocalInput.isControlDownCurrently() && event.getKeyCode() == Keyboard.KEY_LEFT) {
+        if (LocalInput.isShiftDownCurrently()
+                && LocalInput.isControlDownCurrently()
+                && event.getKeyCode() == Keyboard.KEY_LEFT) {
             String contents = getContents();
             if (getIndex() == 0) {
                 return true;
             }
-            boolean isCursorAtStartOfSelection = getIndex() <= selectionStart || selectionStart == -1;
+            boolean isCursorAtStartOfSelection =
+                    getIndex() <= selectionStart || selectionStart == -1;
             int startingIndex = getIndex();
 
             boolean characterBehindCursorIsSpace = contents.charAt(getIndex()) == ' ';
@@ -498,13 +565,16 @@ public strictfp class EditLine extends TextField {
             }
             setIndex(startingIndex);
             return true;
-        } else if (LocalInput.isShiftDownCurrently() && LocalInput.isControlDownCurrently() && event.getKeyCode() == Keyboard.KEY_RIGHT) {
+        } else if (LocalInput.isShiftDownCurrently()
+                && LocalInput.isControlDownCurrently()
+                && event.getKeyCode() == Keyboard.KEY_RIGHT) {
             String contents = getContents();
             if (getIndex() == contents.length()) {
                 return true;
             }
 
-            boolean isCursorAtStartOfSelection = getIndex() - 1 <= selectionStart || selectionStart == -1;
+            boolean isCursorAtStartOfSelection =
+                    getIndex() - 1 <= selectionStart || selectionStart == -1;
 
             int startingIndex = getIndex() - 1;
             if (!isCursorAtStartOfSelection) {
@@ -565,13 +635,16 @@ public strictfp class EditLine extends TextField {
             selectionEnd = getContents().length();
             setIndex(getContents().length());
             return true;
-        } else if (LocalInput.isShiftDownCurrently() && event.getKeyCode() == Keyboard.KEY_RIGHT && (selectionEnd <= getContents().length() || selectionEnd == -1)) {
+        } else if (LocalInput.isShiftDownCurrently()
+                && event.getKeyCode() == Keyboard.KEY_RIGHT
+                && (selectionEnd <= getContents().length() || selectionEnd == -1)) {
             // First time shift is pressed and cursor has moved
             if (selectionStart == -1) {
                 selectionStart = getIndex() - 1;
                 selectionEnd = getIndex();
             } else {
-                // when right is pressed the selection moves 1 to the right by the time we are evaluating this
+                // when right is pressed the selection moves 1 to the right by the time we are
+                // evaluating this
                 // other inputs are processed before mofifier keys at the moment
                 if (getIndex() <= selectionStart + 1) {
                     selectionStart++;
@@ -587,7 +660,9 @@ public strictfp class EditLine extends TextField {
                 selectionEnd = getContents().length();
             }
             return true;
-        } else if (LocalInput.isShiftDownCurrently() && event.getKeyCode() == Keyboard.KEY_LEFT && (selectionStart >= 0 || selectionStart == -1)) {
+        } else if (LocalInput.isShiftDownCurrently()
+                && event.getKeyCode() == Keyboard.KEY_LEFT
+                && (selectionStart >= 0 || selectionStart == -1)) {
             // First time shift is pressed and the cursor has moved
             boolean isCursorAtStartOfSelection = getIndex() <= selectionStart;
             if (selectionStart == -1) {
@@ -597,12 +672,12 @@ public strictfp class EditLine extends TextField {
                 }
                 selectionEnd = getIndex() + 1;
             } else {
-                // cursor is at start of selection                
+                // cursor is at start of selection
                 if (getIndex() < selectionStart) {
                     selectionStart--;
-                } else if(!isCursorAtStartOfSelection) {
+                } else if (!isCursorAtStartOfSelection) {
                     selectionEnd--;
-                }                
+                }
             }
 
             if (selectionEnd < 0) {
@@ -612,30 +687,39 @@ public strictfp class EditLine extends TextField {
                 selectionStart = 0;
             }
             return true;
-        } else if (selectionStart != -1 && selectionEnd != -1
+        } else if (selectionStart != -1
+                && selectionEnd != -1
                 && (event.getKeyChar() != '\0'
-                || event.getKeyCode() == Keyboard.KEY_DELETE
-                || event.getKeyCode() == Keyboard.KEY_BACK)) {
+                        || event.getKeyCode() == Keyboard.KEY_DELETE
+                        || event.getKeyCode() == Keyboard.KEY_BACK)) {
             String beforeReplace;
-            if (event.getKeyCode() != Keyboard.KEY_BACK && event.getKeyCode() != Keyboard.KEY_DELETE) {
+            if (event.getKeyCode() != Keyboard.KEY_BACK
+                    && event.getKeyCode() != Keyboard.KEY_DELETE) {
                 beforeReplace = getContents().substring(0, selectionStart) + event.getKeyChar();
             } else {
                 beforeReplace = getContents().substring(0, selectionStart);
             }
-            String afterReplace = getContents().substring(beforeReplace.length() + (selectionEnd - selectionStart), getContents().length());
+            String afterReplace =
+                    getContents()
+                            .substring(
+                                    beforeReplace.length() + (selectionEnd - selectionStart),
+                                    getContents().length());
             String newContent = beforeReplace + afterReplace;
 
             // resets the cursor index to 0
             set(newContent);
 
-            // indexing needs to be adjusted based on if a new key is typed or backspace/delete is hit
-            if (event.getKeyCode() == Keyboard.KEY_BACK || event.getKeyCode() == Keyboard.KEY_DELETE) {
+            // indexing needs to be adjusted based on if a new key is typed or backspace/delete is
+            // hit
+            if (event.getKeyCode() == Keyboard.KEY_BACK
+                    || event.getKeyCode() == Keyboard.KEY_DELETE) {
                 // Sets the cursor after the replaced content
                 if (newContent.length() == 0) {
                     setIndex(0);
                 } else {
 
-                    // If we're in the middle of the text, keep the cursor at the start of the replaced section
+                    // If we're in the middle of the text, keep the cursor at the start of the
+                    // replaced section
                     setIndex(beforeReplace.length());
 
                     if (index > newContent.length()) {
@@ -649,7 +733,9 @@ public strictfp class EditLine extends TextField {
             selectionStart = -1;
             selectionEnd = -1;
         } // unhighlight if the cursor moves without shift
-        else if (!LocalInput.isShiftDownCurrently() && (event.getKeyCode() == Keyboard.KEY_LEFT || event.getKeyCode() == Keyboard.KEY_RIGHT)
+        else if (!LocalInput.isShiftDownCurrently()
+                && (event.getKeyCode() == Keyboard.KEY_LEFT
+                        || event.getKeyCode() == Keyboard.KEY_RIGHT)
                 && (selectionStart != -1 || selectionEnd != -1)) {
             // Clear selection if shift is not down and the key pressed is not left/right
             if (event.getKeyCode() == Keyboard.KEY_LEFT) {

@@ -1,5 +1,6 @@
 package com.oddlabs.matchserver;
 
+import com.oddlabs.matchmaking.ChatRoomUser;
 import com.oddlabs.matchmaking.MatchmakingServerInterface;
 
 import discord4j.common.util.Snowflake;
@@ -118,6 +119,11 @@ public final strictfp class ChatRoom {
         users.add(client);
         sendUsers();
     }
+    public final void join(Client client) {
+        // TODO check for size!!!!
+        users.add(client);
+        sendUsers();
+    }
 
     public final void sendUsers() {
         Iterator it = users.iterator();
@@ -190,6 +196,9 @@ public final strictfp class ChatRoom {
         }
     }
 
+    public final Set getUsers() {
+        return users;
+    }
     public final Set getUsers() {
         return users;
     }

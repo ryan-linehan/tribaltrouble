@@ -1,14 +1,12 @@
 package com.oddlabs.tt.gui;
 
-import org.lwjgl.opengl.GL11;
-
 import com.oddlabs.tt.render.Texture;
 import com.oddlabs.tt.resource.Resources;
 import com.oddlabs.tt.resource.TextureFile;
 
-/**
- * An image that can be displayed in game
- */
+import org.lwjgl.opengl.GL11;
+
+/** An image that can be displayed in game */
 public final strictfp class GUIImage extends GUIObject {
 
     private final float u1;
@@ -26,11 +24,35 @@ public final strictfp class GUIImage extends GUIObject {
      * @param v1 The top texture coordinate (0.0 to 1.0).
      * @param u2 The right texture coordinate (0.0 to 1.0).
      * @param v2 The bottom texture coordinate (0.0 to 1.0).
-     * @param texture_name The name of the texture resource to load from disk.
-     * Should not include an extension
+     * @param texture_name The name of the texture resource to load from disk. Should not include an
+     *     extension
      */
-    public GUIImage(int width, int height, float u1, float v1, float u2, float v2, String texture_name, boolean is_button) {
-        this(width, height, u1, v1, u2, v2, (Texture) Resources.findResource(new TextureFile(texture_name, GL11.GL_RGBA, GL11.GL_LINEAR, GL11.GL_LINEAR, GL11.GL_REPEAT, GL11.GL_REPEAT)), is_button);
+    public GUIImage(
+            int width,
+            int height,
+            float u1,
+            float v1,
+            float u2,
+            float v2,
+            String texture_name,
+            boolean is_button) {
+        this(
+                width,
+                height,
+                u1,
+                v1,
+                u2,
+                v2,
+                (Texture)
+                        Resources.findResource(
+                                new TextureFile(
+                                        texture_name,
+                                        GL11.GL_RGBA,
+                                        GL11.GL_LINEAR,
+                                        GL11.GL_LINEAR,
+                                        GL11.GL_REPEAT,
+                                        GL11.GL_REPEAT)),
+                is_button);
     }
 
     /**
@@ -42,11 +64,27 @@ public final strictfp class GUIImage extends GUIObject {
      * @param v1 The top texture coordinate (0.0 to 1.0).
      * @param u2 The right texture coordinate (0.0 to 1.0).
      * @param v2 The bottom texture coordinate (0.0 to 1.0).
-     * @param texture_name The name of the texture resource to load from disk.
-     * Should not include an extension
+     * @param texture_name The name of the texture resource to load from disk. Should not include an
+     *     extension
      */
-    public GUIImage(int width, int height, float u1, float v1, float u2, float v2, String texture_name) {
-        this(width, height, u1, v1, u2, v2, (Texture) Resources.findResource(new TextureFile(texture_name, GL11.GL_RGBA, GL11.GL_LINEAR, GL11.GL_LINEAR, GL11.GL_REPEAT, GL11.GL_REPEAT)));
+    public GUIImage(
+            int width, int height, float u1, float v1, float u2, float v2, String texture_name) {
+        this(
+                width,
+                height,
+                u1,
+                v1,
+                u2,
+                v2,
+                (Texture)
+                        Resources.findResource(
+                                new TextureFile(
+                                        texture_name,
+                                        GL11.GL_RGBA,
+                                        GL11.GL_LINEAR,
+                                        GL11.GL_LINEAR,
+                                        GL11.GL_REPEAT,
+                                        GL11.GL_REPEAT)));
     }
 
     /**
@@ -59,13 +97,14 @@ public final strictfp class GUIImage extends GUIObject {
      * @param u2 The right texture coordinate (0.0 to 1.0).
      * @param v2 The bottom texture coordinate (0.0 to 1.0).
      */
-    public GUIImage(int width, int height, float u1, float v1, float u2, float v2, Texture texture) {
+    public GUIImage(
+            int width, int height, float u1, float v1, float u2, float v2, Texture texture) {
         this(width, height, u1, v1, u2, v2, texture, false);
     }
 
     /**
-     * Creates a GUIImage with specified texture coordinates and allows for
-     * mouse clicked events (aka focusing).
+     * Creates a GUIImage with specified texture coordinates and allows for mouse clicked events
+     * (aka focusing).
      *
      * @param width The desired width of the image to display in game.
      * @param height The desired height of the image to display in game.
@@ -76,7 +115,15 @@ public final strictfp class GUIImage extends GUIObject {
      * @param texture The texture to use for this image.
      * @param is_button If true, the image can be focused and clicked on.
      */
-    public GUIImage(int width, int height, float u1, float v1, float u2, float v2, Texture texture, boolean is_button) {
+    public GUIImage(
+            int width,
+            int height,
+            float u1,
+            float v1,
+            float u2,
+            float v2,
+            Texture texture,
+            boolean is_button) {
         this.u1 = u1;
         this.v1 = v1;
         this.u2 = u2;
@@ -112,10 +159,9 @@ public final strictfp class GUIImage extends GUIObject {
         GL11.glBegin(GL11.GL_QUADS);
     }
 
-
     @Override
     protected int getCursorIndex() {
-        if(isHovered()) {
+        if (isHovered()) {
             return GUIRoot.CURSOR_TARGET;
         }
         return GUIRoot.CURSOR_NORMAL;
