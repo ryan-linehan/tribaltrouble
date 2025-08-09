@@ -49,8 +49,12 @@ public final strictfp class ChatRoom {
             discordSubscription =
                     discordChannel
                             .getClient()
-                            .on(MessageCreateEvent.class, this::handleIncomingDiscordMessage)
-                            .subscribe();
+                            .on(MessageCreateEvent.class)
+                            .filter(event -> event.getMessage().getChannelId().equals(discordChannel.getId()))
+                            .filter(event -> !event.getMessage().getAuthor()
+                                    .map(user -> user.getId().equals(DiscordBotService.getInstance().getBotId()))
+                                    .orElse(false))
+                            .subscribe(this::handleIncomingDiscordMessage);
             System.out.println(
                     "Discord channel for " + name + " found: " + (discordChannel).getName());
         }
@@ -183,10 +187,14 @@ public final strictfp class ChatRoom {
      */
     public final void trySendDiscordMessage(String owner, String msg) {
         try {
+            System.out.println("sending message to discord");
             // Send the message to the discord channel if one is setup for this chat room
             if (this.discordChannel != null) {
                 if (!msg.startsWith("<")) msg = formatChat(owner, msg);
-                this.discordChannel.createMessage(msg).retry(3).subscribe();
+                this.discordChannel.createMessage(msg).retry(3).subscribe(
+                    success -> {}, // onNext - do nothing on success
+                    error -> System.err.println("Failed to send Discord message: " + error.getMessage())
+                );
             }
         } catch (Exception e) {
             System.err.println(
@@ -198,7 +206,10 @@ public final strictfp class ChatRoom {
         try {
             // Send the embed to the discord channel if one is setup for this chat room
             if (this.discordChannel != null) {
-                this.discordChannel.createMessage(embed).retry(3).subscribe();
+                this.discordChannel.createMessage(embed).retry(3).subscribe(
+                    success -> {}, // onNext - do nothing on success  
+                    error -> System.err.println("Failed to send Discord embed: " + error.getMessage())
+                );
             }
         } catch (Exception e) {
             System.err.println(
@@ -236,39 +247,24 @@ public final strictfp class ChatRoom {
     }
 
     /**
-     * Sends a message to the chat room associated with the discord channel that the message was
-     * sent through
+     * Handles incoming Discord messages that have already been filtered to this channel
+     * and exclude bot messages
      *
      * @param event The message event containing the message details from discord
-     * @return
      */
-    private Mono<Void> handleIncomingDiscordMessage(MessageCreateEvent event) {
-        System.out.println("handling on chatroom" + name);
-        if (this.discordChannel != null) {
-            Message message = event.getMessage();
-
-            if (message.getChannelId().equals(discordChannel.getId())) {
-                System.out.println("Message in channel tt discord channel posted");
-                // Handle the message
-                String content = message.getContent();
-                Instant timestamp = message.getTimestamp();
-                Snowflake authorId = message.getAuthor().get().getId();
-                boolean isMessageFromBot =
-                        authorId.equals(DiscordBotService.getInstance().getBotId());
-                if (!isMessageFromBot) {
-                    System.out.println(
-                            "Message from " + authorId + ": " + content + " at " + timestamp);
-                    String author =
-                            "@"
-                                    + message.getAuthor()
-                                            .map(user -> user.getUsername())
-                                            .orElse("Unknown");
-                    System.out.println("Queueing Discord message for main thread processing");
-                    sendMessage(author, content);
-                }
-            }
-        }
-
-        return Mono.empty();
+    private void handleIncomingDiscordMessage(MessageCreateEvent event) {
+        System.out.println("Handling Discord message for chatroom " + name);
+        
+        Message message = event.getMessage();
+        String content = message.getContent();
+        
+        // Get the member to access server nickname/display name
+        event.getMember().ifPresent(member -> {
+            String displayName = member.getDisplayName(); // This gets nickname or username if no nickname
+            String author = "@" + displayName;
+            
+            System.out.println("Processing Discord message from " + author + ": " + content);
+            sendMessage(author, content);
+        });
     }
 }
