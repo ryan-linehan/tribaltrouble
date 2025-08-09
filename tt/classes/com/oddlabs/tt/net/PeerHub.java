@@ -447,7 +447,16 @@ public final strictfp class PeerHub implements Animated, RouterHandler {
                     info += "U " + u.getGridX() + " " + u.getGridY() + " ";
                 } else if (obj instanceof Building) {
                     Building b = (Building) obj;
-                    info += "B " + b.getGridX() + " " + b.getGridY() + " " + b.getSize() + " ";
+                    info +=
+                            "B "
+                                    + b.getGridX()
+                                    + " "
+                                    + b.getGridY()
+                                    + " "
+                                    + b.getSize()
+                                    + " "
+                                    + b.getHealth()
+                                    + " ";
                 }
             }
         }

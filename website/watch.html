@@ -305,7 +305,8 @@
                 float dist = sqrt(f_uv.x * f_uv.x + f_uv.y * f_uv.y);
 	            if (dist > u_grid_unit_size) discard;
                 float blend = pow(dist / u_grid_unit_size, 4.3);
-                gl_FragColor = mix(u_color, vec4(0.0, 0.0, 0.0, 1.0), blend);
+                gl_FragColor.xyz = mix(u_color.xyz, vec3(0.0, 0.0, 0.0), blend);
+                gl_FragColor.w = u_color.w;
             }`
         );
 
@@ -473,8 +474,9 @@
                 const x = 1.0 - (unit[0] / map_size) * 2.0;
                 const y = 1.0 - (unit[1] / map_size) * 2.0;
                 const s = unit[3];
+                const h = unit[4];
                 gl.uniform3f(u_loc, x, y, s);
-                gl.uniform4f(u_color, color[0], color[1], color[2], 1.0);
+                gl.uniform4f(u_color, color[0], color[1], color[2], h);
                 gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
             }
 
@@ -592,13 +594,14 @@
                         t++;
                         const x = parseInt(tokens[t++]);
                         const y = parseInt(tokens[t++]);
-                        state.push([x, y, pindex, 1.0]);
+                        state.push([x, y, pindex, 1.0, 1.0]);
                     } else if (typ == 'B') {
                         t++;
                         const x = parseInt(tokens[t++]);
                         const y = parseInt(tokens[t++]);
                         const r = parseFloat(tokens[t++]);
-                        state.push([x, y, pindex, r]);
+                        const h = parseFloat(tokens[t++]);
+                        state.push([x, y, pindex, r, h]);
                     } else {
                         break;
                     }
