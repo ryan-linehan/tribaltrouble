@@ -679,8 +679,9 @@ public final strictfp class Client implements MatchmakingServerInterface, Connec
     }
 
     /**
-     * Sends a message to the current tribal trouble chat room.
-     * If a discord channel is associated with the chat room, it will also send the message to that channel.
+     * Sends a message to the current tribal trouble chat room. If a discord channel is associated
+     * with the chat room, it will also send the message to that channel.
+     *
      * @param msg The message to send
      */
     public final void sendMessageToRoom(String msg) {

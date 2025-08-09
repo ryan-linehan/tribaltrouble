@@ -151,7 +151,7 @@ public final class MatchmakingServer implements ConnectionListenerInterface {
             System.out.println("A user is online, starting automatic server ticking.");
             server_tick_timeout =
                     100; // Set to 100ms for regular updates so discord messages sync into the chat
-                         // room
+            // room
         }
     }
 
@@ -193,12 +193,12 @@ public final class MatchmakingServer implements ConnectionListenerInterface {
             if (token == null || token.isEmpty()) {
                 logger.info(
                         "No discord bot token found at TT_DISCORD_TOKEN environment variable,"
-                            + " skipping Discord bot initialization.");
+                                + " skipping Discord bot initialization.");
 
             } else if (serverIdAsString == null || serverIdAsString.isEmpty()) {
                 logger.info(
                         "No discord guild name found at TT_SERVER_ID environment variable, skipping"
-                            + " Discord bot initialization.");
+                                + " Discord bot initialization.");
             } else {
                 try {
                     long serverId = Long.parseLong(serverIdAsString);
@@ -206,7 +206,7 @@ public final class MatchmakingServer implements ConnectionListenerInterface {
                         logger.log(
                                 Level.INFO,
                                 "Invalid discord guild ID (must be positive): {0}, skipping Discord"
-                                    + " bot initialization.",
+                                        + " bot initialization.",
                                 serverIdAsString);
                     } else {
                         DiscordBotService.getInstance().initialize(token, serverId);
@@ -219,7 +219,7 @@ public final class MatchmakingServer implements ConnectionListenerInterface {
                     logger.log(
                             Level.WARNING,
                             "Invalid discord guild ID format: {0}, skipping Discord bot"
-                                + " initialization. Error: {1}",
+                                    + " initialization. Error: {1}",
                             new Object[] {serverIdAsString, e.getMessage()});
                 }
             }

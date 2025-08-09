@@ -29,8 +29,7 @@ public class DiscordBotService {
     public DiscordBotService() {}
 
     public void initialize(String token, long serverId) {
-        if(isInitialized)
-            return;
+        if (isInitialized) return;
         DiscordClient client = DiscordClient.create(token);
 
         Mono<Void> login =
