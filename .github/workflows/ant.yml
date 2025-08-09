@@ -11,7 +11,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  check-format:
+  format-check:
 
     runs-on: ubuntu-latest
 
@@ -23,11 +23,12 @@ jobs:
         java-version: '21'
         distribution: 'temurin'
     - name: Check Format
-      run: ant -noinput -buildfile build.xml check-format
+      run: ant -noinput -buildfile build.xml format-check
 
   build-linux:
 
     runs-on: ubuntu-latest
+    needs: format-check
 
     steps:
     - uses: actions/checkout@v4
@@ -47,7 +48,8 @@ jobs:
   build-windows:
   
     runs-on: windows-latest
-    
+    needs: format-check
+
     steps:
     - uses: actions/checkout@v4
     - name: Set up JDK 21
@@ -66,7 +68,8 @@ jobs:
   build-mac-x86:
   
     runs-on: macos-13
-    
+    needs: format-check
+
     steps:
     - uses: actions/checkout@v4
     - name: Set up JDK 21
@@ -85,7 +88,8 @@ jobs:
   build-mac-arm64:
   
     runs-on: macos-latest
-    
+    needs: format-check
+
     steps:
     - uses: actions/checkout@v4
     - name: Set up JDK 21
