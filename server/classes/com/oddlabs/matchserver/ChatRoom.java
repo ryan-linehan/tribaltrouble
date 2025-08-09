@@ -8,7 +8,7 @@ import java.util.*;
 public final strictfp class ChatRoom {
     private static final Map chat_rooms = new HashMap();
 
-                    private final Set users = new HashSet();
+    private final Set users = new HashSet();
     private final String name;
 
     public ChatRoom(String name) {
