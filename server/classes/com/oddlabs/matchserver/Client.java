@@ -678,6 +678,11 @@ public final strictfp class Client implements MatchmakingServerInterface, Connec
         return "<" + getProfile().getNick() + "> " + message;
     }
 
+    /**
+     * Sends a message to the current tribal trouble chat room.
+     * If a discord channel is associated with the chat room, it will also send the message to that channel.
+     * @param msg The message to send
+     */
     public final void sendMessageToRoom(String msg) {
         if (current_room != null) {
             if (guest) {
@@ -688,6 +693,7 @@ public final strictfp class Client implements MatchmakingServerInterface, Connec
             String formatted_message = formatChat(msg);
             server.getChatLogger().info(formatted_message);
             current_room.sendMessage(getProfile().getNick(), msg);
+            current_room.trySendDiscordMessage(getProfile().getNick(), formatted_message);
         }
     }
 
