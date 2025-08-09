@@ -209,7 +209,7 @@ public final class MatchmakingServer implements ConnectionListenerInterface {
                                     + " bot initialization.",
                                 serverIdAsString);
                     } else {
-                        // DiscordBotService.getInstance().initialize(token, serverId);
+                        DiscordBotService.getInstance().initialize(token, serverId);
                         logger.log(
                                 Level.INFO,
                                 "Discord bot initialized with token for server id: {0}",
