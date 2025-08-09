@@ -1,0 +1,631 @@
+<head>
+    <style>
+        body {
+            background-color: black;
+        }
+
+        #tv {
+            height: 100%;
+            width: 100%;
+        }
+
+        .canvas {
+            height: 90%;
+            width: 100%;
+            border-top-left-radius: 15px;
+            border-top-right-radius: 15px;
+            background-color: grey;
+        }
+
+        .btn {
+            border: none;
+            float: left;
+            height: 100%;
+            vertical-align: middle;
+        }
+
+        #control-panel {
+            height: 10%;
+            width: 100%;
+            border-bottom-left-radius: 15px;
+            border-bottom-right-radius: 15px;
+            background-color: #24D;
+        }
+
+        #prev-btn {
+            display: none;
+        }
+
+        #next-btn {
+            display: none;
+        }
+
+        #play-btn {
+            display: none;
+        }
+
+        #timeline {
+            height: 5px;
+            width: 100%;
+            background-color: black;
+            position: absolute;
+        }
+
+        #time-cursor {
+            height: 5px;
+            width: 1px;
+            position: relative;
+            border-radius: 5px;
+            left: 0px;
+            background-color: red;
+            -webkit-box-shadow: 0px 0px 8px 3px #99F;
+            box-shadow: 0px 0px 8px 3px #99F;
+        }
+
+        #time-display {
+            right: 15px;
+            top: 10px;
+            text-align: right;
+            color: white;
+            font-size: 20px;
+            position: absolute;
+            text-shadow: 2px 2px #000;
+        }
+    </style>
+
+</head>
+
+<body>
+
+    <div id="tv">
+        <canvas id='canvas-map' class='canvas' width="1500" height="1500"></canvas>
+        <div id="timeline">
+            <div id="time-cursor">
+            </div>
+        </div>
+        <div id="control-panel">
+            <img class="btn" src="prev.png" id="prev-btn" />
+            <img class="btn" src="play.png" id="play-btn" />
+            <img class="btn" src="pause.png" id="pause-btn" />
+            <img class="btn" src="next.png" id="next-btn" />
+            <span id="time-display"></span>
+        </div>
+        <span id="time-display"></span>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('canvas-map');
+        const timeCursor = document.getElementById('time-cursor');
+        const gl = canvas.getContext('webgl');
+
+        var offset = [0.0, 0.0];
+        var scale = 1.0;
+        var aspect = 1.0;
+        var dragging = false;
+        var mouseLastX, mouseLastY;
+        var fetch_lock = false;
+
+        canvas.addEventListener("wheel", function(event) {
+            event.preventDefault();
+            const old = scale;
+            scale *= 1.0 - event.deltaY * 0.0003;
+            scale = Math.max(0.3, scale);
+            scale = Math.min(10.0, scale);
+            offset[0] = offset[0] / (old / scale);
+            offset[1] = offset[1] / (old / scale);
+            renderTick(ticks[curr_tick_index]);
+        }, {
+            passive: false
+        });
+
+        canvas.addEventListener("mousedown", function(event) {
+            if (!map_complete) return;
+            dragging = true;
+            mouseLastX = event.clientX;
+            mouseLastY = event.clientY;
+        });
+
+        canvas.addEventListener("mousemove", function(event) {
+            if (!dragging) return;
+            var dx = event.clientX - mouseLastX;
+            var dy = event.clientY - mouseLastY;
+            mouseLastX = event.clientX;
+            mouseLastY = event.clientY;
+            dx *= 2.0 / canvas.clientHeight;
+            dy *= 2.0 / canvas.clientHeight;
+            offset[0] += dx;
+            offset[1] -= dy;
+            renderTick(ticks[curr_tick_index]);
+        });
+
+        canvas.addEventListener("mouseup", function(event) {
+            dragging = false;
+        });
+
+        document.addEventListener("mouseup", function() {
+            dragging = false;
+        });
+
+        var state_per_tick = {};
+
+        var ticks = [];
+        var trees = [];
+        var map = [];
+        var map_complete = false;
+        var ended = false;
+        var buffering = false;
+        var byte_offset = 0;
+        var players = [];
+
+        var curr_tick_index = 0;
+        var biggest_tick = 0;
+        var jump_to_end = false;
+
+        var baseMapBuf;
+        var treeBuf;
+
+        var isPaused = false;
+
+        const gameId = Number(window.location.hash.substr(1));
+
+        const pauseButton = document.getElementById("pause-btn");
+        const playButton = document.getElementById("play-btn");
+        const nextButton = document.getElementById("next-btn");
+        const prevButton = document.getElementById("prev-btn");
+        const timeDisplay = document.getElementById("time-display");
+        const timeline = document.getElementById("timeline");
+
+        pauseButton.addEventListener("click", function() {
+            isPaused = true;
+            pauseButton.style.display = 'none';
+            playButton.style.display = 'block';
+            nextButton.style.display = 'block';
+            prevButton.style.display = 'block';
+        });
+
+        playButton.addEventListener("click", function() {
+            isPaused = false;
+            pauseButton.style.display = 'block';
+            playButton.style.display = 'none';
+            nextButton.style.display = 'none';
+            prevButton.style.display = 'none';
+            nextTick();
+        });
+
+        nextButton.addEventListener("click", function() {
+            nextTick();
+            jump_to_end = false;
+        });
+
+        prevButton.addEventListener("click", function() {
+            curr_tick_index--;
+            if (curr_tick_index < 0) {
+                curr_tick_index = 0;
+            }
+            timeCursor.style.width = (curr_tick_index * 100.0 / biggest_tick) + "%";
+            timeDisplay.innerHTML = ticks[curr_tick_index] + " / " + biggest_tick;
+            renderTick(ticks[curr_tick_index]);
+            jump_to_end = false;
+        });
+
+        timeline.addEventListener("mousedown", function(event) {
+            const closestIndex = Math.round(ticks.length * (event.clientX / timeline.clientWidth));
+            curr_tick_index = closestIndex;
+            jump_to_end = false;
+        });
+
+        function compileShader(source, type) {
+            const shader = gl.createShader(type);
+            gl.shaderSource(shader, source);
+            gl.compileShader(shader);
+            if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+                console.error('Shader error:' + gl.getShaderInfoLog(shader));
+                gl.deleteShader(shader);
+            }
+            return shader;
+        }
+
+        function makeProg(vert, frag) {
+            const vertexShader = compileShader(vert, gl.VERTEX_SHADER);
+            const fragmentShader = compileShader(frag, gl.FRAGMENT_SHADER);
+            const prog = gl.createProgram();
+            gl.attachShader(prog, vertexShader);
+            gl.attachShader(prog, fragmentShader);
+            gl.linkProgram(prog);
+            return prog;
+        }
+
+        const baseMapProg = makeProg(
+            `
+            uniform highp vec2 u_aspect;
+            uniform highp float u_scale;
+            uniform vec2 u_offset;
+            attribute vec4 v_verts;
+            varying vec2 f_height;
+            void main(void) {
+                gl_Position = vec4(u_aspect * (v_verts.xy * u_scale + u_offset), 0.0, 1.0);
+                f_height = v_verts.zw;
+            }`,
+            `
+            varying highp vec2 f_height;
+            void main(void) {
+                highp float blend = 1.0 - clamp(f_height.y, 0.0, 0.1) / 0.1;
+                highp float h = (1.0 - f_height.x);
+                gl_FragColor.xyz = mix(vec3(0.96, 0.843, 0.69) * pow(h, 6.1), vec3(0.0, 0.55, 0.87), blend);
+                gl_FragColor.w = 1.0;
+            }`
+        );
+
+        const treeProg = makeProg(
+            `
+            uniform highp vec2 u_aspect;
+            uniform highp float u_scale;
+            uniform vec2 u_offset;
+            attribute vec4 v_verts;
+            varying vec2 f_uv;
+            void main(void) {
+                gl_Position = vec4(u_aspect * (v_verts.xy * u_scale + u_offset), 0.0, 1.0);
+                f_uv = v_verts.zw;
+            }`,
+            `
+            precision highp float;
+            varying vec2 f_uv;
+            void main(void) {
+                vec2 delta = f_uv - vec2(0.5, 0.5);
+                float angle = atan(delta.y, delta.x);
+                float angleInt = floor(angle / 0.1);
+                float rem = angle - angleInt * 0.1;
+                float dist = sqrt(delta.x * delta.x + delta.y * delta.y);
+                if (dist > 0.5) discard;
+                if (rem < 0.02) discard;
+                gl_FragColor = vec4(0.0, 0.5, 0.0, 0.9);
+            }`
+        );
+
+        const unitProg = makeProg(
+            `
+            precision highp float;
+            uniform highp vec2 u_aspect;
+            uniform highp float u_scale;
+            uniform vec2 u_offset;
+            uniform vec3 u_loc;
+            uniform vec4 u_color;
+            attribute vec2 v_uv;
+            varying vec2 f_uv;
+	        void main(void) {
+                gl_Position = vec4(u_aspect * ((u_loc.xy + v_uv * u_loc.z) * u_scale + u_offset), 0.0, 1.0);
+                f_uv = v_uv;
+	        }`,
+            `
+            precision highp float;
+            uniform float u_grid_unit_size;
+            varying vec2 f_uv;
+            uniform vec4 u_color;
+            void main(void) {
+                float dist = sqrt(f_uv.x * f_uv.x + f_uv.y * f_uv.y);
+	            if (dist > u_grid_unit_size) discard;
+                float blend = pow(dist / u_grid_unit_size, 4.3);
+                gl_FragColor.xyz = mix(u_color.xyz, vec3(0.0, 0.0, 0.0), blend);
+                gl_FragColor.w = u_color.w;
+            }`
+        );
+
+        function makeBaseMapVertices() {
+            const size = map.length;
+            const vertices = new Float32Array(size * size * 2 * 4);
+            const step = 2.0 / (size - 1);
+            var index = 0;
+            for (var row = 0; row < size - 1; row++) {
+                for (var col = 0; col < size; col++) {
+                    var x = 1.0 - col * step;
+                    var y0 = 1.0 - step * row;
+                    var y1 = y0 - step;
+                    var prow = Math.max(0, row - 1);
+                    var nrow = Math.min(size - 1, row + 1);
+                    const c0 = map[prow][col] / 64.0;
+                    const c1 = map[row][col] / 64.0;
+                    const c2 = map[nrow][col] / 64.0;
+                    vertices[index++] = x;
+                    vertices[index++] = y0;
+                    vertices[index++] = (c0 - c1);
+                    vertices[index++] = c0;
+                    vertices[index++] = x;
+                    vertices[index++] = y1;
+                    vertices[index++] = (c1 - c2);
+                    vertices[index++] = c1;
+                }
+            }
+            const vertexBuffer = gl.createBuffer();
+            gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
+            gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW);
+            return vertexBuffer;
+        }
+
+        function makeTreeVertices() {
+            const size = trees.length;
+            const map_size = map.length;
+            const map_unit = 2.0 / map.length;
+            const tree_size = map_unit * 2.5;
+            const vertices = new Float32Array(size * 4 * 6);
+            var index = 0;
+            for (var t = 0; t < size; t++) {
+                const x = 1.0 - (trees[t][0] / map_size) * 2.0;
+                const y = 1.0 - (trees[t][1] / map_size) * 2.0;
+                const x0 = x - tree_size;
+                const y0 = y - tree_size;
+                const x1 = x + tree_size;
+                const y1 = y + tree_size;
+                vertices[index++] = x0;
+                vertices[index++] = y0;
+                vertices[index++] = 0.0;
+                vertices[index++] = 0.0;
+                vertices[index++] = x0;
+                vertices[index++] = y1;
+                vertices[index++] = 0.0;
+                vertices[index++] = 1.0;
+                vertices[index++] = x1;
+                vertices[index++] = y1;
+                vertices[index++] = 1.0;
+                vertices[index++] = 1.0;
+
+                vertices[index++] = x0;
+                vertices[index++] = y0;
+                vertices[index++] = 0.0;
+                vertices[index++] = 0.0;
+                vertices[index++] = x1;
+                vertices[index++] = y1;
+                vertices[index++] = 1.0;
+                vertices[index++] = 1.0;
+                vertices[index++] = x1;
+                vertices[index++] = y0;
+                vertices[index++] = 1.0;
+                vertices[index++] = 0.0;
+            }
+            const vertexBuffer = gl.createBuffer();
+            gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
+            gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW);
+            return vertexBuffer;
+        }
+
+        function makeUnitBaseBuf() {
+            const uv = new Float32Array(8);
+            const map_size = map.length;
+            const s = 1.0 / map_size;
+            uv[0] = -s;
+            uv[1] = +s;
+            uv[2] = -s;
+            uv[3] = -s;
+            uv[4] = +s;
+            uv[5] = +s;
+            uv[6] = +s;
+            uv[7] = -s;
+            const uvBuffer = gl.createBuffer();
+            gl.bindBuffer(gl.ARRAY_BUFFER, uvBuffer);
+            gl.bufferData(gl.ARRAY_BUFFER, uv, gl.STATIC_DRAW);
+            return uvBuffer;
+        }
+
+        var uvBuf;
+
+        function createMapBuffer() {
+            baseMapBuf = makeBaseMapVertices();
+            treeBuf = makeTreeVertices();
+            uvBuf = makeUnitBaseBuf();
+        }
+
+        function doScreenVars(prog) {
+            const u_scale = gl.getUniformLocation(prog, "u_scale");
+            gl.uniform1f(u_scale, scale);
+            const u_offset = gl.getUniformLocation(prog, "u_offset");
+            gl.uniform2f(u_offset, offset[0], offset[1]);
+            const u_aspect = gl.getUniformLocation(prog, "u_aspect");
+            gl.uniform2f(u_aspect, canvas.clientHeight / canvas.clientWidth, 1.0);
+        }
+
+        function renderMap() {
+            gl.clearColor(0.0, 0.55, 0.87, 1.0);
+            gl.clear(gl.COLOR_BUFFER_BIT);
+            gl.useProgram(baseMapProg);
+            doScreenVars(baseMapProg);
+            gl.bindBuffer(gl.ARRAY_BUFFER, baseMapBuf);
+            var verts = gl.getAttribLocation(baseMapProg, 'v_verts');
+            gl.enableVertexAttribArray(verts);
+            gl.vertexAttribPointer(verts, 4, gl.FLOAT, false, 0, 0);
+            const rowSize = map.length * 2;
+            for (var row = 0; row < map.length - 1; row++) {
+                gl.drawArrays(gl.TRIANGLE_STRIP, row * rowSize, rowSize);
+            }
+        }
+
+        function renderTrees() {
+            gl.useProgram(treeProg);
+            doScreenVars(treeProg);
+            gl.bindBuffer(gl.ARRAY_BUFFER, treeBuf);
+            const verts = gl.getAttribLocation(treeProg, 'v_verts');
+            gl.enableVertexAttribArray(verts);
+            gl.vertexAttribPointer(verts, 4, gl.FLOAT, false, 0, 0);
+            gl.drawArrays(gl.TRIANGLES, 0, trees.length * 6);
+        }
+
+        function renderTick(tick) {
+            if (map_complete) {
+                renderMap();
+            }
+            const info = state_per_tick[tick];
+
+            gl.useProgram(unitProg);
+            gl.bindBuffer(gl.ARRAY_BUFFER, uvBuf);
+            const v_uv = gl.getAttribLocation(unitProg, 'v_uv');
+            gl.enableVertexAttribArray(v_uv);
+            gl.vertexAttribPointer(v_uv, 2, gl.FLOAT, false, 0, 0);
+            doScreenVars(unitProg);
+            const u_grid_unit_size = gl.getUniformLocation(unitProg, "u_grid_unit_size");
+            const unitSize = 1.0 / map.length;
+            gl.uniform1f(u_grid_unit_size, unitSize);
+
+            const u_loc = gl.getUniformLocation(unitProg, "u_loc");
+            const u_color = gl.getUniformLocation(unitProg, "u_color");
+
+            const map_size = map.length;
+            for (var i = 0; i < info.length; i++) {
+                const unit = info[i];
+                const pinfo = players[unit[2]];
+                const color = pinfo[3];
+                const x = 1.0 - (unit[0] / map_size) * 2.0;
+                const y = 1.0 - (unit[1] / map_size) * 2.0;
+                const s = unit[3];
+                const h = unit[4];
+                gl.uniform3f(u_loc, x, y, s);
+                gl.uniform4f(u_color, color[0], color[1], color[2], h);
+                gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+            }
+
+            if (map_complete) {
+                renderTrees();
+            }
+        }
+
+        function nextTick() {
+            if (ticks.length > 0) {
+                curr_tick_index++;
+                if (curr_tick_index >= ticks.length) {
+                    curr_tick_index = ticks.length - 1;
+                    jump_to_end = true;
+                    if (!ended) {
+                        pullMoreData();
+                    }
+                }
+                const tick = ticks[curr_tick_index];
+                timeCursor.style.width = (tick * 100.0 / biggest_tick) + "%";
+                renderTick(tick);
+                timeDisplay.innerHTML = tick + " / " + biggest_tick;
+            }
+            if (!isPaused) {
+                setTimeout(nextTick, 20);
+            }
+        }
+
+        setTimeout(nextTick, 100);
+
+        function parseRows(text) {
+            if (text.length == 0) {
+                buferring = true;
+                fetch_lock = false;
+            } else {
+                buffering = false;
+                byte_offset += text.length;
+                const rows = text.split("\n");
+                for (var i = 0; i < rows.length; i++) {
+                    parseRow(rows[i]);
+                }
+                fetch_lock = false;
+                if (jump_to_end) {
+                    curr_tick_index = ticks.length - 1;
+                }
+            }
+        }
+
+        function parseRow(text) {
+            const tokens = text.split(" ");
+            if (tokens[0] == "END") {
+                ended = true;
+                jump_to_end = false;
+            } else if (tokens[0] == "I") {
+                var name = "",
+                    race, color, team;
+                var t = 1;
+                while (t < tokens.length) {
+                    if (tokens[t] == "NAME") {
+                        if (name != "") {
+                            players.push([name, race, team, color]);
+                        }
+                        name = tokens[t + 1];
+                        t += 2;
+                    } else if (tokens[t] == "TEAM") {
+                        team = parseInt(tokens[t + 1]);
+                        t += 2;
+                    } else if (tokens[t] == "RACE") {
+                        race = parseInt(tokens[t + 1]);
+                        t += 2;
+                    } else if (tokens[t] == "COLOR") {
+                        color = [parseFloat(tokens[t + 1]), parseFloat(tokens[t + 2]), parseFloat(tokens[t + 3])];
+                        t += 4;
+                    } else {
+                        break;
+                    }
+                }
+                if (name != "") {
+                    players.push([name, race, team, color]);
+                }
+            } else if (tokens[0] == "M") {
+                var map_row = [];
+                for (var t = 2; t < tokens.length; t++) {
+                    const h = parseFloat(tokens[t]);
+                    if (!isNaN(h)) {
+                        map_row.push(h);
+                    }
+                }
+                map.push(map_row);
+            } else if (tokens[0] == "T") {
+                for (var t = 1; t < tokens.length; t += 2) {
+                    const x = parseFloat(tokens[t]);
+                    const y = parseFloat(tokens[t + 1]);
+                    if (!isNaN(x) && !isNaN(y)) {
+                        trees.push([x, y]);
+                    }
+                }
+            } else {
+                const tick = parseInt(tokens[0]);
+                if (isNaN(tick)) return;
+                var state = [];
+                ticks.push(tick);
+                biggest_tick = Math.max(tick, biggest_tick);
+                var t = 1;
+                var pindex = -1;
+                while (true) {
+                    if (t >= tokens.length) {
+                        break;
+                    }
+                    const typ = tokens[t];
+                    if (typ == 'P') {
+                        t++;
+                        pindex = parseInt(tokens[t++]);
+                    } else if (typ == 'U') {
+                        t++;
+                        const x = parseInt(tokens[t++]);
+                        const y = parseInt(tokens[t++]);
+                        state.push([x, y, pindex, 1.0, 1.0]);
+                    } else if (typ == 'B') {
+                        t++;
+                        const x = parseInt(tokens[t++]);
+                        const y = parseInt(tokens[t++]);
+                        const r = parseFloat(tokens[t++]);
+                        const h = parseFloat(tokens[t++]);
+                        state.push([x, y, pindex, r, h]);
+                    } else {
+                        break;
+                    }
+                }
+                state_per_tick[tick] = state;
+            }
+
+            // Check if map is finally complete
+            if (!map_complete && map.length > 0 && map.length >= map[0].length && trees.length > 0) {
+                createMapBuffer();
+                map_complete = true;
+            }
+        }
+
+        function pullMoreData() {
+            if (!fetch_lock) {
+                fetch_lock = true;
+                fetch('stream.php?gid=' + gameId + '&offset=' + byte_offset).then(res => res.text()).then(res => parseRows(res));
+            }
+        }
+
+        pullMoreData();
+    </script>
+
+</body>
+
+</html>

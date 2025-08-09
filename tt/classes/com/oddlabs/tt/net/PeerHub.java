@@ -15,7 +15,10 @@ import com.oddlabs.tt.event.LocalEventQueue;
 import com.oddlabs.tt.global.Globals;
 import com.oddlabs.tt.global.Settings;
 import com.oddlabs.tt.gui.GUIRoot;
+import com.oddlabs.tt.landscape.HeightMap;
 import com.oddlabs.tt.landscape.World;
+import com.oddlabs.tt.model.Building;
+import com.oddlabs.tt.model.Unit;
 import com.oddlabs.tt.player.Player;
 import com.oddlabs.tt.player.PlayerInterface;
 import com.oddlabs.tt.util.StateChecksum;
@@ -42,6 +45,7 @@ public final strictfp class PeerHub implements Animated, RouterHandler {
     private static final float FREE_QUIT_TIME = 120f;
     private static final int TICKS_PER_STATUS_UPDATE =
             (int) (20 / AnimationManager.ANIMATION_SECONDS_PER_TICK);
+    private static final int TICKS_PER_SPECTATOR_UPDATE = 5;
     private static final int TICKS_PER_CHECKSUM =
             (int) (10 / AnimationManager.ANIMATION_SECONDS_PER_TICK);
 
@@ -72,8 +76,10 @@ public final strictfp class PeerHub implements Animated, RouterHandler {
     private int server_millis;
     private int paused;
     private boolean is_synchronized;
-
-    // private int ignore_peer = -1;
+    private boolean sent_map = false;
+    private boolean sent_init_info = false;
+    private boolean sent_trees = false;
+    private int rows_sent = 0;
 
     static {
         SYSTEM_NAME = Utils.getBundleString(bundle, "system_name");
@@ -113,7 +119,6 @@ public final strictfp class PeerHub implements Animated, RouterHandler {
                             Logger.getAnonymousLogger(),
                             new RouterListener() {
                                 public final void routerFailed(IOException e) {
-                                    //					PeerHub.this.routerFailed(e);
                                     throw new RuntimeException(e);
                                 }
                             });
@@ -304,7 +309,6 @@ public final strictfp class PeerHub implements Animated, RouterHandler {
                                 server_millis
                                         - MILLISECONDS_PER_HEARTBEAT
                                         - CLIENT_MAX_DELAY_MILLIS);
-                // System.out.println("min_tick-getTick() = " + (min_tick-getTick()));
                 while (getTick() < min_tick) doTick(t);
             } else pause_ticks++;
         }
@@ -322,6 +326,21 @@ public final strictfp class PeerHub implements Animated, RouterHandler {
 
         if (getTick() % TICKS_PER_STATUS_UPDATE == 0
                 && Network.getMatchmakingClient().isConnected()) sendStatusUpdate();
+
+        if (!sent_map) {
+            sendMap();
+        }
+
+        if (!sent_init_info) {
+            sendInitInfo();
+        }
+
+        if (!sent_trees) {
+            sendTrees();
+        }
+
+        if (getTick() % TICKS_PER_SPECTATOR_UPDATE == 0
+                && Network.getMatchmakingClient().isConnected()) sendSpectatorInfo();
 
         for (int i = 0; i < peer_index_to_peer.length; i++) {
             Peer peer = peer_index_to_peer[i];
@@ -364,6 +383,85 @@ public final strictfp class PeerHub implements Animated, RouterHandler {
             if (peer != null) status[i] = peer.getPlayer().getStatus();
         }
         Network.getMatchmakingClient().getInterface().updateGameStatus(getTick(), status);
+    }
+
+    private final void sendMap() {
+        HeightMap map = local_player.getWorld().getHeightMap();
+        int size = map.getGridUnitsPerWorld();
+        if (rows_sent < size) {
+            String info = "M " + rows_sent + " ";
+            for (int x = 0; x < size; x++) {
+                info += map.getHeight(x, rows_sent) + " ";
+            }
+            rows_sent++;
+            info += "\n";
+            Network.getMatchmakingClient().getInterface().updateSpectatorInfo(-rows_sent, info);
+        } else {
+            sent_map = true;
+        }
+    }
+
+    private final void sendTrees() {
+        HeightMap map = local_player.getWorld().getHeightMap();
+        String info = "T ";
+        List trees = map.getTrees();
+        for (int t = 0; t < trees.size(); t++) {
+            int[] pos = (int[]) trees.get(t);
+            info += pos[0] + " " + pos[1] + " ";
+        }
+        info += "\n";
+        Network.getMatchmakingClient().getInterface().updateSpectatorInfo(-10000, info);
+        sent_trees = true;
+    }
+
+    private final void sendInitInfo() {
+        String info = "I ";
+        Player[] players = local_player.getWorld().getPlayers();
+        for (int i = 0; i < players.length; i++) {
+            float[] color = players[i].getColor();
+            String name = players[i].getPlayerInfo().getName();
+            int race = players[i].getPlayerInfo().getRace();
+            int team = players[i].getPlayerInfo().getTeam();
+            info += "NAME " + name + " ";
+            info += "RACE " + race + " ";
+            info += "TEAM " + team + " ";
+            info += "COLOR " + color[0] + " " + color[1] + " " + color[2] + " ";
+        }
+        info += "\n";
+        Network.getMatchmakingClient().getInterface().updateSpectatorInfo(-10001, info);
+        sent_init_info = true;
+    }
+
+    private final void sendSpectatorInfo() {
+        int tick = getTick();
+        String info = tick + " ";
+        Player[] players = local_player.getWorld().getPlayers();
+        for (int i = 0; i < players.length; i++) {
+            info += "P " + i + " ";
+            Set units = players[i].getUnits().getSet();
+            Iterator it = units.iterator();
+            while (it.hasNext()) {
+                Object obj = it.next();
+                if (obj instanceof Unit) {
+                    Unit u = (Unit) obj;
+                    info += "U " + u.getGridX() + " " + u.getGridY() + " ";
+                } else if (obj instanceof Building) {
+                    Building b = (Building) obj;
+                    info +=
+                            "B "
+                                    + b.getGridX()
+                                    + " "
+                                    + b.getGridY()
+                                    + " "
+                                    + b.getSize()
+                                    + " "
+                                    + b.getHealth()
+                                    + " ";
+                }
+            }
+        }
+        info += "\n";
+        Network.getMatchmakingClient().getInterface().updateSpectatorInfo(tick, info);
     }
 
     private final Iterator getPeerIterator() {

@@ -68,4 +68,6 @@ public strictfp interface MatchmakingServerInterface {
     public void gameWonNotify();
 
     public void updateGameStatus(int tick, int[] status);
+
+    public void updateSpectatorInfo(int tick, String info);
 }

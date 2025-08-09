@@ -4,7 +4,10 @@ import com.oddlabs.matchmaking.GameSession;
 import com.oddlabs.matchmaking.MatchmakingServerInterface;
 import com.oddlabs.matchmaking.Participant;
 
+import java.io.File;
+import java.io.FileWriter;
 import java.sql.SQLException;
+import java.util.HashSet;
 
 public final strictfp class TimestampedGameSession {
     private static final long JOIN_MAX_TIME = 3 * 60 * 1000;
@@ -46,6 +49,10 @@ public final strictfp class TimestampedGameSession {
     private boolean all_5_wins;
     private int[] player_ratings;
 
+    private File spectator_file;
+    private FileWriter spectator_file_writer;
+    private HashSet info_written;
+
     public TimestampedGameSession(GameSession session, int database_id) {
         this.session = session;
         this.database_id = database_id;
@@ -64,6 +71,13 @@ public final strictfp class TimestampedGameSession {
                                 + nicks
                                 + "] "
                                 + getParticipantStates());
+        info_written = new HashSet();
+        try {
+            spectator_file = new File("/var/games/" + database_id);
+            spectator_file_writer = new FileWriter(spectator_file);
+        } catch (Exception e) {
+            System.out.println("An exception while creating spectator file: " + e);
+        }
     }
 
     private final String getParticipantStates() {
@@ -157,6 +171,18 @@ public final strictfp class TimestampedGameSession {
                         return;
                     }
             }
+        }
+    }
+
+    public final void updateSpectatorInfo(int tick, String info) {
+        try {
+            if (!info_written.contains(tick)) {
+                spectator_file_writer.write(info);
+                spectator_file_writer.flush();
+                info_written.add(tick);
+            }
+        } catch (Exception e) {
+            System.out.println("Exception during writing spectator file: " + e);
         }
     }
 
@@ -264,6 +290,7 @@ public final strictfp class TimestampedGameSession {
                                 + getParticipantStates());
         // if (game_state != GAME_STARTING)
         evaluateGame(server);
+        updateSpectatorInfo(0, "END");
     }
 
     private final void evaluateGame(MatchmakingServer server) {

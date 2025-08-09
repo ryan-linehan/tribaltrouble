@@ -954,4 +954,8 @@ public final strictfp class Building extends Selectable implements Occupant {
                             + getSupplyContainer(RubberAxeWeapon.class).getNumSupplies());
         }
     }
+
+    public final float getHealth() {
+        return build_points / (float) getBuildingTemplate().getMaxHitPoints();
+    }
 }
