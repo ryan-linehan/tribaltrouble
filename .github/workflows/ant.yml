@@ -23,15 +23,7 @@ jobs:
         java-version: '21'
         distribution: 'temurin'
     - name: Check Format
-      run: |
-        ci/auto_format.sh
-        if [[ "$(git diff --name-only | wc -l)" == "0" ]]; then
-          exit 0
-        else
-          echo "Please auto format the code before committing"
-          exit 1
-        fi
-      shell: bash
+      run: ant -noinput -buildfile build.xml check-format
 
   build-linux:
 

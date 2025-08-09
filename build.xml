@@ -19,4 +19,87 @@
 	<target name="compile">
 		<iterate target="compile"/>
 	</target>
+
+	<target name="format" description="Format all Java files using google-java-format">
+		<!-- Define the path to google-java-format jar -->
+		<property name="gjf.jar" location="ci/google-java-format-1.28.0-all-deps.jar"/>
+		
+		<!-- Check if the jar file exists -->
+		<fail message="Google Java Format jar not found at: ${gjf.jar}">
+			<condition>
+				<not>
+					<available file="${gjf.jar}"/>
+				</not>
+			</condition>
+		</fail>
+		
+		<echo message="Formatting Java files with google-java-format..."/>
+		
+		<!-- Create a temporary file list to avoid command line length issues -->
+		<tempfile property="temp.filelist.format" suffix=".txt" deleteonexit="true"/>
+		<fileset id="java.files.format" dir="." includes="**/*.java"/>
+		<pathconvert property="java.files.list.format" refid="java.files.format" pathsep="${line.separator}"/>
+		<echo file="${temp.filelist.format}" message="${java.files.list.format}"/>
+		
+		<!-- Use java task with file list argument for better performance -->
+		<java jar="${gjf.jar}" fork="true" failonerror="true" 
+		      resultproperty="format.result">
+			<arg value="--replace"/>
+			<arg value="--aosp"/>
+			<arg value="@${temp.filelist.format}"/>
+		</java>
+		
+		<!-- Check if formatting succeeded -->
+		<condition property="format.failed">
+			<not>
+				<equals arg1="${format.result}" arg2="0"/>
+			</not>
+		</condition>
+		
+		<fail if="format.failed" message="Java formatting failed! Check the output above for errors."/>
+		
+		<echo message="Java formatting completed successfully."/>
+	</target>
+
+	<target name="format-check" description="Check if any Java files need formatting (for CI/CD)">
+		<!-- Define the path to google-java-format jar -->
+		<property name="gjf.jar" location="ci/google-java-format-1.28.0-all-deps.jar"/>
+		
+		<!-- Check if the jar file exists -->
+		<fail message="Google Java Format jar not found at: ${gjf.jar}">
+			<condition>
+				<not>
+					<available file="${gjf.jar}"/>
+				</not>
+			</condition>
+		</fail>
+		
+		<echo message="Checking Java file formatting with google-java-format..."/>
+		
+		<!-- Create a temporary file list to avoid command line length issues -->
+		<tempfile property="temp.filelist" suffix=".txt" deleteonexit="true"/>
+		<fileset id="java.files" dir="." includes="**/*.java"/>
+		<pathconvert property="java.files.list" refid="java.files" pathsep="${line.separator}"/>
+		<echo file="${temp.filelist}" message="${java.files.list}"/>
+		
+		<!-- Use java task with file list argument -->
+		<java jar="${gjf.jar}" fork="true" failonerror="false" 
+		      resultproperty="format.check.result" outputproperty="format.check.output">
+			<arg value="--dry-run"/>
+			<arg value="--set-exit-if-changed"/>
+			<arg value="--aosp"/>
+			<arg value="@${temp.filelist}"/>
+		</java>
+		
+		<!-- Check if any files need formatting -->
+		<condition property="format.check.failed">
+			<not>
+				<equals arg1="${format.check.result}" arg2="0"/>
+			</not>
+		</condition>
+		
+		<fail if="format.check.failed" message="format-check FAILED! ${line.separator} Files that need formatting:${line.separator}${format.check.output}${line.separator}Run 'ant format' to fix formatting issues."/>
+		
+		<echo message="format-check succeeded. All files are properly formatted."/>
+	</target>
 </project>
