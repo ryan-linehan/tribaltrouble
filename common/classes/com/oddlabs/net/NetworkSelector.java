@@ -83,80 +83,78 @@ public final strictfp class NetworkSelector {
         return selector;
     }
 
-	final void unregisterForPinging(Connection conn) {
-		TimedConnection unregister_key = new TimedConnection(-1, conn);
-		ping_timeouts.remove(unregister_key);
-		ping_connections.remove(unregister_key);
-	}
-	
-	final void registerForPingTimeout(Connection conn) {
-		long ping_timeout = time_manager.getMillis() + PING_TIMEOUT;
-		ping_timeouts.add(new TimedConnection(ping_timeout, conn));
-	}
-	
-	final void registerForPing(Connection conn) {
-		long ping_time = time_manager.getMillis() + PING_DELAY;
-		ping_connections.add(new TimedConnection(ping_time, conn));
-	}
-	
-	private final void processTasks() {
-		if (task_thread != null)
-			task_thread.poll();
-	}
-	
-	private final long processPings(long millis) {
-		long next_select_timeout = PING_DELAY;
-		while (ping_timeouts.size() > 0) {
-			TimedConnection first_conn = (TimedConnection)ping_timeouts.get(0);
-			long first = first_conn.getTimeout();
-			if (first <= millis) {
-				ping_timeouts.remove(0);
-				first_conn.getConnection().timeout();
-			} else {
-				next_select_timeout = first - millis;
-				break;
-			}
-		}
-		while (ping_connections.size() > 0) {
-			TimedConnection first_conn = (TimedConnection)ping_connections.get(0);
-			long first = first_conn.getTimeout();
-			if (first <= millis) {
-				ping_connections.remove(0);
-				Connection conn = first_conn.getConnection();
-				if (conn.isConnected()) {
-					conn.doPing();
-					registerForPing(conn);
-				}
-			} else {
-				next_select_timeout = Math.min(first - millis, next_select_timeout);
-				break;
-			}
-		}
-		return next_select_timeout;
-	}
+    final void unregisterForPinging(Connection conn) {
+        TimedConnection unregister_key = new TimedConnection(-1, conn);
+        ping_timeouts.remove(unregister_key);
+        ping_connections.remove(unregister_key);
+    }
 
-	/** Blocks until the network traffic is received or until the timeout occurs
-	 * @param timeout the maximum time to wait for network traffic, in milliseconds. If 0, it will block until network traffic is received.
-	 */
-	public final void tickBlocking(long timeout) throws IOException {
-		processTasks();
-		long millis = time_manager.getMillis();
-		long next_timeout;
-		long ping_timeout = processPings(millis);
-		if (ping_timeout == 0)
-			next_timeout = timeout;
-		else if (timeout == 0)
-			next_timeout = ping_timeout;
-		else
-			next_timeout = StrictMath.min(ping_timeout, timeout);
-		if (deterministic.log(selector != null && selector.select(next_timeout) > 0))
-			doTick();
-	}
+    final void registerForPingTimeout(Connection conn) {
+        long ping_timeout = time_manager.getMillis() + PING_TIMEOUT;
+        ping_timeouts.add(new TimedConnection(ping_timeout, conn));
+    }
 
-	/** Blocks until the network traffic is recieved */
-	public final void tickBlocking() throws IOException {
-		tickBlocking(0);
-	}
+    final void registerForPing(Connection conn) {
+        long ping_time = time_manager.getMillis() + PING_DELAY;
+        ping_connections.add(new TimedConnection(ping_time, conn));
+    }
+
+    private final void processTasks() {
+        if (task_thread != null) task_thread.poll();
+    }
+
+    private final long processPings(long millis) {
+        long next_select_timeout = PING_DELAY;
+        while (ping_timeouts.size() > 0) {
+            TimedConnection first_conn = (TimedConnection) ping_timeouts.get(0);
+            long first = first_conn.getTimeout();
+            if (first <= millis) {
+                ping_timeouts.remove(0);
+                first_conn.getConnection().timeout();
+            } else {
+                next_select_timeout = first - millis;
+                break;
+            }
+        }
+        while (ping_connections.size() > 0) {
+            TimedConnection first_conn = (TimedConnection) ping_connections.get(0);
+            long first = first_conn.getTimeout();
+            if (first <= millis) {
+                ping_connections.remove(0);
+                Connection conn = first_conn.getConnection();
+                if (conn.isConnected()) {
+                    conn.doPing();
+                    registerForPing(conn);
+                }
+            } else {
+                next_select_timeout = Math.min(first - millis, next_select_timeout);
+                break;
+            }
+        }
+        return next_select_timeout;
+    }
+
+    /**
+     * Blocks until the network traffic is received or until the timeout occurs
+     *
+     * @param timeout the maximum time to wait for network traffic, in milliseconds. If 0, it will
+     *     block until network traffic is received.
+     */
+    public final void tickBlocking(long timeout) throws IOException {
+        processTasks();
+        long millis = time_manager.getMillis();
+        long next_timeout;
+        long ping_timeout = processPings(millis);
+        if (ping_timeout == 0) next_timeout = timeout;
+        else if (timeout == 0) next_timeout = ping_timeout;
+        else next_timeout = StrictMath.min(ping_timeout, timeout);
+        if (deterministic.log(selector != null && selector.select(next_timeout) > 0)) doTick();
+    }
+
+    /** Blocks until the network traffic is recieved */
+    public final void tickBlocking() throws IOException {
+        tickBlocking(0);
+    }
 
     public final void tick() {
         try {

@@ -592,9 +592,13 @@ public final strictfp class DBInterface {
         }
     }
 
-    public final static GameData getGame(int game_id, boolean get_player_data) {
+    public static final GameData getGame(int game_id, boolean get_player_data) {
         try {
-            PreparedStatement stmt = DBUtils.createStatement("SELECT time_create,name,rated,speed,size,hills,trees,resources,mapcode,status,id,winner,time_stop,player1_name,player1_race,player1_team,player2_name,player2_race,player2_team,player3_name,player3_race,player3_team,player4_name,player4_race,player4_team,player5_name,player5_race,player5_team,player6_name,player6_race,player6_team,player7_name,player7_race,player7_team,player8_name,player8_race,player8_team,time_start FROM games G WHERE G.id = ?");
+            PreparedStatement stmt =
+                    DBUtils.createStatement(
+                            "SELECT"
+                                + " time_create,name,rated,speed,size,hills,trees,resources,mapcode,status,id,winner,time_stop,player1_name,player1_race,player1_team,player2_name,player2_race,player2_team,player3_name,player3_race,player3_team,player4_name,player4_race,player4_team,player5_name,player5_race,player5_team,player6_name,player6_race,player6_team,player7_name,player7_race,player7_team,player8_name,player8_race,player8_team,time_start"
+                                + " FROM games G WHERE G.id = ?");
             try {
                 stmt.setInt(1, game_id);
                 ResultSet result = stmt.executeQuery();
@@ -698,18 +702,48 @@ public final strictfp class DBInterface {
                             System.out.println("Fetching player data for game ID: " + game_id);
                             // Collect unique, non-null player names (nicks)
                             String[] nicks = new String[8];
-                            nicks[0] = (gameData.getPlayer1Name() != null) ? gameData.getPlayer1Name() : null;
-                            nicks[1] = (gameData.getPlayer2Name() != null) ? gameData.getPlayer2Name() : null;
-                            nicks[2] = (gameData.getPlayer3Name() != null) ? gameData.getPlayer3Name() : null;
-                            nicks[3] = (gameData.getPlayer4Name() != null) ? gameData.getPlayer4Name() : null;
-                            nicks[4] = (gameData.getPlayer5Name() != null) ? gameData.getPlayer5Name() : null;
-                            nicks[5] = (gameData.getPlayer6Name() != null) ? gameData.getPlayer6Name() : null;
-                            nicks[6] = (gameData.getPlayer7Name() != null) ? gameData.getPlayer7Name() : null;
-                            nicks[7] = (gameData.getPlayer8Name() != null) ? gameData.getPlayer8Name() : null;
-                            com.oddlabs.matchmaking.Profile[] fetchedProfiles = DBInterface.getProfilesByNick(nicks);
-                            System.out.println("Fetched " + fetchedProfiles.length + " profiles for game ID: " + game_id);
+                            nicks[0] =
+                                    (gameData.getPlayer1Name() != null)
+                                            ? gameData.getPlayer1Name()
+                                            : null;
+                            nicks[1] =
+                                    (gameData.getPlayer2Name() != null)
+                                            ? gameData.getPlayer2Name()
+                                            : null;
+                            nicks[2] =
+                                    (gameData.getPlayer3Name() != null)
+                                            ? gameData.getPlayer3Name()
+                                            : null;
+                            nicks[3] =
+                                    (gameData.getPlayer4Name() != null)
+                                            ? gameData.getPlayer4Name()
+                                            : null;
+                            nicks[4] =
+                                    (gameData.getPlayer5Name() != null)
+                                            ? gameData.getPlayer5Name()
+                                            : null;
+                            nicks[5] =
+                                    (gameData.getPlayer6Name() != null)
+                                            ? gameData.getPlayer6Name()
+                                            : null;
+                            nicks[6] =
+                                    (gameData.getPlayer7Name() != null)
+                                            ? gameData.getPlayer7Name()
+                                            : null;
+                            nicks[7] =
+                                    (gameData.getPlayer8Name() != null)
+                                            ? gameData.getPlayer8Name()
+                                            : null;
+                            com.oddlabs.matchmaking.Profile[] fetchedProfiles =
+                                    DBInterface.getProfilesByNick(nicks);
+                            System.out.println(
+                                    "Fetched "
+                                            + fetchedProfiles.length
+                                            + " profiles for game ID: "
+                                            + game_id);
                             // Map nick to Profile
-                            java.util.Map<String, com.oddlabs.matchmaking.Profile> nickToProfile = new java.util.HashMap<>();
+                            java.util.Map<String, com.oddlabs.matchmaking.Profile> nickToProfile =
+                                    new java.util.HashMap<>();
                             for (com.oddlabs.matchmaking.Profile pf : fetchedProfiles) {
                                 if (pf != null && pf.getNick() != null) {
                                     nickToProfile.put(pf.getNick(), pf);
@@ -719,7 +753,8 @@ public final strictfp class DBInterface {
                             // Assign to GameData fields
                             for (int i = 0; i < 8; i++) {
                                 String nick = nicks[i];
-                                com.oddlabs.matchmaking.Profile pf = (nick != null) ? nickToProfile.get(nick) : null;
+                                com.oddlabs.matchmaking.Profile pf =
+                                        (nick != null) ? nickToProfile.get(nick) : null;
                                 switch (i) {
                                     case 0:
                                         gameData.setProfile1(pf);
@@ -764,8 +799,8 @@ public final strictfp class DBInterface {
         return null;
     }
 
-	// Helper function to create IN clause with placeholders
-    private final static String createInClause(int parameterCount) {
+    // Helper function to create IN clause with placeholders
+    private static final String createInClause(int parameterCount) {
         if (parameterCount <= 0) {
             return "()";
         }
@@ -781,7 +816,7 @@ public final strictfp class DBInterface {
         return inClause.toString();
     }
 
-    public final static Profile[] getProfilesByNick(String[] nicks) {
+    public static final Profile[] getProfilesByNick(String[] nicks) {
         if (nicks == null || nicks.length == 0) {
             return new Profile[0];
         }
@@ -800,7 +835,9 @@ public final strictfp class DBInterface {
 
         try {
             String inClause = createInClause(filteredNicks.length);
-            String sql = "SELECT nick, rating, wins, losses, invalid FROM profiles WHERE nick IN " + inClause;
+            String sql =
+                    "SELECT nick, rating, wins, losses, invalid FROM profiles WHERE nick IN "
+                            + inClause;
             PreparedStatement stmt = DBUtils.createStatement(sql);
             try {
                 // Set the nicks as parameters
@@ -834,7 +871,8 @@ public final strictfp class DBInterface {
             }
         } catch (SQLException e) {
             System.out.println("Exception: " + e);
-            MatchmakingServer.getLogger().throwing(DBInterface.class.getName(), "getProfilesByNick", e);
+            MatchmakingServer.getLogger()
+                    .throwing(DBInterface.class.getName(), "getProfilesByNick", e);
             throw new RuntimeException(e);
         }
     }

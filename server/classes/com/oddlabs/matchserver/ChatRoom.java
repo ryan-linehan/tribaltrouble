@@ -1,6 +1,7 @@
 package com.oddlabs.matchserver;
 
 import com.oddlabs.matchmaking.ChatRoomUser;
+import com.oddlabs.matchmaking.MatchmakingClientInterface;
 import com.oddlabs.matchmaking.MatchmakingServerInterface;
 
 import discord4j.common.util.Snowflake;
@@ -8,13 +9,10 @@ import discord4j.core.event.domain.message.MessageCreateEvent;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.channel.TextChannel;
 import discord4j.core.spec.EmbedCreateSpec;
-import reactor.core.publisher.Mono;
+
 import reactor.core.Disposable;
+import reactor.core.publisher.Mono;
 
-import com.oddlabs.matchmaking.MatchmakingClientInterface;
-import com.oddlabs.matchmaking.ChatRoomUser;
-
-import java.io.Serializable;
 import java.time.Instant;
 import java.util.*;
 
@@ -22,14 +20,14 @@ public final strictfp class ChatRoom {
     public static class MessageTuple {
         public final String author;
         public final String message;
-        
+
         public MessageTuple(String author, String message) {
             this.author = author;
             this.message = message;
         }
     }
-    
-    private final static Map<String, ChatRoom> chat_rooms = new HashMap();
+
+    private static final Map<String, ChatRoom> chat_rooms = new HashMap();
     private static final int MAX_MESSAGES = 100;
     private MessageTuple[] messages = new MessageTuple[MAX_MESSAGES];
     private int currentIndex = 0;
@@ -41,27 +39,35 @@ public final strictfp class ChatRoom {
 
     public ChatRoom(String name) {
         this.name = name;
-        discordChannel = DiscordBotService.getInstance().getDiscordChannelByTTRoomNumber(Integer.parseInt(name.substring("Chatroom".length())));
+        discordChannel =
+                DiscordBotService.getInstance()
+                        .getDiscordChannelByTTRoomNumber(
+                                Integer.parseInt(name.substring("Chatroom".length())));
         if (discordChannel == null) {
             System.err.println("Discord channel for " + name + " not found!");
         } else {
-            discordSubscription = discordChannel.getClient().on(MessageCreateEvent.class, this::handleIncomingDiscordMessage).subscribe();
-            System.out.println("Discord channel for " + name + " found: " + (discordChannel).getName());
+            discordSubscription =
+                    discordChannel
+                            .getClient()
+                            .on(MessageCreateEvent.class, this::handleIncomingDiscordMessage)
+                            .subscribe();
+            System.out.println(
+                    "Discord channel for " + name + " found: " + (discordChannel).getName());
         }
     }
 
-    public final static Map getChatRooms() {
+    public static final Map getChatRooms() {
         return chat_rooms;
     }
 
     /**
-     * Joins a standard chat room for the client. This method will find the
-     * first chat room that is not more than half full and join the client to
-     * it. If no such room exists, a new one will be created.
+     * Joins a standard chat room for the client. This method will find the first chat room that is
+     * not more than half full and join the client to it. If no such room exists, a new one will be
+     * created.
      *
      * @param client
      */
-    public final static void joinStandardChatRoom(Client client) {
+    public static final void joinStandardChatRoom(Client client) {
         // <= so that if all rooms are 1/2 full it creates a new one
         for (int i = 0; i <= chat_rooms.size(); i++) {
             String room_name = "Chatroom" + i + 1;
@@ -74,11 +80,17 @@ public final strictfp class ChatRoom {
             client.joinRoom(room_name);
             // Send existing messages to the new client
             for (int j = 0; j < room.messageCount; j++) {
-                int index = (room.currentIndex - room.messageCount + j + MAX_MESSAGES) % MAX_MESSAGES;
+                int index =
+                        (room.currentIndex - room.messageCount + j + MAX_MESSAGES) % MAX_MESSAGES;
                 MessageTuple message = room.messages[index];
                 if (message != null) {
-                    System.out.println("Sending message to client: " + message.author + ": " + message.message);
-                    client.getClientInterface().receiveChatRoomMessage(message.author, message.message);
+                    System.out.println(
+                            "Sending message to client: "
+                                    + message.author
+                                    + ": "
+                                    + message.message);
+                    client.getClientInterface()
+                            .receiveChatRoomMessage(message.author, message.message);
                 }
             }
             return; // Client has joined a room
@@ -91,7 +103,7 @@ public final strictfp class ChatRoom {
      * @param room_name
      * @return
      */
-    public final static ChatRoom getChatRoom(String room_name) {
+    public static final ChatRoom getChatRoom(String room_name) {
         ChatRoom room = (ChatRoom) chat_rooms.get(room_name);
         if (room == null) {
             room = new ChatRoom(room_name);
@@ -100,12 +112,14 @@ public final strictfp class ChatRoom {
         return room;
     }
 
-    public final static boolean isNameValid(String name) {
-        return name != null && name.length() <= MatchmakingServerInterface.MAX_ROOM_NAME_LENGTH
-                && name.length() >= MatchmakingServerInterface.MIN_ROOM_NAME_LENGTH && areCharactersValid(name);
+    public static final boolean isNameValid(String name) {
+        return name != null
+                && name.length() <= MatchmakingServerInterface.MAX_ROOM_NAME_LENGTH
+                && name.length() >= MatchmakingServerInterface.MIN_ROOM_NAME_LENGTH
+                && areCharactersValid(name);
     }
 
-    private final static boolean areCharactersValid(String name) {
+    private static final boolean areCharactersValid(String name) {
         for (int i = 0; i < name.length(); i++) {
             if (MatchmakingServerInterface.ALLOWED_ROOM_CHARS.indexOf(name.charAt(i)) == -1) {
                 return false;
@@ -119,11 +133,6 @@ public final strictfp class ChatRoom {
         users.add(client);
         sendUsers();
     }
-    public final void join(Client client) {
-        // TODO check for size!!!!
-        users.add(client);
-        sendUsers();
-    }
 
     public final void sendUsers() {
         Iterator it = users.iterator();
@@ -131,7 +140,8 @@ public final strictfp class ChatRoom {
         int i = 0;
         while (it.hasNext()) {
             Client client = (Client) it.next();
-            chat_room_users[i] = new ChatRoomUser(client.getProfile().getNick(), client.isPlaying());
+            chat_room_users[i] =
+                    new ChatRoomUser(client.getProfile().getNick(), client.isPlaying());
             i++;
         }
         it = users.iterator();
@@ -168,21 +178,20 @@ public final strictfp class ChatRoom {
     }
 
     /**
-     * Sends a discord message into the discord channel associated with this
-     * tribal trouble chat room
+     * Sends a discord message into the discord channel associated with this tribal trouble chat
+     * room
      */
     public final void trySendDiscordMessage(String owner, String msg) {
         try {
             // Send the message to the discord channel if one is setup for this chat room
             if (this.discordChannel != null) {
-                if(!msg.startsWith("<"))
-                    msg = formatChat(owner, msg);
+                if (!msg.startsWith("<")) msg = formatChat(owner, msg);
                 this.discordChannel.createMessage(msg).retry(3).subscribe();
-            }   
+            }
+        } catch (Exception e) {
+            System.err.println(
+                    "Error sending discord message in chat room " + name + ": " + e.getMessage());
         }
-        catch (Exception e) {
-            System.err.println("Error sending discord message in chat room " + name + ": " + e.getMessage());
-        }        
     }
 
     public final void trySendDiscordEmbed(EmbedCreateSpec embed) {
@@ -190,15 +199,13 @@ public final strictfp class ChatRoom {
             // Send the embed to the discord channel if one is setup for this chat room
             if (this.discordChannel != null) {
                 this.discordChannel.createMessage(embed).retry(3).subscribe();
-            }   
+            }
         } catch (Exception e) {
-            System.err.println("Error sending discord embed in chat room " + name + ": " + e.getMessage());            
+            System.err.println(
+                    "Error sending discord embed in chat room " + name + ": " + e.getMessage());
         }
     }
 
-    public final Set getUsers() {
-        return users;
-    }
     public final Set getUsers() {
         return users;
     }
@@ -215,10 +222,7 @@ public final strictfp class ChatRoom {
         }
     }
 
-    /**
-     * Cleanup method to dispose of Discord subscription and prevent memory
-     * leaks
-     */
+    /** Cleanup method to dispose of Discord subscription and prevent memory leaks */
     public final void cleanup() {
         if (discordSubscription != null && !discordSubscription.isDisposed()) {
             System.out.println("Disposing Discord subscription for chat room " + name);
@@ -232,11 +236,10 @@ public final strictfp class ChatRoom {
     }
 
     /**
-     * Sends a message to the chat room associated with the discord channel that
-     * the message was sent through
+     * Sends a message to the chat room associated with the discord channel that the message was
+     * sent through
      *
-     * @param event The message event containing the message details from
-     * discord
+     * @param event The message event containing the message details from discord
      * @return
      */
     private Mono<Void> handleIncomingDiscordMessage(MessageCreateEvent event) {
@@ -250,10 +253,16 @@ public final strictfp class ChatRoom {
                 String content = message.getContent();
                 Instant timestamp = message.getTimestamp();
                 Snowflake authorId = message.getAuthor().get().getId();
-                boolean isMessageFromBot = authorId.equals(DiscordBotService.getInstance().getBotId());
+                boolean isMessageFromBot =
+                        authorId.equals(DiscordBotService.getInstance().getBotId());
                 if (!isMessageFromBot) {
-                    System.out.println("Message from " + authorId + ": " + content + " at " + timestamp);
-                    String author = "@" + message.getAuthor().map(user -> user.getUsername()).orElse("Unknown");
+                    System.out.println(
+                            "Message from " + authorId + ": " + content + " at " + timestamp);
+                    String author =
+                            "@"
+                                    + message.getAuthor()
+                                            .map(user -> user.getUsername())
+                                            .orElse("Unknown");
                     System.out.println("Queueing Discord message for main thread processing");
                     sendMessage(author, content);
                 }

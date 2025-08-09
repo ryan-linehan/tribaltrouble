@@ -27,14 +27,14 @@ import java.util.Set;
 
 public final strictfp class Client implements MatchmakingServerInterface, ConnectionInterface {
 
-    private final static int CHUNK_SIZE = 10;
-    private final static Set game_hosts = new HashSet();
-    private final static Map active_clients = new HashMap();
+    private static final int CHUNK_SIZE = 10;
+    private static final Set game_hosts = new HashSet();
+    private static final Map active_clients = new HashMap();
 
     private static int current_random_seed = 1;
-    private static int current_random_seed = 1;
 
-    private final ARMIInterfaceMethods interface_methods = new ARMIInterfaceMethods(MatchmakingServerInterface.class);
+    private final ARMIInterfaceMethods interface_methods =
+            new ARMIInterfaceMethods(MatchmakingServerInterface.class);
     private final MatchmakingServer server;
     private final MatchmakingClientInterface client_interface;
 
@@ -56,16 +56,23 @@ public final strictfp class Client implements MatchmakingServerInterface, Connec
     private Game current_game;
     private TimestampedGameSession current_session;
     private ChatRoom current_room;
-    private Game current_game;
-    private TimestampedGameSession current_session;
-    private ChatRoom current_room;
 
-    public Client(MatchmakingServer server, AbstractConnection conn, InetAddress remote_address, InetAddress local_remote_address, String username, boolean guest, int revision, int host_id) {
+    public Client(
+            MatchmakingServer server,
+            AbstractConnection conn,
+            InetAddress remote_address,
+            InetAddress local_remote_address,
+            String username,
+            boolean guest,
+            int revision,
+            int host_id) {
         this.conn = conn;
         this.server = server;
         this.remote_address = remote_address;
         this.local_remote_address = local_remote_address;
-        this.client_interface = (MatchmakingClientInterface) ARMIEvent.createProxy(conn, MatchmakingClientInterface.class);
+        this.client_interface =
+                (MatchmakingClientInterface)
+                        ARMIEvent.createProxy(conn, MatchmakingClientInterface.class);
         this.username = username;
         this.guest = guest;
         this.revision = revision;
@@ -73,12 +80,13 @@ public final strictfp class Client implements MatchmakingServerInterface, Connec
         conn.setConnectionInterface(this);
     }
 
-    public final void writeBufferDrained(AbstractConnection conn) {
-    }
+    public final void writeBufferDrained(AbstractConnection conn) {}
 
     public final void requestProfiles() {
         if (!guest) {
-            client_interface.updateProfileList(DBInterface.getProfiles(username, revision), DBInterface.getLastUsedProfile(username));
+            client_interface.updateProfileList(
+                    DBInterface.getProfiles(username, revision),
+                    DBInterface.getLastUsedProfile(username));
         }
     }
 
@@ -102,7 +110,8 @@ public final strictfp class Client implements MatchmakingServerInterface, Connec
         if (!guest) {
             Profile[] profiles = DBInterface.getProfiles(username, revision);
             if (profiles.length >= DBInterface.getSettingsInt("max_profiles")) {
-                client_interface.createProfileError(MatchmakingClientInterface.USERNAME_ERROR_TOO_MANY);
+                client_interface.createProfileError(
+                        MatchmakingClientInterface.USERNAME_ERROR_TOO_MANY);
                 return;
             }
 
@@ -131,7 +140,8 @@ public final strictfp class Client implements MatchmakingServerInterface, Connec
             }
 
             if (DBInterface.nickExists(nick)) {
-                client_interface.createProfileError(MatchmakingClientInterface.USERNAME_ERROR_ALREADY_EXISTS);
+                client_interface.createProfileError(
+                        MatchmakingClientInterface.USERNAME_ERROR_ALREADY_EXISTS);
                 return;
             }
 
@@ -139,22 +149,19 @@ public final strictfp class Client implements MatchmakingServerInterface, Connec
             client_interface.createProfileSuccess();
         }
     }
-            DBInterface.createProfile(username, nick);
-            client_interface.createProfileSuccess();
-        }
-    }
 
     public final void logPriority(String other_nick, int priority) {
-        if (current_session != null && active_profile != null && active_clients.get(other_nick.toLowerCase()) != null) {
-            DBInterface.logPriority(current_session.getDatabaseID(), active_profile.getNick(), other_nick, priority);
+        if (current_session != null
+                && active_profile != null
+                && active_clients.get(other_nick.toLowerCase()) != null) {
+            DBInterface.logPriority(
+                    current_session.getDatabaseID(),
+                    active_profile.getNick(),
+                    other_nick,
+                    priority);
         }
     }
 
-    public final void deleteProfile(String nick) {
-        if (!guest) {
-            DBInterface.deleteProfile(username, nick);
-        }
-    }
     public final void deleteProfile(String nick) {
         if (!guest) {
             DBInterface.deleteProfile(username, nick);
@@ -187,24 +194,6 @@ public final strictfp class Client implements MatchmakingServerInterface, Connec
     public final Profile getProfile() {
         return active_profile;
     }
-    private final void updateProfile(String nick) {
-        if (!guest) {
-            Profile profile = DBInterface.getProfile(username, nick, revision);
-            if (profile != null) {
-                updateProfile(profile);
-                DBInterface.setLastUsedProfile(username, nick);
-            }
-        }
-    }
-
-    private final void updateProfile(Profile profile) {
-        active_profile = profile;
-        client_interface.updateProfile(active_profile);
-    }
-
-    public final Profile getProfile() {
-        return active_profile;
-    }
 
     public final void freeQuitStopNotify() {
         if (getGameSession() == null) {
@@ -218,6 +207,11 @@ public final strictfp class Client implements MatchmakingServerInterface, Connec
             return;
         }
         getGameSession().updateGameStatus(tick, status);
+    }
+
+    public final void updateSpectatorInfo(int tick, String info) {
+        if (getGameSession() == null) return;
+        getGameSession().updateSpectatorInfo(tick, info);
     }
 
     public final void gameQuitNotify(String nick) {
@@ -373,26 +367,7 @@ public final strictfp class Client implements MatchmakingServerInterface, Connec
             error(e);
         }
     }
-    private final TimestampedGameSession getGameSession() {
-        return current_session;
-    }
 
-    public final boolean isPlaying() {
-        return current_session != null;
-    }
-
-    public final void handle(Object sender, ARMIEvent event) {
-        try {
-            event.execute(interface_methods, this);
-        } catch (IllegalARMIEventException e) {
-            System.out.println("Exception: " + e);
-            error(e);
-        }
-    }
-
-    public final String getUsername() {
-        return username;
-    }
     public final String getUsername() {
         return username;
     }
@@ -406,39 +381,19 @@ public final strictfp class Client implements MatchmakingServerInterface, Connec
         MatchmakingServer.getLogger().throwing("Client", "error", e);
         close();
     }
-    public final void error(AbstractConnection conn, IOException e) {
-        error(e);
-    }
 
-    private final void error(Exception e) {
-        MatchmakingServer.getLogger().info(username + " logged out. Caused by: " + e.getMessage());
-        MatchmakingServer.getLogger().throwing("Client", "error", e);
-        close();
-    }
-
-    public final void connected(AbstractConnection conn) {
-    }
+    public final void connected(AbstractConnection conn) {}
 
     public final int getHostID() {
         return host_id;
-    }
-    public final int getHostID() {
-        return host_id;
-    }
-
-    private final Game getCurrentGame() {
-        return current_game;
     }
 
     public final InetAddress getRemoteAddress() {
         return remote_address;
     }
+
     private final Game getCurrentGame() {
         return current_game;
-    }
-
-    public final InetAddress getRemoteAddress() {
-        return remote_address;
     }
 
     private final int getRevision() {
@@ -481,7 +436,8 @@ public final strictfp class Client implements MatchmakingServerInterface, Connec
                 ChatRoomEntry[] chat_rooms_chunk = new ChatRoomEntry[CHUNK_SIZE];
                 while (it.hasNext()) {
                     ChatRoom chat_room = (ChatRoom) it.next();
-                    chat_rooms_chunk[chunk_index++] = new ChatRoomEntry(chat_room.getName(), chat_room.getUsers().size());
+                    chat_rooms_chunk[chunk_index++] =
+                            new ChatRoomEntry(chat_room.getName(), chat_room.getUsers().size());
                     if (chunk_index == chat_rooms_chunk.length) {
                         client_interface.updateList(type, chat_rooms_chunk);
                         chunk_index = 0;
@@ -533,7 +489,8 @@ public final strictfp class Client implements MatchmakingServerInterface, Connec
         Client client = server.getClientFromID(address_to);
         tunnels.put(host_seq_id, client);
         if (client != null) {
-            client.tunnelOpened(host_seq_id, remote_address, local_remote_address, active_profile, this);
+            client.tunnelOpened(
+                    host_seq_id, remote_address, local_remote_address, active_profile, this);
         } else {
             tunnelClosed(host_seq_id);
         }
@@ -569,18 +526,13 @@ public final strictfp class Client implements MatchmakingServerInterface, Connec
             active_profile = null;
         }
     }
-    private final void closeProfile() {
-        gameLostNotify();
-        leaveRoom();
-        unregisterGame();
-        if (active_profile != null) {
-            active_clients.remove(active_profile.getNick().toLowerCase());
-            DBInterface.profileOffline(active_profile.getNick());
-            active_profile = null;
-        }
-    }
 
-    private final void tunnelOpened(HostSequenceID address_to, InetAddress inet_address_to, InetAddress local_inet_address_to, Profile profile, Client remote_client) {
+    private final void tunnelOpened(
+            HostSequenceID address_to,
+            InetAddress inet_address_to,
+            InetAddress local_inet_address_to,
+            Profile profile,
+            Client remote_client) {
         tunnels.put(address_to, remote_client);
         client_interface.tunnelOpened(address_to, inet_address_to, local_inet_address_to, profile);
     }
@@ -622,8 +574,7 @@ public final strictfp class Client implements MatchmakingServerInterface, Connec
     }
 
     /**
-     * Registers a game with the matchmaking server to make it available for
-     * other players to join.
+     * Registers a game with the matchmaking server to make it available for other players to join.
      */
     public final void registerGame(Game game) {
         if (game != null && game.isValid() && getProfile() != null) {
@@ -633,7 +584,11 @@ public final strictfp class Client implements MatchmakingServerInterface, Connec
             DBInterface.createGame(game, getProfile().getNick());
 
             if (current_room != null) {
-                String formatted_message = getProfile().getNick() + " has created a game called \"" + current_game.getName() + "\".";
+                String formatted_message =
+                        getProfile().getNick()
+                                + " has created a game called \""
+                                + current_game.getName()
+                                + "\".";
                 server.getChatLogger().info(formatted_message);
                 current_room.sendMessage("Server", formatted_message);
                 current_room.trySendDiscordMessage("Server", formatted_message);
@@ -643,15 +598,13 @@ public final strictfp class Client implements MatchmakingServerInterface, Connec
 
     public final void unregisterGame() {
         if (game_hosts.contains(this)) {
-            MatchmakingServer.getLogger().info("Game unregistered, name = " + current_game.getName());
+            MatchmakingServer.getLogger()
+                    .info("Game unregistered, name = " + current_game.getName());
             game_hosts.remove(this);
             DBInterface.dropGame(getProfile().getNick());
         }
     }
 
-    public final MatchmakingClientInterface getClientInterface() {
-        return client_interface;
-    }
     public final MatchmakingClientInterface getClientInterface() {
         return client_interface;
     }
@@ -661,11 +614,21 @@ public final strictfp class Client implements MatchmakingServerInterface, Connec
             if (current_room == null && ChatRoom.isNameValid(room_name)) {
                 ChatRoom room = ChatRoom.getChatRoom(room_name);
                 if (room.getUsers().size() < MAX_ROOM_USERS) {
-                    MatchmakingServer.getLogger().info(getProfile().getNick() + " joined chat room, name = " + room.getName());
+                    MatchmakingServer.getLogger()
+                            .info(
+                                    getProfile().getNick()
+                                            + " joined chat room, name = "
+                                            + room.getName());
                     current_room = room;
                     client_interface.joiningChatRoom(current_room.getName());
                     current_room.join(this);
-                    client_interface.receiveChatRoomMessage("Server", "Welcome to the Tribal Trouble multiplayer server. Please keep a proper tone while playing online: All activity in the chatrooms and the game is logged and any abusive behavior will result in the immediate banning from the multiplayer server at Oddlabs' discretion.");
+                    client_interface.receiveChatRoomMessage(
+                            "Server",
+                            "Welcome to the Tribal Trouble multiplayer server. Please keep a proper"
+                                + " tone while playing online: All activity in the chatrooms and"
+                                + " the game is logged and any abusive behavior will result in the"
+                                + " immediate banning from the multiplayer server at Oddlabs'"
+                                + " discretion.");
                     return;
                 } else {
                     client_interface.error(MatchmakingClientInterface.CHAT_ERROR_TOO_MANY_USERS);
@@ -682,7 +645,8 @@ public final strictfp class Client implements MatchmakingServerInterface, Connec
         }
         if (getProfile() != null) {
             if (guest) {
-                client_interface.receivePrivateMessage("Server", "Sorry, only registered users are able to chat.");
+                client_interface.receivePrivateMessage(
+                        "Server", "Sorry, only registered users are able to chat.");
                 return;
             }
             Client client = (Client) active_clients.get(nick.toLowerCase());
@@ -714,30 +678,19 @@ public final strictfp class Client implements MatchmakingServerInterface, Connec
         return "<" + getProfile().getNick() + "> " + message;
     }
 
-    /**
-     * Sends a message to the current tribal trouble chat room.
-     * If a discord channel is associated with the chat room, it will also send the message to that channel.
-     * @param msg The message to send
-     */
     public final void sendMessageToRoom(String msg) {
         if (current_room != null) {
             if (guest) {
-                client_interface.receivePrivateMessage("Server", "Sorry, only registered users are able to chat.");
+                client_interface.receivePrivateMessage(
+                        "Server", "Sorry, only registered users are able to chat.");
                 return;
             }
             String formatted_message = formatChat(msg);
             server.getChatLogger().info(formatted_message);
             current_room.sendMessage(getProfile().getNick(), msg);
-            current_room.trySendDiscordMessage(getProfile().getNick(), formatted_message);
         }
     }
 
-    public final void leaveRoom() {
-        if (current_room != null) {
-            current_room.leave(this);
-            current_room = null;
-        }
-    }
     public final void leaveRoom() {
         if (current_room != null) {
             current_room.leave(this);
