@@ -1,6 +1,5 @@
 package com.oddlabs.tt.gui;
 
-import org.lwjgl.opengl.GL11;
 import com.oddlabs.util.Quad;
 
 public final strictfp class Box {
@@ -24,7 +23,8 @@ public final strictfp class Box {
     private final int bottom_height;
     private final int top_height;
 
-    public Box(Quad[] left_bottom,
+    public Box(
+            Quad[] left_bottom,
             Quad[] bottom,
             Quad[] right_bottom,
             Quad[] right,
@@ -63,9 +63,11 @@ public final strictfp class Box {
         left_bottom[type].render(x, y);
         bottom[type].render(x + left_width, y, center_width, bottom_height);
         right_bottom[type].render(x + left_width + center_width, y);
-        right[type].render(x + left_width + center_width, y + bottom_height, right_width, center_height);
+        right[type].render(
+                x + left_width + center_width, y + bottom_height, right_width, center_height);
         right_top[type].render(x + left_width + center_width, y + bottom_height + center_height);
-        top[type].render(x + left_width, y + bottom_height + center_height, center_width, top_height);
+        top[type].render(
+                x + left_width, y + bottom_height + center_height, center_width, top_height);
         left_top[type].render(x, y + bottom_height + center_height);
         left[type].render(x, y + bottom_height, left_width, center_height);
         center[type].render(x + left_width, y + bottom_height, center_width, center_height);
@@ -88,28 +90,30 @@ public final strictfp class Box {
     }
 
     /**
-     * Renders a solid color rectangle for highlights (e.g., text selection),
-     * ensuring the highlight is clipped to the visible region of the box.
+     * Renders a solid color rectangle for highlights (e.g., text selection), ensuring the highlight
+     * is clipped to the visible region of the box.
      *
-     * @param x The left position of the highlight rectangle (in box
-     * coordinates).
-     * @param y The top position of the highlight rectangle (in box
-     * coordinates).
+     * @param x The left position of the highlight rectangle (in box coordinates).
+     * @param y The top position of the highlight rectangle (in box coordinates).
      * @param width The width of the highlight rectangle.
      * @param height The height of the highlight rectangle.
-     * @param clip_left The minimum x value (left edge) to render the highlight
-     * (clipping region).
-     * @param clip_right The maximum x value (right edge) to render the
-     * highlight (clipping region).
-     * @param clip_bottom The minimum y value (bottom edge) to render the
-     * highlight (clipping region).
-     * @param clip_top The maximum y value (top edge) to render the highlight
-     * (clipping region).
-     *
-     * The highlight rectangle will be clamped so it does not extend outside the
-     * clipping region.
+     * @param clip_left The minimum x value (left edge) to render the highlight (clipping region).
+     * @param clip_right The maximum x value (right edge) to render the highlight (clipping region).
+     * @param clip_bottom The minimum y value (bottom edge) to render the highlight (clipping
+     *     region).
+     * @param clip_top The maximum y value (top edge) to render the highlight (clipping region).
+     *     <p>The highlight rectangle will be clamped so it does not extend outside the clipping
+     *     region.
      */
-    public void renderHighlight(float x, float y, int width, int height, float clip_left, float clip_right, float clip_bottom, float clip_top) {
+    public void renderHighlight(
+            float x,
+            float y,
+            int width,
+            int height,
+            float clip_left,
+            float clip_right,
+            float clip_bottom,
+            float clip_top) {
         float highlightLeft = Math.max(x, clip_left);
         float highlightRight = Math.min(x + width, clip_right);
         float highlightBottom = Math.max(y, clip_bottom);
@@ -118,8 +122,13 @@ public final strictfp class Box {
         float clampedWidth = highlightRight - highlightLeft;
         float clampedHeight = highlightTop - highlightBottom;
 
-        if (clampedWidth > 0 && clampedHeight > 0 && center != null && center.length > 0 && center[Skin.NORMAL] != null) {
-            center[Skin.NORMAL].render(highlightLeft, highlightBottom, (int) clampedWidth, (int) clampedHeight);
+        if (clampedWidth > 0
+                && clampedHeight > 0
+                && center != null
+                && center.length > 0
+                && center[Skin.NORMAL] != null) {
+            center[Skin.NORMAL].render(
+                    highlightLeft, highlightBottom, (int) clampedWidth, (int) clampedHeight);
         }
     }
 }

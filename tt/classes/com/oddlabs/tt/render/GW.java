@@ -1,20 +1,6 @@
 package com.oddlabs.tt.render;
 
-import org.lwjgl.glfw.GLFW;
-import org.lwjgl.glfw.GLFWErrorCallback;
-import org.lwjgl.glfw.GLFWKeyCallback;
-import org.lwjgl.glfw.GLFWCursorPosCallback;
-import org.lwjgl.glfw.GLFWMouseButtonCallback;
-import org.lwjgl.glfw.GLFWScrollCallback;
-import org.lwjgl.glfw.GLFWCharCallback;
-import org.lwjgl.glfw.GLFWVidMode;
-
 import org.lwjgl.opengl.GL11;
-
-import com.oddlabs.tt.input.Keyboard;
-import com.oddlabs.tt.input.Mouse;
-
-import java.nio.IntBuffer;
 
 public final strictfp class GW {
     public static final int GL_PROJECTION = GL11.GL_PROJECTION;
@@ -41,8 +27,9 @@ public final strictfp class GW {
         GL11.glColor4f(r, g, b, a);
     }
 
-    public static void ortho(float left, float right, float bottom, float top, float near, float far) {
-		GL11.glOrtho(left, right, bottom, top, near, far);
+    public static void ortho(
+            float left, float right, float bottom, float top, float near, float far) {
+        GL11.glOrtho(left, right, bottom, top, near, far);
     }
 
     public static void translate(float x, float y, float z) {
@@ -65,7 +52,8 @@ public final strictfp class GW {
         GL11.glClearColor(r, g, b, a);
     }
 
-    public static void renderRect(float x0, float x1, float y0, float y1, float z, float r, float g, float b, float a) {
+    public static void renderRect(
+            float x0, float x1, float y0, float y1, float z, float r, float g, float b, float a) {
         GL11.glColor4f(r, g, b, a);
         GL11.glPolygonMode(GL11.GL_FRONT, GL11.GL_LINE);
         GL11.glPolygonMode(GL11.GL_BACK, GL11.GL_LINE);
