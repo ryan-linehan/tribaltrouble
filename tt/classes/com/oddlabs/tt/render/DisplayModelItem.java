@@ -1,8 +1,8 @@
 package com.oddlabs.tt.render;
 
 import com.oddlabs.tt.global.Settings;
-import org.lwjgl.glfw.GLFWVidMode;
 
+import org.lwjgl.glfw.GLFWVidMode;
 
 public class DisplayModelItem {
     private int width;
@@ -27,24 +27,20 @@ public class DisplayModelItem {
 
     @Override
     public boolean equals(Object obj) {
-        if (obj == null)
-            return false;
-        if (obj.getClass() != this.getClass())
-            return false;
-        
+        if (obj == null) return false;
+        if (obj.getClass() != this.getClass()) return false;
+
         DisplayModelItem item = (DisplayModelItem) obj;
 
-        if(item.width() == width && item.height() == height && item.refreshRate() == refreshRate)
+        if (item.width() == width && item.height() == height && item.refreshRate() == refreshRate)
             return true;
         return false;
     }
 
     public boolean resolution_equals(DisplayModelItem item) {
-        if (item == null)
-            return false;
+        if (item == null) return false;
 
-        if(item.width() == width && item.height() == height)
-            return true;
+        if (item.width() == width && item.height() == height) return true;
         return false;
     }
 
@@ -74,11 +70,11 @@ public class DisplayModelItem {
 
     public void setToConfig() {
         Settings.getSettings().new_view_width = width;
-		Settings.getSettings().new_view_height = height;
-		Settings.getSettings().new_view_freq = refreshRate;
-		Settings.getSettings().view_width = width;
-		Settings.getSettings().view_height = height;
-		Settings.getSettings().view_freq = refreshRate;
+        Settings.getSettings().new_view_height = height;
+        Settings.getSettings().new_view_freq = refreshRate;
+        Settings.getSettings().view_width = width;
+        Settings.getSettings().view_height = height;
+        Settings.getSettings().view_freq = refreshRate;
     }
 
     private void loadFromConfig() {

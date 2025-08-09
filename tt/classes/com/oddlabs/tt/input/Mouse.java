@@ -1,15 +1,14 @@
 package com.oddlabs.tt.input;
 
+import com.oddlabs.tt.render.Display;
+
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.glfw.GLFWCursorPosCallback;
 import org.lwjgl.glfw.GLFWMouseButtonCallback;
 import org.lwjgl.glfw.GLFWScrollCallback;
-import org.lwjgl.system.MemoryUtil;
-import com.oddlabs.tt.render.Display;
-import com.oddlabs.tt.render.Cursor;
 
-import java.util.Queue;
 import java.util.LinkedList;
+import java.util.Queue;
 
 public final strictfp class Mouse {
 
@@ -34,7 +33,15 @@ public final strictfp class Mouse {
         public final boolean buttonState;
         public final EventType type;
 
-        public MouseEvent(int x, int y, int dx, int dy, int dWheel, int button, boolean buttonState, EventType type) {
+        public MouseEvent(
+                int x,
+                int y,
+                int dx,
+                int dy,
+                int dWheel,
+                int button,
+                boolean buttonState,
+                EventType type) {
             this.x = x;
             this.y = y;
             this.dx = dx;
@@ -47,7 +54,9 @@ public final strictfp class Mouse {
     }
 
     public enum EventType {
-        MOVE, BUTTON, SCROLL
+        MOVE,
+        BUTTON,
+        SCROLL
     }
 
     public static void create() {
@@ -59,56 +68,78 @@ public final strictfp class Mouse {
             throw new IllegalStateException("Display must be created before Mouse");
         }
 
-        GLFW.glfwSetCursorPosCallback(window, new GLFWCursorPosCallback() {
-            @Override
-            public void invoke(long win, double xpos, double ypos) {
-                int ix = (int) xpos;
-                int iy = Display.getHeight() - (int) ypos;
+        GLFW.glfwSetCursorPosCallback(
+                window,
+                new GLFWCursorPosCallback() {
+                    @Override
+                    public void invoke(long win, double xpos, double ypos) {
+                        int ix = (int) xpos;
+                        int iy = Display.getHeight() - (int) ypos;
 
-                // Clamp coordinates to stay within game bounds
-                int clampedX = Math.max(0, Math.min(ix, Display.getWidth() - 1));
-                int clampedY = Math.max(0, Math.min(iy, Display.getHeight() - 1));
-                
-                // If coordinates were clamped, reset GLFW cursor position to prevent drift
-                if (clampedX != ix || clampedY != iy) {
-                    // Convert back to GLFW coordinate space and reset cursor
-                    double newGlfwX = clampedX;
-                    double newGlfwY = Display.getHeight() - clampedY;
-                    GLFW.glfwSetCursorPos(win, newGlfwX, newGlfwY);
-                }
-                
-                ix = clampedX;
-                iy = clampedY;
+                        // Clamp coordinates to stay within game bounds
+                        int clampedX = Math.max(0, Math.min(ix, Display.getWidth() - 1));
+                        int clampedY = Math.max(0, Math.min(iy, Display.getHeight() - 1));
 
-                //System.out.println("GLFW raw: (" + xpos + ", " + ypos + ") -> Processed: (" + ix + ", " + iy + ") DisplaySize: (" + Display.getWidth() + ", " + Display.getHeight() + ")");
-                dX = ix - mouseX;
-                dY = iy - mouseY;
-                lastMouseX = mouseX;
-                lastMouseY = mouseY;
-                mouseX = ix;
-                mouseY = iy;
-                //System.out.println("Mouse moved to: (" + mouseX + ", " + mouseY + ") Delta: (" + dX + ", " + dY + ")");
-                eventQueue.offer(new MouseEvent(mouseX, mouseY, dX, dY, 0, -1, false, EventType.MOVE));
-            }
-        });
-        GLFW.glfwSetMouseButtonCallback(window, new GLFWMouseButtonCallback() {
-            @Override
-            public void invoke(long win, int button, int action, int mods) {
-                if (button < 0 || button >= buttonStates.length) {
-                    return;
-                }
-                boolean pressed = action == GLFW.GLFW_PRESS;
-                buttonStates[button] = pressed;
-                eventQueue.offer(new MouseEvent(mouseX, mouseY, 0, 0, 0, button, pressed, EventType.BUTTON));
-            }
-        });
-        GLFW.glfwSetScrollCallback(window, new GLFWScrollCallback() {
-            @Override
-            public void invoke(long win, double xoffset, double yoffset) {
-                dWheel = (int) (yoffset * 100);
-                eventQueue.offer(new MouseEvent(mouseX, mouseY, 0, 0, dWheel, -1, false, EventType.SCROLL));
-            }
-        });
+                        // If coordinates were clamped, reset GLFW cursor position to prevent drift
+                        if (clampedX != ix || clampedY != iy) {
+                            // Convert back to GLFW coordinate space and reset cursor
+                            double newGlfwX = clampedX;
+                            double newGlfwY = Display.getHeight() - clampedY;
+                            GLFW.glfwSetCursorPos(win, newGlfwX, newGlfwY);
+                        }
+
+                        ix = clampedX;
+                        iy = clampedY;
+
+                        // System.out.println("GLFW raw: (" + xpos + ", " + ypos + ") -> Processed:
+                        // (" + ix + ", " + iy + ") DisplaySize: (" + Display.getWidth() + ", " +
+                        // Display.getHeight() + ")");
+                        dX = ix - mouseX;
+                        dY = iy - mouseY;
+                        lastMouseX = mouseX;
+                        lastMouseY = mouseY;
+                        mouseX = ix;
+                        mouseY = iy;
+                        // System.out.println("Mouse moved to: (" + mouseX + ", " + mouseY + ")
+                        // Delta: (" + dX + ", " + dY + ")");
+                        eventQueue.offer(
+                                new MouseEvent(
+                                        mouseX, mouseY, dX, dY, 0, -1, false, EventType.MOVE));
+                    }
+                });
+        GLFW.glfwSetMouseButtonCallback(
+                window,
+                new GLFWMouseButtonCallback() {
+                    @Override
+                    public void invoke(long win, int button, int action, int mods) {
+                        if (button < 0 || button >= buttonStates.length) {
+                            return;
+                        }
+                        boolean pressed = action == GLFW.GLFW_PRESS;
+                        buttonStates[button] = pressed;
+                        eventQueue.offer(
+                                new MouseEvent(
+                                        mouseX,
+                                        mouseY,
+                                        0,
+                                        0,
+                                        0,
+                                        button,
+                                        pressed,
+                                        EventType.BUTTON));
+                    }
+                });
+        GLFW.glfwSetScrollCallback(
+                window,
+                new GLFWScrollCallback() {
+                    @Override
+                    public void invoke(long win, double xoffset, double yoffset) {
+                        dWheel = (int) (yoffset * 100);
+                        eventQueue.offer(
+                                new MouseEvent(
+                                        mouseX, mouseY, 0, 0, dWheel, -1, false, EventType.SCROLL));
+                    }
+                });
         created = true;
     }
 
@@ -162,7 +193,9 @@ public final strictfp class Mouse {
     }
 
     public static boolean getEventButtonState() {
-        return currentEvent != null && currentEvent.type == EventType.BUTTON ? currentEvent.buttonState : false;
+        return currentEvent != null && currentEvent.type == EventType.BUTTON
+                ? currentEvent.buttonState
+                : false;
     }
 
     public static int getX() {
@@ -193,7 +226,10 @@ public final strictfp class Mouse {
         grabbed = grab;
         long window = Display.getWindow();
         if (window != 0) {
-            GLFW.glfwSetInputMode(window, GLFW.GLFW_CURSOR, grab ? GLFW.GLFW_CURSOR_DISABLED : GLFW.GLFW_CURSOR_NORMAL);
+            GLFW.glfwSetInputMode(
+                    window,
+                    GLFW.GLFW_CURSOR,
+                    grab ? GLFW.GLFW_CURSOR_DISABLED : GLFW.GLFW_CURSOR_NORMAL);
         }
     }
 
@@ -212,6 +248,5 @@ public final strictfp class Mouse {
         }
     }
 
-    public static void update() {
-    }
+    public static void update() {}
 }
