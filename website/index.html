@@ -50,6 +50,10 @@
             display: none;
         }
 
+        #player {
+            display: none;
+        }
+
         #contribute {
             display: none;
         }
@@ -107,10 +111,12 @@
             const about = document.getElementById("about");
             const download = document.getElementById("download");
             const scores = document.getElementById("scores");
+            const player = document.getElementById("player");
             const contribute = document.getElementById("contribute");
             about.style.display = "block";
             download.style.display = "none";
             scores.style.display = "none";
+            player.style.display = "none";
             contribute.style.display = "none";
             window.location.hash = '#about';
         }
@@ -119,11 +125,13 @@
             const about = document.getElementById("about");
             const download = document.getElementById("download");
             const scores = document.getElementById("scores");
+            const player = document.getElementById("player");
             const contribute = document.getElementById("contribute");
             about.style.display = "none";
             download.style.display = "block";
             scores.style.display = "none";
             contribute.style.display = "none";
+            player.style.display = "none";
             window.location.hash = '#download';
         }
 
@@ -131,11 +139,13 @@
             const about = document.getElementById("about");
             const download = document.getElementById("download");
             const scores = document.getElementById("scores");
+            const player = document.getElementById("player");
             const contribute = document.getElementById("contribute");
             about.style.display = "none";
             download.style.display = "none";
             scores.style.display = "none";
             contribute.style.display = "block";
+            player.style.display = "none";
             window.location.hash = '#contribute';
         }
 
@@ -144,6 +154,7 @@
             const download = document.getElementById("download");
             const scores = document.getElementById("scores");
             const contribute = document.getElementById("contribute");
+            const player = document.getElementById("player");
             const scoresTable = document.getElementById("scorestable");
             fetch("highscores.php")
                 .then((res) => res.text())
@@ -152,21 +163,56 @@
             download.style.display = "none";
             scores.style.display = "block";
             contribute.style.display = "none";
+            player.style.display = "none";
             window.location.hash = '#scores';
         }
 
-        window.onload = function() {
-            const page = window.location.hash.substr(1);
-            if (page == 'download') {
-                showDownload();
-            } else if (page == 'scores') {
-                showScores();
-            } else if (page == 'contribute') {
-                showContribute();
-            } else {
-                showAbout();
+        function showPlayer(name) {
+            const about = document.getElementById("about");
+            const download = document.getElementById("download");
+            const scores = document.getElementById("scores");
+            const contribute = document.getElementById("contribute");
+            const player = document.getElementById("player");
+            const playerTable = document.getElementById("playertable");
+            fetch("gamesOf.php?name=" + name)
+                .then((res) => res.text())
+                .then((res) => (playerTable.innerHTML = res));
+            about.style.display = "none";
+            download.style.display = "none";
+            scores.style.display = "none";
+            contribute.style.display = "none";
+            player.style.display = "block";
+            window.location.hash = '#player#' + name;
+        }
+
+        var lastHash = "";
+        function hashChanged() {
+            const hashStr = window.location.hash.substr(1);
+            if (lastHash != hashStr) {
+                console.log("Applying " + hashStr);
+                const hashes = hashStr.split("#");
+                const page = hashes[0];
+                if (page == 'download') {
+                    showDownload();
+                } else if (page == 'scores') {
+                    showScores();
+                } else if (page == 'contribute') {
+                    showContribute();
+                } else if (page == 'player') {
+                    if (hashes.length > 1) {
+                        const query = hashes[1];
+                        showPlayer(query);
+                    }
+                } else {
+                    showAbout();
+                }
             }
-        };
+            lastHash = hashStr;
+        }
+
+        window.addEventListener('hashchange', hashChanged);
+        window.onload = hashChanged;
+    
     </script>
 </head>
 
@@ -184,12 +230,12 @@
     <table class="link_table">
         <tr>
             <td class="link_button">
-                <a href="https://github.com/OmarAMokhtar/tribaltrouble" target="new">
+                <a href="https://github.com/OmarAMokhtar/tribaltrouble" target="_blank">
                     <img src="github.png" width="100" height="100" />
                 </a>
             </td>
             <td class="link_button">
-                <a href="https://discord.gg/j8PZyGBZt5" target="new">
+                <a href="https://discord.gg/j8PZyGBZt5" target="_blank">
                     <img src="discord.png" width="100" height="100" />
                 </a>
             </td>
@@ -207,7 +253,7 @@
             Oddlabs.</i><br /><br />
 
         This is what remained of the original website:
-        <a href="https://web.archive.org/web/20070729233824/http://tribaltrouble.com" target="new">Archived version</a><br /><br />
+        <a href="https://web.archive.org/web/20070729233824/http://tribaltrouble.com" target="_blank">Archived version</a><br /><br />
     </div>
 
     <div id="download" class="content">
@@ -228,6 +274,10 @@
         <div id="scorestable"></div>
     </div>
 
+    <div id="player" class="content">
+        <div id="playertable"></div>
+    </div>
+
     <div id="contribute" class="content">
         <h2>Contribute</h2>
 
@@ -236,15 +286,15 @@
 
         This is the fork used at the moment if you want to get familiar with the
         source code:
-        <a href="https://github.com/OmarAMokhtar/tribaltrouble" target="new"><img width="20" height="20" src="github.png" /> Github repository</a>
+        <a href="https://github.com/OmarAMokhtar/tribaltrouble" target="_blank"><img width="20" height="20" src="github.png" /> Github repository</a>
         <br /><br />
         The current maintainers on github:<br />
-        <a href="https://github.com/OmarAMokhtar" target="new">OmarAMokhtar</a><br />
-        <a href="https://github.com/Merikrotti" target="new">Merikrotti</a><br />
-        <a href="https://github.com/ryan-linehan" target="new">Ryan-Linehan</a><br />
+        <a href="https://github.com/OmarAMokhtar" target="_blank">OmarAMokhtar</a><br />
+        <a href="https://github.com/Merikrotti" target="_blank">Merikrotti</a><br />
+        <a href="https://github.com/ryan-linehan" target="_blank">Ryan-Linehan</a><br />
         <br />
         Join our discussion on discord!
-        <a href="https://discord.gg/j8PZyGBZt5" target="new"><img width="20" height="20" src="discord.png" /> Discord server</a>
+        <a href="https://discord.gg/j8PZyGBZt5" target="_blank"><img width="20" height="20" src="discord.png" /> Discord server</a>
     </div>
 </body>
 

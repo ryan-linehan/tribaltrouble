@@ -31,6 +31,13 @@
             border-bottom-right-radius: 15px;
             background-color: #24D;
         }
+        
+        #game-info {
+            right: 10px;
+            position: relative;
+            margin: 10px;
+            text-align: right;
+        }
 
         #prev-btn {
             display: none;
@@ -88,7 +95,8 @@
             <img class="btn" src="play.png" id="play-btn" />
             <img class="btn" src="pause.png" id="pause-btn" />
             <img class="btn" src="next.png" id="next-btn" />
-            <span id="time-display"></span>
+            <div id="game-info">
+            </div>
         </div>
         <span id="time-display"></span>
     </div>
@@ -679,6 +687,16 @@
             if (!map_complete && map.length > 0 && map.length >= map[0].length && trees.length > 0) {
                 createMapBuffer();
                 map_complete = true;
+                const gameInfo = document.getElementById("game-info");
+                gameInfo.innerHTML = "";
+                var teams = {};
+                for (var i = 0; i < players.length; i++) {
+                    const p = players[i];
+                    const color = p[3];
+                    const name = p[0];
+                    const team = p[2];
+                    gameInfo.innerHTML += "<a style='color: rgb(" + Math.floor(color[0] * 255) + "," + Math.floor(color[1] * 255) + "," + Math.floor(color[2] * 255) + "); font-weight: bold; font-size: 20px;' target='_blank' href='index.html#player#" + name + "'>" + name + "</a> ";
+                }
             }
 
         }
