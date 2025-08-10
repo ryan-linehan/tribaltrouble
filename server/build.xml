@@ -81,6 +81,14 @@
 			<!-- Memory allocation settings optimized for 1GB server -->
 			<jvmarg value="-Xms128m" />
 			<jvmarg value="-Xmx512m" />
+			<!-- Limit direct memory (off-heap) used by Netty/NIO -->
+			<!-- <jvmarg value="-XX:MaxDirectMemorySize=128m" /> -->
+			<!-- Enable native memory tracking for detailed monitoring -->
+			<jvmarg value="-XX:NativeMemoryTracking=summary" />
+			<!-- Enable GC logging to monitor memory usage -->
+			<jvmarg value="-XX:+PrintGCDetails" />
+			<jvmarg value="-XX:+PrintGCTimeStamps" />
+			<jvmarg value="-Xloggc:gc.log" />
 		</java>
 	</target>
 
@@ -90,6 +98,17 @@
 			<classpath refid="build.classes.classpath" />
 			<classpath refid="common.static.classpath" />
 			<classpath refid="common.classes.classpath" />
+
+			<jvmarg value="-Djdk.crypto.KeyAgreement.legacyKDF=true" />
+			<!-- Memory allocation settings optimized for 1GB server -->
+			<jvmarg value="-Xms64m" />
+			<jvmarg value="-Xmx256m" />
+			<!-- Limit direct memory (off-heap) used by Netty/NIO -->
+			<!-- <jvmarg value="-XX:MaxDirectMemorySize=64m" /> -->
+			<!-- Enable GC logging to monitor memory usage -->
+			<jvmarg value="-XX:+PrintGCDetails" />
+			<jvmarg value="-XX:+PrintGCTimeStamps" />
+			<jvmarg value="-Xloggc:router-gc.log" />
 		</java>
 	</target>
 
