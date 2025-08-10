@@ -1,6 +1,6 @@
 <?php
 
-import 'common.php';
+include 'common.php';
 
 require_once __DIR__ . '/vendor/autoload.php';
 
