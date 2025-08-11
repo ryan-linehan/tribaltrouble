@@ -112,6 +112,7 @@
             download.style.display = "none";
             scores.style.display = "none";
             contribute.style.display = "none";
+            window.location.hash = '#about';
         }
 
         function showDownload() {
@@ -123,6 +124,7 @@
             download.style.display = "block";
             scores.style.display = "none";
             contribute.style.display = "none";
+            window.location.hash = '#download';
         }
 
         function showContribute() {
@@ -134,6 +136,7 @@
             download.style.display = "none";
             scores.style.display = "none";
             contribute.style.display = "block";
+            window.location.hash = '#contribute';
         }
 
         function showScores() {
@@ -149,7 +152,21 @@
             download.style.display = "none";
             scores.style.display = "block";
             contribute.style.display = "none";
+            window.location.hash = '#scores';
         }
+
+        window.onload = function() {
+            const page = window.location.hash.substr(1);
+            if (page == 'download') {
+                showDownload();
+            } else if (page == 'scores') {
+                showScores();
+            } else if (page == 'contribute') {
+                showContribute();
+            } else {
+                showAbout();
+            }
+        };
     </script>
 </head>
 
@@ -195,14 +212,10 @@
 
     <div id="download" class="content">
         <h2>Download binaries</h2>
-        <h3>Experimental version:</h3>
-        <a href="https://github.com/OmarAMokhtar/tribaltrouble/actions/runs/16608140811/artifacts/3643456050">Linux</a>
-        <a href="https://github.com/OmarAMokhtar/tribaltrouble/actions/runs/16608140811/artifacts/3643459142">Windows</a>
-        <a href="https://github.com/OmarAMokhtar/tribaltrouble/actions/runs/16608140811/artifacts/3643473672">Mac x86</a>
-        <a href="https://github.com/OmarAMokhtar/tribaltrouble/actions/runs/16608140811/artifacts/3643455527">Mac ARM</a>
-        <h3>Legacy version:</h3>
-        <a href="TribalTrouble-x86_64.AppImage">Linux</a>
-        <a href="TribalTroubleWindows.zip">Windows</a>
+        <a href="linux.zip">Linux</a>
+        <a href="windows.zip">Windows</a>
+        <a href="mac-x86.zip">Mac x86</a>
+        <a href="mac-arm64.zip">Mac ARM</a>
         <h2>Building from source</h2>
         Clone this
         <a href="https://github.com/OmarAMokhtar/tribaltrouble">github repository</a>
