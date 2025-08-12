@@ -13,7 +13,7 @@ if (!$conn) {
     die('Connection failed: ' . mysqli_connect_error());
 }
 
-$sql = "select nick, wins from profiles order by wins desc";
+$sql = "select nick, wins from profiles where wins > 0 order by wins desc";
 
 echo "<table><tr><td class='tableheader'>Player</td><td class='tableheader'>Won games</td></tr>";
 $result = mysqli_query($conn, $sql);
