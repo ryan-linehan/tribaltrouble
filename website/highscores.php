@@ -1,5 +1,7 @@
 <?php
 
+include 'common.php';
+
 require_once __DIR__ . '/vendor/autoload.php';
 
 use Carbon\Carbon;
@@ -20,7 +22,9 @@ $result = mysqli_query($conn, $sql);
 while ($row = mysqli_fetch_assoc($result)) {
     $name = $row['nick'];
     $wins = $row['wins'];
-    echo "<tr><td class='pname'>$name</td><td class='pscore'>$wins</td></tr>";
+    echo "<tr><td class='pname'>";
+    echo showPlayer($name);
+    echo "</td><td class='pscore'>$wins</td></tr>";
 }
 echo '</table>';
 
