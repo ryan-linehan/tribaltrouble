@@ -149,6 +149,29 @@
             window.location.hash = '#contribute';
         }
 
+        function processLocalTimes(container) {
+            (container || document).querySelectorAll('.localtime').forEach(function (el) {
+                var utcTime = el.getAttribute('data-time');
+                if (utcTime) {
+                    var date = new Date(utcTime.replace(' ', 'T') + 'Z');
+                    var now = new Date();
+                    var isToday = date.getDate() === now.getDate() &&
+                        date.getMonth() === now.getMonth() &&
+                        date.getFullYear() === now.getFullYear();
+                    var isYesterday = date.getDate() === now.getDate() - 1 &&
+                        date.getMonth() === now.getMonth() &&
+                        date.getFullYear() === now.getFullYear();
+                    if (isToday) {
+                        el.textContent = 'Today @ ' + date.toLocaleTimeString();
+                    } else if (isYesterday) {
+                        el.textContent = 'Yesterday @ ' + date.toLocaleTimeString();
+                    } else {
+                        el.textContent += ' (' + date.toLocaleString() + ')';
+                    }
+                }
+            });
+        }
+
         function showScores() {
             const about = document.getElementById("about");
             const download = document.getElementById("download");
@@ -160,27 +183,7 @@
                 .then((res) => res.text())
                 .then((res) => {
                     scorestable.innerHTML = res;
-                    // Process local time elements after content is loaded
-                    document.querySelectorAll('.localtime').forEach(function(el) {
-                        var utcTime = el.getAttribute('data-time');
-                        if (utcTime) {
-                            var date = new Date(utcTime.replace(' ', 'T') + 'Z');
-                            var now = new Date();
-                            var isToday = date.getDate() === now.getDate() &&
-                                          date.getMonth() === now.getMonth() &&
-                                          date.getFullYear() === now.getFullYear();
-                            var isYesterday = date.getDate() === now.getDate() - 1 &&
-                                              date.getMonth() === now.getMonth() &&
-                                              date.getFullYear() === now.getFullYear();
-                            if (isToday) {
-                                el.textContent = 'Today @ ' + date.toLocaleTimeString();
-                            } else if (isYesterday) {
-                                el.textContent = 'Yesterday @ ' + date.toLocaleTimeString();
-                            } else {
-                                el.textContent += ' (' + date.toLocaleString() + ')';
-                            }
-                        }
-                    });
+                    processLocalTimes(scoresTable);
                 });
             about.style.display = "none";
             download.style.display = "none";
@@ -199,7 +202,9 @@
             const playerTable = document.getElementById("playertable");
             fetch("gamesOf.php?name=" + name)
                 .then((res) => res.text())
-                .then((res) => (playerTable.innerHTML = res));
+                .then((res) => {
+                    playerTable.innerHTML = res;
+                });
             about.style.display = "none";
             download.style.display = "none";
             scores.style.display = "none";
