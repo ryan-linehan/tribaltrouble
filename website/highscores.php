@@ -36,7 +36,7 @@ if (mysqli_num_rows($result) > 0) {
         $diff = $date->diffForHumans();
         $last = "$last $diff";
     }
-    echo "<br>Last game played was <i>$last</i>.";
+    echo "<br>Last game played was <i class='localtime' data-time='" . htmlspecialchars($time) . "'>" . htmlspecialchars($last) . "</i>.";
     $winner = $row['winner'];
     $names = '';
     $losers = '';
