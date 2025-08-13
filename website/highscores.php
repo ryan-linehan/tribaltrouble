@@ -15,16 +15,17 @@ if (!$conn) {
     die('Connection failed: ' . mysqli_connect_error());
 }
 
-$sql = "select nick, wins from profiles where wins > 0 order by wins desc";
+$sql = "select nick, wins, rating from profiles where wins > 0 ORDER BY rating desc, (wins - losses) desc, wins desc";
 
-echo "<table><tr><td class='tableheader'>Player</td><td class='tableheader'>Won games</td></tr>";
+echo "<table><tr><td class='tableheader'>Player</td><td class='tableheader'>Won games</td><td class='tableheader'>Rating</td></tr>";
 $result = mysqli_query($conn, $sql);
 while ($row = mysqli_fetch_assoc($result)) {
     $name = $row['nick'];
     $wins = $row['wins'];
+    $rating = $row['rating'];
     echo "<tr><td class='pname'>";
     echo showPlayer($name);
-    echo "</td><td class='pscore'>$wins</td></tr>";
+    echo "</td><td class='pscore'>$wins</td><td class='pscore'>$rating</td></tr>";
 }
 echo '</table>';
 
