@@ -24,10 +24,7 @@ echo "<h2>Games played by $n</h2>";
 $result = mysqli_query($conn, $sql);
 while ($row = mysqli_fetch_assoc($result)) {
     $id = $row['id'];
-    if (!file_exists("/var/games/$id")) {
-        continue;
-    }
-    
+    $file_exists = file_exists("/var/games/$id");
     $humanDate = new HumanDate();
     $time = $row['time_stop'];
     $htime = $humanDate->transform($time);
@@ -62,7 +59,10 @@ while ($row = mysqli_fetch_assoc($result)) {
                 echo " ";
             }
         }
-        echo " <a href='watch.html#$id' target='_blank'>watch here</a></br>";
+        if ($file_exists) {
+            echo " <a href='watch.html#$id' target='_blank'>watch here</a>";
+        }
+        echo "</br>";
     }
 }
 

@@ -15,16 +15,18 @@ if (!$conn) {
     die('Connection failed: ' . mysqli_connect_error());
 }
 
-$sql = "select nick, wins from profiles order by wins desc";
+$sql = "select nick, wins, losses, rating from profiles where wins != 0 || losses != 0 ORDER BY rating desc, (wins - losses) desc, wins desc";
 
-echo "<table><tr><td class='tableheader'>Player</td><td class='tableheader'>Won games</td></tr>";
+echo "<table><tr><td class='tableheader'>Player</td><td class='tableheader'>Won games</td><td class='tableheader'>Lost games</td><td class='tableheader'>Rating</td></tr>";
 $result = mysqli_query($conn, $sql);
 while ($row = mysqli_fetch_assoc($result)) {
     $name = $row['nick'];
     $wins = $row['wins'];
+    $losses = $row['losses'];
+    $rating = $row['rating'];
     echo "<tr><td class='pname'>";
     echo showPlayer($name);
-    echo "</td><td class='pscore'>$wins</td></tr>";
+    echo "</td><td class='pscore'>$wins</td><td class='pscore'>$losses</td><td class='pscore'>$rating</td></tr>";
 }
 echo '</table>';
 
@@ -40,7 +42,7 @@ if (mysqli_num_rows($result) > 0) {
         $diff = $date->diffForHumans();
         $last = "$last $diff";
     }
-    echo "<br>Last game played was <i>$last</i>.";
+    echo "<br>Last game played was <i class='localtime' data-time='" . htmlspecialchars($time) . "'>" . htmlspecialchars($last) . "</i>.";
     $winner = $row['winner'];
     $names = '';
     $losers = '';
