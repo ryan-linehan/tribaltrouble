@@ -8,10 +8,11 @@ import discord4j.core.object.command.ApplicationCommandInteractionOption;
 import discord4j.core.object.command.ApplicationCommandInteractionOptionValue;
 import discord4j.core.object.command.ApplicationCommandOption;
 import discord4j.core.spec.EmbedCreateSpec;
-import discord4j.core.spec.InteractionApplicationCommandCallbackReplyMono;
 import discord4j.discordjson.json.ApplicationCommandOptionData;
 import discord4j.discordjson.json.ApplicationCommandRequest;
 import discord4j.rest.util.Color;
+
+import reactor.core.publisher.Mono;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,8 +32,7 @@ public class LeaderboardsCommand extends DiscordCommand {
     }
 
     @Override
-    public InteractionApplicationCommandCallbackReplyMono executeCommand(
-            ChatInputInteractionEvent event) {
+    public Mono<Void> executeCommand(ChatInputInteractionEvent event) {
 
         long start =
                 event.getOption(command_option_start)
@@ -99,7 +99,7 @@ public class LeaderboardsCommand extends DiscordCommand {
             return event.reply("No rankings available to display.");
         }
 
-        return event.reply().withEmbeds(embeds);
+        return event.reply().withEmbeds(embeds).retry(3);
     }
 
     /**

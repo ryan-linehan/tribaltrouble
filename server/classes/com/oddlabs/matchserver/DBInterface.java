@@ -8,6 +8,7 @@ import com.oddlabs.matchmaking.LoginDetails;
 import com.oddlabs.matchmaking.Participant;
 import com.oddlabs.matchmaking.Profile;
 import com.oddlabs.matchmaking.RankingEntry;
+import com.oddlabs.matchserver.db_models.VersusMatchupResultModel;
 import com.oddlabs.util.CryptUtils;
 import com.oddlabs.util.DBUtils;
 
@@ -859,6 +860,64 @@ public final strictfp class DBInterface {
         }
         inClause.append(")");
         return inClause.toString();
+    }
+
+    public static final VersusMatchupResultModel getMatchupStats(
+            String player1, String player2, boolean only1v1Matchups) {
+        String query =
+                "WITH game_players AS ( SELECT id AS GameId, player1_name AS Name, player1_team AS"
+                    + " Team, player1_race AS Race FROM games WHERE player1_name IS NOT NULL UNION"
+                    + " ALL SELECT id, player2_name, player2_team, player2_race FROM games WHERE"
+                    + " player2_name IS NOT NULL UNION ALL SELECT id, player3_name, player3_team,"
+                    + " player3_race FROM games WHERE player3_name IS NOT NULL UNION ALL SELECT id,"
+                    + " player4_name, player4_team, player4_race FROM games WHERE player4_name IS"
+                    + " NOT NULL UNION ALL SELECT id, player5_name, player5_team, player5_race FROM"
+                    + " games WHERE player5_name IS NOT NULL UNION ALL SELECT id, player6_name,"
+                    + " player6_team, player6_race FROM games WHERE player6_name IS NOT NULL UNION"
+                    + " ALL SELECT id, player7_name, player7_team, player7_race FROM games WHERE"
+                    + " player7_name IS NOT NULL UNION ALL SELECT id, player8_name, player8_team,"
+                    + " player8_race FROM games WHERE player8_name IS NOT NULL), two_player_games"
+                    + " AS ( SELECT GameId FROM game_players GROUP BY GameId HAVING COUNT(*) = 2)"
+                    + " SELECT CASE WHEN g.winner = gp.Team THEN 'Player1' WHEN g.winner = gp2.Team"
+                    + " THEN 'Player2' ELSE 'Neither' END AS vsResult, g.* FROM game_players gp"
+                    + " inner JOIN game_players as gp2 on gp.GameId = gp2.GameId and gp.Team <>"
+                    + " gp2.Team inner JOIN games g on g.id = gp.GameId"
+                        // 1v1 only
+                        + (only1v1Matchups
+                                ? " inner join two_player_games tpg on tpg.GameId = g.id"
+                                : "")
+                        + " WHERE"
+                        + " winner IS NOT NULL"
+                        + " AND gp.Name = ?"
+                        + " AND gp2.Name = ?"
+                        + " and gp.Team <> gp2.Team"
+                        + " order by gp.GameId;";
+        try {
+            PreparedStatement stmt = DBUtils.createStatement(query);
+            stmt.setString(1, player1);
+            stmt.setString(2, player2);
+            ResultSet result = stmt.executeQuery();
+            int p1Wins = 0;
+            int p2Wins = 0;
+            int neitherWins = 0;
+            while (result.next()) {
+                String vsResult = result.getString("vsResult").trim();
+                if (vsResult.equals("Player1")) {
+                    p1Wins++;
+                } else if (vsResult.equals("Player2")) {
+                    p2Wins++;
+                } else {
+                    neitherWins++;
+                }
+            }
+            System.out.println("p1 wins: " + p1Wins);
+            System.out.println("p2 wins: " + p2Wins);
+            System.out.println("neither wins: " + neitherWins);
+            return new VersusMatchupResultModel(player1, player2, p1Wins, p2Wins, neitherWins);
+        } catch (Exception e) {
+            System.out.println("err" + e.getMessage());
+        }
+        return null;
     }
 
     public static final Profile[] getProfilesByNick(String[] nicks) {
