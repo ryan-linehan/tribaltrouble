@@ -502,8 +502,8 @@ public final strictfp class DBInterface {
             PreparedStatement stmt =
                     DBUtils.createStatement(
                             "SELECT nick, rating, wins, losses, invalid FROM profiles P WHERE"
-                                + " (P.wins > 0 OR P.losses > 0) ORDER BY rating DESC, (wins -"
-                                + " losses) DESC, wins DESC LIMIT ? OFFSET ?");
+                                    + " (P.wins > 0 OR P.losses > 0) ORDER BY rating DESC, (wins -"
+                                    + " losses) DESC, wins DESC LIMIT ? OFFSET ?");
             try {
                 stmt.setInt(1, count);
                 stmt.setInt(2, start);

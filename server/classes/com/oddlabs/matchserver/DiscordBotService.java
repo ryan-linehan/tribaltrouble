@@ -51,7 +51,7 @@ public class DiscordBotService {
                             setupEventHandlers(serverId);
                             commands.add(new LeaderboardsCommand());
                             registerCommands();
-                            //deleteCommands();
+                            // deleteCommands();
                             return gateway.onDisconnect();
                         });
         isInitialized = true;
@@ -76,16 +76,25 @@ public class DiscordBotService {
         gateway.on(
                         ChatInputInteractionEvent.class,
                         event -> {
-                            LeaderboardsCommand leaderboardsCommand = new LeaderboardsCommand();
-                            if (event.getCommandName()
-                                    .equals(leaderboardsCommand.getCommandName())) {
-                                return leaderboardsCommand.executeCommand(event);
-                            }
-
                             if (event.getCommandName().equals("ping")) {
                                 return event.reply("Pong!");
                             }
-                            return event.reply("Unknown command").withEphemeral(true);
+
+                            return commands.stream()
+                                    .filter(
+                                            cmd ->
+                                                    event.getCommandName()
+                                                            .equals(cmd.getCommandName()))
+                                    .findFirst()
+                                    .map(cmd -> cmd.executeCommand(event))
+                                    .orElseGet(
+                                            () -> {
+                                                System.out.println(
+                                                        "No matching command found for: "
+                                                                + event.getCommandName());
+                                                return event.reply("Unknown command")
+                                                        .withEphemeral(true);
+                                            });
                         })
                 .subscribe();
         gateway.on(ReadyEvent.class, this::handleReady).take(1).subscribe();
