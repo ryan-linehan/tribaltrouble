@@ -2,8 +2,8 @@ package com.oddlabs.matchserver.discord.commands;
 
 import com.oddlabs.matchmaking.Profile;
 import com.oddlabs.matchserver.DBInterface;
-import com.oddlabs.matchserver.db_models.VersusMatchupModel;
-import com.oddlabs.matchserver.db_models.VersusMatchupResultModel;
+import com.oddlabs.matchserver.models.VersusMatchupModel;
+import com.oddlabs.matchserver.models.VersusMatchupResultModel;
 
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
 import discord4j.core.object.command.ApplicationCommandInteractionOption;

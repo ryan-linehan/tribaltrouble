@@ -1,4 +1,4 @@
-package com.oddlabs.matchserver.db_models;
+package com.oddlabs.matchserver.models;
 
 import java.io.File;
 

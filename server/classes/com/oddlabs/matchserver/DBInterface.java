@@ -8,9 +8,9 @@ import com.oddlabs.matchmaking.LoginDetails;
 import com.oddlabs.matchmaking.Participant;
 import com.oddlabs.matchmaking.Profile;
 import com.oddlabs.matchmaking.RankingEntry;
-import com.oddlabs.matchserver.db_models.GameDataModel;
-import com.oddlabs.matchserver.db_models.VersusMatchupModel;
-import com.oddlabs.matchserver.db_models.VersusMatchupResultModel;
+import com.oddlabs.matchserver.models.GameDataModel;
+import com.oddlabs.matchserver.models.VersusMatchupModel;
+import com.oddlabs.matchserver.models.VersusMatchupResultModel;
 import com.oddlabs.util.CryptUtils;
 import com.oddlabs.util.DBUtils;
 
@@ -926,7 +926,7 @@ public final strictfp class DBInterface {
                     String mapSeed = result.getString("mapcode");
                     java.sql.Timestamp startTime = result.getTimestamp("time_start");
                     recentMatchups.add(
-                            new com.oddlabs.matchserver.db_models.VersusMatchupModel(
+                            new com.oddlabs.matchserver.models.VersusMatchupModel(
                                     player1Name,
                                     player2Name,
                                     winnerName,
