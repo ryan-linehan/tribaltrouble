@@ -1255,4 +1255,28 @@ public final strictfp class DBInterface {
                     .throwing(DBInterface.class.getName(), "clearOnlineProfiles", e);
         }
     }
+
+    public static final String[] getOnlineProfiles() {
+        try {
+            PreparedStatement stmt =
+                    DBUtils.createStatement("SELECT nick FROM online_profiles ORDER BY nick");
+            try {
+                ResultSet result = stmt.executeQuery();
+                List<String> nicks = new ArrayList<String>();
+                while (result.next()) {
+                    String nick = result.getString("nick").trim();
+                    nicks.add(nick);
+                }
+
+                return nicks.toArray(new String[0]);
+            } finally {
+                stmt.getConnection().close();
+            }
+        } catch (Exception e) {
+            System.out.println("Exception: " + e);
+            MatchmakingServer.getLogger()
+                    .throwing(DBInterface.class.getName(), "getOnlineProfiles", e);
+        }
+        return new String[0];
+    }
 }

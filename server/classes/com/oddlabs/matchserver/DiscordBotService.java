@@ -3,6 +3,7 @@ package com.oddlabs.matchserver;
 import com.oddlabs.matchserver.discord.commands.DiscordCommand;
 import com.oddlabs.matchserver.discord.commands.LeaderboardsCommand;
 import com.oddlabs.matchserver.discord.commands.MatchupCommand;
+import com.oddlabs.matchserver.discord.commands.OnlineCommand;
 import com.oddlabs.matchserver.discord.commands.RegisterProfileToDiscordUserCommand;
 import com.oddlabs.matchserver.discord.commands.WhoIsCommand;
 
@@ -56,6 +57,7 @@ public class DiscordBotService {
                             commands.add(new MatchupCommand());
                             commands.add(new RegisterProfileToDiscordUserCommand());
                             commands.add(new WhoIsCommand());
+                            commands.add(new OnlineCommand());
                             registerCommands();
                             // deleteCommands();
                             return gateway.onDisconnect();

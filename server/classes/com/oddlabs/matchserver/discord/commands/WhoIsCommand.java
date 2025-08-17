@@ -1,6 +1,5 @@
 package com.oddlabs.matchserver.discord.commands;
 
-
 import com.oddlabs.matchserver.DBInterface;
 
 import discord4j.common.util.Snowflake;
@@ -89,7 +88,7 @@ public class WhoIsCommand extends DiscordCommand {
                                         .name(command_option_lookup_name)
                                         .description(
                                                 "The user to look up (@discord_user or"
-                                                    + " tt_nickname)")
+                                                        + " tt_nickname)")
                                         .type(ApplicationCommandOption.Type.STRING.getValue())
                                         .required(true)
                                         .build())
