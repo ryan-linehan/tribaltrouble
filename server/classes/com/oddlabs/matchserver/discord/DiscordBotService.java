@@ -31,7 +31,7 @@ public class DiscordBotService {
     private boolean isInitialized = false;
     private long serverId = -1;
     private DiscordChatroomCoordinator chatroomCoordinator;
-    
+
     ArrayList<DiscordCommand> commands = new ArrayList<DiscordCommand>();
 
     public static DiscordBotService getInstance() {
@@ -67,10 +67,7 @@ public class DiscordBotService {
                         });
         isInitialized = true;
         login.subscribe();
-        
     }
-
-    
 
     public boolean isInitialized() {
         return isInitialized;
@@ -80,6 +77,7 @@ public class DiscordBotService {
     Snowflake getBotId() {
         return bot_id;
     }
+
     /** Gets the chatroom coordinator for managing discord to tribal trouble chatrooms */
     public DiscordChatroomCoordinator getChatroomCoordinator() {
         return chatroomCoordinator;

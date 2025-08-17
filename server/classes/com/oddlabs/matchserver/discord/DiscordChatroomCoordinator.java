@@ -1,11 +1,13 @@
 package com.oddlabs.matchserver.discord;
 
+import com.oddlabs.matchserver.ChatRoom;
+
 import discord4j.core.event.domain.message.MessageCreateEvent;
 import discord4j.core.object.entity.channel.TextChannel;
 import discord4j.core.spec.EmbedCreateSpec;
+
 import reactor.core.Disposable;
 
-import com.oddlabs.matchserver.ChatRoom;
 import java.util.HashMap;
 
 public class DiscordChatroomCoordinator {
@@ -13,11 +15,12 @@ public class DiscordChatroomCoordinator {
     // TT Chatroom instance -> associated discord text channel
     private HashMap<ChatRoom, TextChannel> chatRoomChannels = new HashMap<ChatRoom, TextChannel>();
     // TT Chatroom instance -> to its subscription to a message sending
-    private HashMap<ChatRoom, Disposable> discordMessageSubscriptions = new HashMap<ChatRoom, Disposable>();
+    private HashMap<ChatRoom, Disposable> discordMessageSubscriptions =
+            new HashMap<ChatRoom, Disposable>();
 
     /**
      * Adds a chatroom and its associated discord channel to the coordinator.
-     * 
+     *
      * @param chatroom
      */
     public void AddChatroom(ChatRoom chatroom) {
@@ -27,15 +30,18 @@ public class DiscordChatroomCoordinator {
         } else {
             chatRoomChannels.put(chatroom, discordChannel);
             subscribeToDiscordMessages(chatroom);
-            LogDebug("Discord channel for " + chatroom.getName() + " found: " + discordChannel.getName()
-                    + ". Registered to coordinator.");
+            LogDebug(
+                    "Discord channel for "
+                            + chatroom.getName()
+                            + " found: "
+                            + discordChannel.getName()
+                            + ". Registered to coordinator.");
         }
     }
 
     /**
-     * Safely removes a chatroom from the coordinator by cleaning up any
-     * subscriptions
-     * 
+     * Safely removes a chatroom from the coordinator by cleaning up any subscriptions
+     *
      * @param chatroom
      */
     public void RemoveChatroom(ChatRoom chatroom) {
@@ -46,7 +52,7 @@ public class DiscordChatroomCoordinator {
 
     /**
      * Sends a discord message to the chatroom if it can
-     * 
+     *
      * @param chatRoom
      * @param owner
      * @param msg
@@ -60,13 +66,17 @@ public class DiscordChatroomCoordinator {
             }
 
             LogDebug("sending message to discord");
-            if (!msg.startsWith("<"))
-                msg = formatChat(owner, msg);
+            if (!msg.startsWith("<")) msg = formatChat(owner, msg);
 
-            discordChannel.createMessage(msg).retry(3).subscribe(
-                    _ -> {
-                    },
-                    error -> LogDebug("Failed to send Discord message: " + error.getMessage()));
+            discordChannel
+                    .createMessage(msg)
+                    .retry(3)
+                    .subscribe(
+                            _ -> {},
+                            error ->
+                                    LogDebug(
+                                            "Failed to send Discord message: "
+                                                    + error.getMessage()));
 
         } catch (Exception e) {
             LogDebug("Error sending discord message: " + e.getMessage());
@@ -75,7 +85,7 @@ public class DiscordChatroomCoordinator {
 
     /**
      * Sends a discord embed to the specified chatroom instance if it can
-     * 
+     *
      * @param discordChannel
      * @param embed
      * @param roomName
@@ -90,18 +100,25 @@ public class DiscordChatroomCoordinator {
         String roomName = chatroom.getName();
         try {
             if (discordChannel != null) {
-                discordChannel.createMessage(embed).retry(3).subscribe(
-                        _ -> {
-                        },
-                        error -> LogDebug("Failed to send Discord embed: " + error.getMessage()));
+                discordChannel
+                        .createMessage(embed)
+                        .retry(3)
+                        .subscribe(
+                                _ -> {},
+                                error ->
+                                        LogDebug(
+                                                "Failed to send Discord embed: "
+                                                        + error.getMessage()));
             }
         } catch (Exception e) {
-            LogDebug("Error sending discord embed in chat room " + roomName + ": " + e.getMessage());
+            LogDebug(
+                    "Error sending discord embed in chat room " + roomName + ": " + e.getMessage());
         }
     }
 
     /**
      * Gets the Discord channel associated with a chat room based on a naming convention.
+     *
      * @param roomName
      * @return
      */
@@ -110,43 +127,61 @@ public class DiscordChatroomCoordinator {
             int roomNumber = Integer.parseInt(roomName.substring("Chatroom".length()));
             return DiscordBotService.getInstance().getDiscordChannelByTTRoomNumber(roomNumber);
         } catch (Exception e) {
-            System.err.println("Error getting Discord channel for room " + roomName + ": " + e.getMessage());
+            System.err.println(
+                    "Error getting Discord channel for room " + roomName + ": " + e.getMessage());
             return null;
         }
     }
 
     /**
      * Event handler for a discord message sent into a connected chatroom
-     * 
+     *
      * @param event
      * @param chatRoom
      */
     private void handleIncomingDiscordMessage(MessageCreateEvent event, ChatRoom chatRoom) {
         LogDebug("Handling Discord message for chatroom " + chatRoom.getName());
         String content = event.getMessage().getContent();
-        event.getMember().ifPresent(member -> {
-            String displayName = member.getDisplayName();
-            String author = "@" + displayName;
-            LogDebug("Processing Discord message from " + author + ": " + content);
-            chatRoom.sendMessage(author, content);
-        });
+        event.getMember()
+                .ifPresent(
+                        member -> {
+                            String displayName = member.getDisplayName();
+                            String author = "@" + displayName;
+                            LogDebug("Processing Discord message from " + author + ": " + content);
+                            chatRoom.sendMessage(author, content);
+                        });
     }
 
     /**
      * Subscribes to receiving Discord messages for a chat room.
-     * 
+     *
      * @param chatRoom
      */
     private void subscribeToDiscordMessages(ChatRoom chatRoom) {
         TextChannel discordChannel = chatRoomChannels.get(chatRoom);
 
-        Disposable messageSubscription = discordChannel
-                .getClient()
-                .on(MessageCreateEvent.class)
-                .filter(event -> event.getMessage().getChannelId().equals(discordChannel.getId()))
-                .filter(event -> !event.getMessage().getAuthor()
-                        .map(user -> user.getId().equals(DiscordBotService.getInstance().getBotId())).orElse(false))
-                .subscribe(event -> handleIncomingDiscordMessage(event, chatRoom));
+        Disposable messageSubscription =
+                discordChannel
+                        .getClient()
+                        .on(MessageCreateEvent.class)
+                        .filter(
+                                event ->
+                                        event.getMessage()
+                                                .getChannelId()
+                                                .equals(discordChannel.getId()))
+                        .filter(
+                                event ->
+                                        !event.getMessage()
+                                                .getAuthor()
+                                                .map(
+                                                        user ->
+                                                                user.getId()
+                                                                        .equals(
+                                                                                DiscordBotService
+                                                                                        .getInstance()
+                                                                                        .getBotId()))
+                                                .orElse(false))
+                        .subscribe(event -> handleIncomingDiscordMessage(event, chatRoom));
         discordMessageSubscriptions.put(chatRoom, messageSubscription);
     }
 
