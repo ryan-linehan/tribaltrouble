@@ -29,7 +29,7 @@ public class RegisterProfileToDiscordUserCommand extends DiscordCommand {
 
     @Override
     public Mono<Void> executeCommand(ChatInputInteractionEvent event) {
-        return event.deferReply().then(methodThatTakesALongTime(event));
+        return event.deferReply().withEphemeral(true).then(methodThatTakesALongTime(event));
     }
 
     /** Static dicitonary of profiles awaiting to be processed by a user response. */
@@ -90,11 +90,11 @@ public class RegisterProfileToDiscordUserCommand extends DiscordCommand {
                         .map(ApplicationCommandInteractionOptionValue::asString)
                         .orElse(null);
         if (profileToRegisterName == null)
-            return event.createFollowup("Unable to retrieve profile name to register.").then();
+            return event.createFollowup("Unable to retrieve profile name to register.").withEphemeral(true).then();
         profileToRegisterName = profileToRegisterName.toLowerCase();
         long discord_user_id = event.getInteraction().getUser().getId().asLong();
         if (DBInterface.isProfileRegisteredToDiscord(profileToRegisterName)) {
-            return event.createFollowup("Profile is already registered to a Discord user.").then();
+            return event.createFollowup("Profile is already registered to a Discord user.").withEphemeral(true).then();
         }
         com.oddlabs.matchserver.Client client =
                 (com.oddlabs.matchserver.Client)
@@ -115,6 +115,7 @@ public class RegisterProfileToDiscordUserCommand extends DiscordCommand {
                         event.createFollowup(
                                         "Successfully registered profile: "
                                                 + registration.getNick())
+                                .withEphemeral(true)
                                 .then()
                                 .subscribe();
                         processingProfiles.remove(registration.getNick());
@@ -127,12 +128,14 @@ public class RegisterProfileToDiscordUserCommand extends DiscordCommand {
                             "Sent registration request to profile: "
                                     + profileToRegisterName
                                     + ". Please respond in-game.")
+                        .withEphemeral(true)
                     .then();
         } else {
             // Handle not found
             System.out.println(
                     "Could not find active client with profile name: " + profileToRegisterName);
             return event.createFollowup("Failed to register profile: " + profileToRegisterName)
+                    .withEphemeral(true)
                     .then();
         }
     }
