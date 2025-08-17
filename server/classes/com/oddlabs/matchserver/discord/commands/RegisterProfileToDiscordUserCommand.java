@@ -11,13 +11,15 @@ import discord4j.discordjson.json.ApplicationCommandRequest;
 
 import reactor.core.publisher.Mono;
 
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class RegisterProfileToDiscordUserCommand extends DiscordCommand {
     private String command_name = "register-user";
     private String command_description =
             "Registers a tribal trouble user profile to the Discord user. TT user must reply in"
-                + " game.";
+                    + " game.";
     private String command_option_profile_name = "profile_name";
 
     @Override
@@ -30,18 +32,39 @@ public class RegisterProfileToDiscordUserCommand extends DiscordCommand {
         return event.deferReply().then(methodThatTakesALongTime(event));
     }
 
-    /**
-     * Static dicitonary of profiles awaiting to be processed by a user response. TODO: Should give
-     * up after 1 minute?
-     */
+    /** Static dicitonary of profiles awaiting to be processed by a user response. */
     private class ProfileRegistrationTimeout {
         long discord_user_id;
         String profile_name;
+        Timer timer;
 
-        public ProfileRegistrationTimeout(long discord_user_id, String profile_name) {
+        public ProfileRegistrationTimeout(
+                long discord_user_id, String profile_name, ChatInputInteractionEvent event) {
             this.discord_user_id = discord_user_id;
             this.profile_name = profile_name;
-            // TODO: Add timeout
+            this.timer = new Timer(true);
+            timer.schedule(
+                    new TimerTask() {
+                        @Override
+                        public void run() {
+                            System.out.println(
+                                    "Timeout: Removing profile "
+                                            + profile_name
+                                            + " from processingProfiles");
+                            RegisterProfileToDiscordUserCommand.processingProfiles.remove(
+                                    profile_name);
+                            event.createFollowup(
+                                            "No response from tribal trouble user. Profile"
+                                                + " registration timed out.")
+                                    .then()
+                                    .subscribe();
+                            System.out.println(
+                                    "Timeout: Removed "
+                                            + profile_name
+                                            + " from processingProfiles");
+                        }
+                    },
+                    60000);
         }
 
         public String getNick() {
@@ -50,6 +73,10 @@ public class RegisterProfileToDiscordUserCommand extends DiscordCommand {
 
         public long getDiscordUserId() {
             return discord_user_id;
+        }
+
+        public void stopTimer() {
+            timer.cancel();
         }
     }
 
@@ -78,10 +105,11 @@ public class RegisterProfileToDiscordUserCommand extends DiscordCommand {
             // You can now send a private message or perform other actions
             System.out.println("Found active client with profile name: " + profileToRegisterName);
             final ProfileRegistrationTimeout registration =
-                    new ProfileRegistrationTimeout(discord_user_id, profileToRegisterName);
+                    new ProfileRegistrationTimeout(discord_user_id, profileToRegisterName, event);
             processingProfiles.put(
                     profileToRegisterName,
                     () -> {
+                        registration.stopTimer();
                         DBInterface.registerProfileToDiscordUser(
                                 registration.getNick(), registration.getDiscordUserId());
                         event.createFollowup(
@@ -94,7 +122,7 @@ public class RegisterProfileToDiscordUserCommand extends DiscordCommand {
             client.sendPrivateMessage(
                     profileToRegisterName,
                     "A discord user is requesting to register this profile. Allow this? Reply with"
-                        + " y/n");
+                            + " y/n");
             return event.createFollowup(
                             "Sent registration request to profile: "
                                     + profileToRegisterName
@@ -107,15 +135,6 @@ public class RegisterProfileToDiscordUserCommand extends DiscordCommand {
             return event.createFollowup("Failed to register profile: " + profileToRegisterName)
                     .then();
         }
-        // Client.getActiveClients().entrySet().stream().filter(entry -> {
-        // String profileName = entry.getKey();
-        // Client client = entry.getValue();
-        // // Add your filtering logic here
-        // return false;
-        // });
-        // return Mono.delay(Duration.ofSeconds(30))
-        //         .then(event.createFollowup("Long-running task completed!"))
-        //         .then();
     }
 
     @Override
@@ -129,7 +148,7 @@ public class RegisterProfileToDiscordUserCommand extends DiscordCommand {
                                         .name(command_option_profile_name)
                                         .description(
                                                 "The in-game profile name to register to your"
-                                                    + " Discord user")
+                                                        + " Discord user")
                                         .type(
                                                 ApplicationCommandOption.Type.STRING
                                                         .getValue()) // 3 is STRING type
