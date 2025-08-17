@@ -3,6 +3,7 @@ package com.oddlabs.matchserver;
 import com.oddlabs.matchmaking.ChatRoomUser;
 import com.oddlabs.matchmaking.MatchmakingClientInterface;
 import com.oddlabs.matchmaking.MatchmakingServerInterface;
+import com.oddlabs.matchserver.models.ChatRoomMessageModel;
 
 import discord4j.core.event.domain.message.MessageCreateEvent;
 import discord4j.core.object.entity.Message;
@@ -14,19 +15,9 @@ import reactor.core.Disposable;
 import java.util.*;
 
 public final strictfp class ChatRoom {
-    public static class MessageTuple {
-        public final String author;
-        public final String message;
-
-        public MessageTuple(String author, String message) {
-            this.author = author;
-            this.message = message;
-        }
-    }
-
     private static final Map<String, ChatRoom> chat_rooms = new HashMap();
     private static final int MAX_MESSAGES = 100;
-    private MessageTuple[] messages = new MessageTuple[MAX_MESSAGES];
+    private ChatRoomMessageModel[] messages = new ChatRoomMessageModel[MAX_MESSAGES];
     private int currentIndex = 0;
     private int messageCount = 0;
     private final Set<Client> users = new HashSet();
@@ -92,22 +83,29 @@ public final strictfp class ChatRoom {
             }
 
             client.joinRoom(room_name);
-            // Send existing messages to the new client
-            for (int j = 0; j < room.messageCount; j++) {
-                int index =
-                        (room.currentIndex - room.messageCount + j + MAX_MESSAGES) % MAX_MESSAGES;
-                MessageTuple message = room.messages[index];
-                if (message != null) {
-                    System.out.println(
-                            "Sending message to client: "
-                                    + message.author
-                                    + ": "
-                                    + message.message);
-                    client.getClientInterface()
-                            .receiveChatRoomMessage(message.author, message.message);
-                }
-            }
+            sendExistingMessagesToClient(client, room);
             return; // Client has joined a room
+        }
+    }
+
+    /**
+     * Sends any messages already in the chat room to a client that just joined
+     */
+    private static final void sendExistingMessagesToClient(Client client, ChatRoom room) {
+        // Send existing messages to the new client
+        for (int j = 0; j < room.messageCount; j++) {
+            int index =
+                    (room.currentIndex - room.messageCount + j + MAX_MESSAGES) % MAX_MESSAGES;
+            ChatRoomMessageModel message = room.messages[index];
+            if (message != null) {
+                System.out.println(
+                        "Sending message to client: "
+                                + message.author
+                                + ": "
+                                + message.message);
+                client.getClientInterface()
+                        .receiveChatRoomMessage(message.author, message.message);
+            }
         }
     }
 
@@ -176,14 +174,14 @@ public final strictfp class ChatRoom {
      * @param msg
      */
     public final void sendMessage(String owner, String msg) {
-        addMessage(new MessageTuple(owner, msg));
+        addMessage(new ChatRoomMessageModel(owner, msg));
         for (Client client : users) {
             MatchmakingClientInterface ci = client.getClientInterface();
             ci.receiveChatRoomMessage(owner, msg);
         }
     }
 
-    private void addMessage(MessageTuple message) {
+    private void addMessage(ChatRoomMessageModel message) {
         messages[currentIndex] = message;
         currentIndex = (currentIndex + 1) % MAX_MESSAGES;
         if (messageCount < MAX_MESSAGES) {
