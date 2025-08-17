@@ -5,6 +5,7 @@ import com.oddlabs.matchmaking.GameSession;
 import com.oddlabs.matchmaking.MatchmakingServerInterface;
 import com.oddlabs.matchmaking.Participant;
 import com.oddlabs.matchmaking.PlayerTypes;
+import com.oddlabs.matchserver.db_models.GameDataModel;
 
 import discord4j.core.spec.EmbedCreateSpec;
 import discord4j.rest.util.Color;
@@ -497,7 +498,7 @@ public final strictfp class TimestampedGameSession {
     /** Sends a Discord embed message when humans lose to bots. */
     private void SendHumansLoseToBotsDiscordEmbed() {
         if (!DiscordBotService.getInstance().isInitialized()) return;
-        GameData data = DBInterface.getGame(database_id, true);
+        GameDataModel data = DBInterface.getGame(database_id, true);
         String game_name = data.getName();
 
         Map<Integer, String> playerData = this.getTeamLineup(session.getPlayerInfo());
@@ -533,7 +534,7 @@ public final strictfp class TimestampedGameSession {
      */
     private void SendHumansWinAgainstOtherHumans(int winning_team_index) {
         if (!DiscordBotService.getInstance().isInitialized()) return;
-        GameData data = DBInterface.getGame(database_id, false);
+        GameDataModel data = DBInterface.getGame(database_id, false);
         String game_name = data.getName();
 
         Map<Integer, String> playerData = this.getTeamLineup(session.getPlayerInfo());
@@ -564,7 +565,7 @@ public final strictfp class TimestampedGameSession {
     /** Sends a Discord embed message when humans win against bots. */
     private void SendHumansWinAgainstBotsDiscordEmbed(int winning_team_index) {
         if (!DiscordBotService.getInstance().isInitialized()) return;
-        GameData data = DBInterface.getGame(database_id, true);
+        GameDataModel data = DBInterface.getGame(database_id, true);
         String game_name = data.getName();
 
         Map<Integer, String> playerData = this.getTeamLineup(session.getPlayerInfo());
@@ -595,7 +596,7 @@ public final strictfp class TimestampedGameSession {
     /** Sends a Discord embed message when the game was invalidated. */
     private void SendInvalidatedGameDiscordEmbed() {
         if (!DiscordBotService.getInstance().isInitialized()) return;
-        GameData data = DBInterface.getGame(database_id, true);
+        GameDataModel data = DBInterface.getGame(database_id, true);
         String game_name = data.getName();
         Map<Integer, String> playerData = this.getTeamLineup(session.getPlayerInfo());
         String replayUrl = getReplayUrl(database_id);
@@ -623,7 +624,7 @@ public final strictfp class TimestampedGameSession {
 
     private void SendGameStartedDiscordEmbed() {
         if (!DiscordBotService.getInstance().isInitialized()) return;
-        GameData data = DBInterface.getGame(database_id, false);
+        GameDataModel data = DBInterface.getGame(database_id, false);
         String game_name = data.getName();
 
         Map<Integer, String> playerData = this.getTeamLineup(session.getPlayerInfo());

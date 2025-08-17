@@ -8,6 +8,7 @@ import com.oddlabs.matchmaking.LoginDetails;
 import com.oddlabs.matchmaking.Participant;
 import com.oddlabs.matchmaking.Profile;
 import com.oddlabs.matchmaking.RankingEntry;
+import com.oddlabs.matchserver.db_models.GameDataModel;
 import com.oddlabs.matchserver.db_models.VersusMatchupModel;
 import com.oddlabs.matchserver.db_models.VersusMatchupResultModel;
 import com.oddlabs.util.CryptUtils;
@@ -639,7 +640,7 @@ public final strictfp class DBInterface {
         }
     }
 
-    public static final GameData getGame(int game_id, boolean get_player_data) {
+    public static final GameDataModel getGame(int game_id, boolean get_player_data) {
         try {
             PreparedStatement stmt =
                     DBUtils.createStatement(
@@ -651,7 +652,7 @@ public final strictfp class DBInterface {
                 ResultSet result = stmt.executeQuery();
                 try {
                     if (result.next()) {
-                        GameData gameData = new GameData();
+                        GameDataModel gameData = new GameDataModel();
                         gameData.setTimeCreate(result.getTimestamp("time_create"));
                         gameData.setName(result.getString("name"));
                         gameData.setRated(result.getString("rated"));
@@ -797,7 +798,7 @@ public final strictfp class DBInterface {
                                 }
                             }
 
-                            // Assign to GameData fields
+                            // Assign to GameDataModel fields
                             for (int i = 0; i < 8; i++) {
                                 String nick = nicks[i];
                                 com.oddlabs.matchmaking.Profile pf =

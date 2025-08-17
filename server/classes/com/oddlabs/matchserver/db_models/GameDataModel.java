@@ -1,10 +1,10 @@
-package com.oddlabs.matchserver;
+package com.oddlabs.matchserver.db_models;
 
 import com.oddlabs.matchmaking.Profile;
 
 import java.sql.Timestamp;
 
-public final class GameData {
+public final class GameDataModel {
 
     // Basic game information
     private Timestamp timeCreate;
@@ -71,7 +71,7 @@ public final class GameData {
     private Profile profile8;
 
     // Constructor
-    public GameData() {}
+    public GameDataModel() {}
 
     // Getters and Setters for basic game information
     public Timestamp getTimeCreate() {
