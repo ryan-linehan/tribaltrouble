@@ -4,6 +4,7 @@ import com.oddlabs.matchmaking.ChatRoomUser;
 import com.oddlabs.matchmaking.MatchmakingClientInterface;
 import com.oddlabs.matchmaking.MatchmakingServerInterface;
 import com.oddlabs.matchserver.discord.DiscordBotService;
+import com.oddlabs.matchserver.discord.DiscordChatroomCoordinator;
 import com.oddlabs.matchserver.models.ChatRoomMessageModel;
 
 import discord4j.core.event.domain.message.MessageCreateEvent;
@@ -28,37 +29,13 @@ public final strictfp class ChatRoom {
 
     public ChatRoom(String name) {
         this.name = name;
-        discordChannel =
-                DiscordBotService.getInstance()
-                        .getDiscordChannelByTTRoomNumber(
-                                Integer.parseInt(name.substring("Chatroom".length())));
+        DiscordChatroomCoordinator discordCoordinator = DiscordBotService.getInstance().getChatroomCoordinator();
+        discordChannel = discordCoordinator != null ? discordCoordinator.getDiscordChannelForRoom(name) : null;
         if (discordChannel == null) {
             System.err.println("Discord channel for " + name + " not found!");
         } else {
-            discordSubscription =
-                    discordChannel
-                            .getClient()
-                            .on(MessageCreateEvent.class)
-                            .filter(
-                                    event ->
-                                            event.getMessage()
-                                                    .getChannelId()
-                                                    .equals(discordChannel.getId()))
-                            .filter(
-                                    event ->
-                                            !event.getMessage()
-                                                    .getAuthor()
-                                                    .map(
-                                                            user ->
-                                                                    user.getId()
-                                                                            .equals(
-                                                                                    DiscordBotService
-                                                                                            .getInstance()
-                                                                                            .getBotId()))
-                                                    .orElse(false))
-                            .subscribe(this::handleIncomingDiscordMessage);
-            System.out.println(
-                    "Discord channel for " + name + " found: " + (discordChannel).getName());
+            discordSubscription = discordCoordinator.subscribeToDiscordMessages(discordChannel, this);
+            System.out.println("Discord channel for " + name + " found: " + discordChannel.getName());
         }
     }
 
@@ -191,48 +168,19 @@ public final strictfp class ChatRoom {
     }
 
     /**
-     * Sends a discord message into the discord channel associated with this tribal trouble chat
-     * room
+     * Sends a discord message into the discord channel associated with this tribal trouble chat room
      */
     public final void trySendDiscordMessage(String owner, String msg) {
-        try {
-            System.out.println("sending message to discord");
-            // Send the message to the discord channel if one is setup for this chat room
-            if (this.discordChannel != null) {
-                if (!msg.startsWith("<")) msg = formatChat(owner, msg);
-                this.discordChannel
-                        .createMessage(msg)
-                        .retry(3)
-                        .subscribe(
-                                success -> {}, // onNext - do nothing on success
-                                error ->
-                                        System.err.println(
-                                                "Failed to send Discord message: "
-                                                        + error.getMessage()));
-            }
-        } catch (Exception e) {
-            System.err.println(
-                    "Error sending discord message in chat room " + name + ": " + e.getMessage());
+        DiscordChatroomCoordinator discordCoordinator = DiscordBotService.getInstance().getChatroomCoordinator();
+        if (discordCoordinator != null) {
+            discordCoordinator.sendDiscordMessage(discordChannel, owner, msg);
         }
     }
 
     public final void trySendDiscordEmbed(EmbedCreateSpec embed) {
-        try {
-            // Send the embed to the discord channel if one is setup for this chat room
-            if (this.discordChannel != null) {
-                this.discordChannel
-                        .createMessage(embed)
-                        .retry(3)
-                        .subscribe(
-                                success -> {}, // onNext - do nothing on success
-                                error ->
-                                        System.err.println(
-                                                "Failed to send Discord embed: "
-                                                        + error.getMessage()));
-            }
-        } catch (Exception e) {
-            System.err.println(
-                    "Error sending discord embed in chat room " + name + ": " + e.getMessage());
+        DiscordChatroomCoordinator discordCoordinator = DiscordBotService.getInstance().getChatroomCoordinator();
+        if (discordCoordinator != null) {
+            discordCoordinator.sendDiscordEmbed(discordChannel, embed, name);
         }
     }
 
@@ -265,30 +213,5 @@ public final strictfp class ChatRoom {
         return name;
     }
 
-    /**
-     * Handles incoming Discord messages that have already been filtered to this channel and exclude
-     * bot messages
-     *
-     * @param event The message event containing the message details from discord
-     */
-    private void handleIncomingDiscordMessage(MessageCreateEvent event) {
-        System.out.println("Handling Discord message for chatroom " + name);
-
-        Message message = event.getMessage();
-        String content = message.getContent();
-
-        // Get the member to access server nickname/display name
-        event.getMember()
-                .ifPresent(
-                        member -> {
-                            String displayName =
-                                    member.getDisplayName(); // This gets nickname or username if
-                            // no nickname
-                            String author = "@" + displayName;
-
-                            System.out.println(
-                                    "Processing Discord message from " + author + ": " + content);
-                            sendMessage(author, content);
-                        });
-    }
+    // Discord message handling is now delegated to DiscordChatroomCoordinator
 }

@@ -30,6 +30,8 @@ public class DiscordBotService {
     private static DiscordBotService instance;
     private boolean isInitialized = false;
     private long serverId = -1;
+    private DiscordChatroomCoordinator chatroomCoordinator;
+    
     ArrayList<DiscordCommand> commands = new ArrayList<DiscordCommand>();
 
     public static DiscordBotService getInstance() {
@@ -58,13 +60,17 @@ public class DiscordBotService {
                             commands.add(new RegisterProfileToDiscordUserCommand());
                             commands.add(new WhoIsCommand());
                             commands.add(new OnlineCommand());
+                            chatroomCoordinator = new DiscordChatroomCoordinator();
                             registerCommands();
                             // deleteCommands();
                             return gateway.onDisconnect();
                         });
         isInitialized = true;
         login.subscribe();
+        
     }
+
+    
 
     public boolean isInitialized() {
         return isInitialized;
@@ -73,6 +79,10 @@ public class DiscordBotService {
     /** Gets the discord id associated with the bot user */
     Snowflake getBotId() {
         return bot_id;
+    }
+    /** Gets the chatroom coordinator for managing discord to tribal trouble chatrooms */
+    public DiscordChatroomCoordinator getChatroomCoordinator() {
+        return chatroomCoordinator;
     }
 
     private ArrayList<TextChannel> message_channels = new ArrayList<TextChannel>();
