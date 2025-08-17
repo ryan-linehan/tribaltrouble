@@ -23,13 +23,46 @@ $sql = "select * from games where player1_name='$n' or player2_name='$n' or play
 $response = array();
 $result = mysqli_query($conn, $sql);
 while ($row = mysqli_fetch_assoc($result)) {
+    $id = $row['id'];
+    $file_exists = file_exists("/var/games/$id");
     $humanDate = new HumanDate();
     $time = $row['time_stop'];
     $last = $humanDate->transform($time);
     if ($last == 'Today') {
         $date = Carbon::parse($time);
         $diff = $date->diffForHumans();
-        $last = "$last $diff";
+        $htime = "$last $diff";
+    }
+    $winner = $row['winner'];
+    $names = [];
+    $losers = [];
+    for ($i = 1; $i <= 8; $i++) {
+        $team = $row["player${i}_team"];
+        $name = $row["player${i}_name"];
+        if ($team == $winner) {
+            array_push($names, $name);
+        } elseif ($name != '') {
+            array_push($losers, $name);
+        }
+    }
+    if ($names != []) {
+        echo "<i>$htime</i>: ";
+        foreach ($names as $name) {
+            echo showPlayer($name);
+            echo " ";
+        }
+        echo " won";
+        if ($losers != []) {
+            echo " against ";
+            foreach ($losers as $name) {
+                echo showPlayer($name);
+                echo " ";
+            }
+        }
+        if ($file_exists) {
+            echo " <a href='watch.html#$id' target='_blank'>watch here</a>";
+        }
+        echo "</br>";
     }
 
     $row['htime'] = $last;

@@ -181,7 +181,7 @@
         }
 
         function processLocalTimes(container) {
-            (container || document).querySelectorAll('.localtime').forEach(function(el) {
+            (container || document).querySelectorAll('.localtime').forEach(function (el) {
                 var utcTime = el.getAttribute('data-time');
                 if (utcTime) {
                     var date = new Date(utcTime.replace(' ', 'T') + 'Z');
@@ -203,143 +203,19 @@
             });
         }
 
-        function playerURL(pname, offset) {
-            if (offset == null) {
-                offset = 0;
-            }
-            return "<a href='#player#" + pname + "#" + offset + "'>" + pname + "</a>";
-        }
-
-        let players_offset = 0;
-
-        function updatePlayers() {
-            if (players_offset < 0) {
-                players_offset = 0;
-            }
-            const scoresTable = document.getElementById("scorestable");
-            fetch("players.php?offset=" + players_offset)
-                .then((res) => res.json())
-                .then((res) => {
-                    if (res.length == 0) {
-                        players_offset -= 10;
-                        return;
-                    }
-                    const rows = scoresTable.getElementsByTagName('tr');
-                    while (rows.length > 1) {
-                        scoresTable.deleteRow(1);
-                    }
-                    for (var i = 0; i < res.length; i++) {
-                        let row = scoresTable.insertRow();
-                        let num = row.insertCell();
-                        let nick = row.insertCell();
-                        let wins = row.insertCell();
-                        let losses = row.insertCell();
-                        let rating = row.insertCell();
-                        num.className = 'pscore';
-                        num.innerHTML = (i + players_offset + 1);
-                        nick.className = 'pscore';
-                        nick.innerHTML = playerURL(res[i].nick);
-                        wins.className = 'pscore';
-                        wins.innerHTML = res[i].wins;
-                        losses.className = 'pscore';
-                        losses.innerHTML = res[i].losses;
-                        rating.className = 'pscore';
-                        rating.innerHTML = res[i].rating;
-                    }
-                    processLocalTimes(scoresTable);
-                });
-        }
-
-        function gameInfo(row) {
-            var all = '';
-            var winner = '';
-            var teams = new Map();
-            var winnerId = row['winner'];
-            for (var i = 1; i <= 6; i++) {
-                const name = row['player' + i + '_name'];
-                if (name == null) continue;
-                const team = row['player' + i + '_team'];
-                if (!teams.has(team)) {
-                    teams.set(team, "");
-                } else {
-                    teams.set(team, teams.get(team) + " / ");
-                }
-                teams.set(team, teams.get(team) + playerURL(name));
-                if (team == winnerId) {
-                    if (winner == '') {
-                        winner = playerURL(name);
-                    } else {
-                        winner += " / " + playerURL(name);
-                    }
-                }
-            }
-            var firstOne = true;
-            for (const text of teams.values()) {
-                if (!firstOne) {
-                    all += " VS ";
-                }
-                all += text;
-                firstOne = false;
-            }
-            return [all, winner];
-        }
-
-        let games_offset = 0;
-
-        function updateGames() {
-            if (games_offset < 0) {
-                games_offset = 0;
-            }
-            const gamesTable = document.getElementById("gamestable");
-            fetch("games.php?offset=" + games_offset)
-                .then((res) => res.json())
-                .then((res) => {
-                    if (res.length == 0) {
-                        games_offset -= 10;
-                        return;
-                    }
-                    const rows = gamesTable.getElementsByTagName('tr');
-                    while (rows.length > 1) {
-                        gamesTable.deleteRow(1);
-                    }
-                    for (var i = 0; i < res.length; i++) {
-                        let row = gamesTable.insertRow();
-                        let num = row.insertCell();
-                        let timePlayed = row.insertCell();
-                        let players = row.insertCell();
-                        let winner = row.insertCell();
-                        let link = row.insertCell();
-                        let info = gameInfo(res[i]);
-                        num.innerHTML = (i + games_offset + 1);
-                        num.className = 'pscore';
-                        if (res[i].status == 'completed') {
-                            timePlayed.innerHTML = res[i].htime;
-                        } else {
-                            timePlayed.innerHTML = 'Playing NOW!';
-                        }
-                        timePlayed.className = 'pscore';
-                        players.innerHTML = info[0];
-                        players.className = 'pscore';
-                        winner.innerHTML = info[1];
-                        winner.className = 'pscore';
-                        link.className = 'pscore';
-                        link.style.textAlign = 'center';
-                        if (res[i].watchable) {
-                            link.innerHTML = "<a href='watch.html#" + res[i].id + "' target='_blank'><img height='20' src='tv.png'/></a>";
-                        }
-                    }
-                    processLocalTimes(gamesTable);
-                });
-        }
-
         function showScores() {
             const about = document.getElementById("about");
             const download = document.getElementById("download");
             const scores = document.getElementById("scores");
             const contribute = document.getElementById("contribute");
             const player = document.getElementById("player");
-            updatePlayers();
-            updateGames();
+            const scoresTable = document.getElementById("scorestable");
+            fetch("highscores.php")
+                .then((res) => res.text())
+                .then((res) => {
+                    scorestable.innerHTML = res;
+                    processLocalTimes(scoresTable);
+                });
             about.style.display = "none";
             download.style.display = "none";
             scores.style.display = "block";
@@ -367,10 +243,12 @@
             const scores = document.getElementById("scores");
             const contribute = document.getElementById("contribute");
             const player = document.getElementById("player");
-            const gamesOfName = document.getElementById("games-of-name");
-            const gamesTable = document.getElementById("player-games");
-            updatePlayers();
-            updateGames();
+            const playerTable = document.getElementById("playertable");
+            fetch("gamesOf.php?name=" + name)
+                .then((res) => res.text())
+                .then((res) => {
+                    playerTable.innerHTML = res;
+                });
             about.style.display = "none";
             download.style.display = "none";
             scores.style.display = "block";
