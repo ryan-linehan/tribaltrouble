@@ -15,11 +15,8 @@ if (!$conn) {
     die('Connection failed: ' . mysqli_connect_error());
 }
 
-$n = $_GET['name'];
 $offset = (int)$_GET['offset'];
-
-$sql = "select * from games where player1_name='$n' or player2_name='$n' or player3_name='$n' or player4_name='$n' or player5_name='$n' or player6_name='$n' and status='completed' order by time_start desc limit 10 offset $offset";
-
+$sql = "SELECT * from games where status='completed' or status='started' order by time_start desc limit 10 offset $offset";
 $response = array();
 $result = mysqli_query($conn, $sql);
 while ($row = mysqli_fetch_assoc($result)) {
