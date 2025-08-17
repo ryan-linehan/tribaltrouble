@@ -8,6 +8,7 @@ import com.oddlabs.matchmaking.LoginDetails;
 import com.oddlabs.matchmaking.Participant;
 import com.oddlabs.matchmaking.Profile;
 import com.oddlabs.matchmaking.RankingEntry;
+import com.oddlabs.matchserver.db_models.VersusMatchupModel;
 import com.oddlabs.matchserver.db_models.VersusMatchupResultModel;
 import com.oddlabs.util.CryptUtils;
 import com.oddlabs.util.DBUtils;
@@ -891,7 +892,7 @@ public final strictfp class DBInterface {
                         + " AND gp.Name = ?"
                         + " AND gp2.Name = ?"
                         + " and gp.Team <> gp2.Team"
-                        + " order by gp.GameId;";
+                        + " order by gp.GameId DESC;";
         try {
             PreparedStatement stmt = DBUtils.createStatement(query);
             stmt.setString(1, player1);
@@ -900,6 +901,7 @@ public final strictfp class DBInterface {
             int p1Wins = 0;
             int p2Wins = 0;
             int neitherWins = 0;
+            ArrayList<VersusMatchupModel> recentMatchups = new ArrayList<>();
             while (result.next()) {
                 String vsResult = result.getString("vsResult").trim();
                 if (vsResult.equals("Player1")) {
@@ -909,11 +911,35 @@ public final strictfp class DBInterface {
                 } else {
                     neitherWins++;
                 }
+                if (!vsResult.equals("Neither") && recentMatchups.size() < 10) {
+                    int gameId = result.getInt("id");
+                    String player1Name = result.getString("player1_name");
+                    String player2Name = result.getString("player2_name");
+                    String winnerName = null;
+                    if (vsResult.equals("Player1")) {
+                        winnerName = player1Name;
+                    } else if (vsResult.equals("Player2")) {
+                        winnerName = player2Name;
+                    }
+                    String gameName = result.getString("name");
+                    String mapSeed = result.getString("mapcode");
+                    java.sql.Timestamp startTime = result.getTimestamp("time_start");
+                    recentMatchups.add(
+                            new com.oddlabs.matchserver.db_models.VersusMatchupModel(
+                                    player1Name,
+                                    player2Name,
+                                    winnerName,
+                                    gameId,
+                                    gameName,
+                                    mapSeed,
+                                    startTime));
+                }
             }
             System.out.println("p1 wins: " + p1Wins);
             System.out.println("p2 wins: " + p2Wins);
             System.out.println("neither wins: " + neitherWins);
-            return new VersusMatchupResultModel(player1, player2, p1Wins, p2Wins, neitherWins);
+            return new VersusMatchupResultModel(
+                    player1, player2, p1Wins, p2Wins, neitherWins, recentMatchups);
         } catch (Exception e) {
             System.out.println("err" + e.getMessage());
         }

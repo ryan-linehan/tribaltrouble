@@ -21,7 +21,7 @@ public class OnlineCommand extends DiscordCommand {
     }
 
     @Override
-    public Mono<Void> executeCommand(ChatInputInteractionEvent event) {        
+    public Mono<Void> executeCommand(ChatInputInteractionEvent event) {
         String[] onlineProfiles = DBInterface.getOnlineProfiles();
         int totalOnline = onlineProfiles.length;
         EmbedCreateSpec.Builder builder =

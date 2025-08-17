@@ -1,7 +1,9 @@
 package com.oddlabs.matchserver.discord.commands;
 
+
 import com.oddlabs.matchmaking.Profile;
 import com.oddlabs.matchserver.DBInterface;
+import com.oddlabs.matchserver.db_models.VersusMatchupModel;
 import com.oddlabs.matchserver.db_models.VersusMatchupResultModel;
 
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
@@ -51,7 +53,7 @@ public class MatchupCommand extends DiscordCommand {
                 DBInterface.getMatchupStats(player1, player2, false);
         EmbedCreateSpec.Builder builder =
                 EmbedCreateSpec.builder()
-                        .color(Color.RED)
+                        .color(Color.ORANGE)
                         .title(String.format("%s vs %s", player1, player2));
         int totalGames = matchupResult.getTotalGamesPlayed();
         builder.addField("Games played: ", Integer.toString(totalGames), false);
@@ -66,6 +68,17 @@ public class MatchupCommand extends DiscordCommand {
         float winRate = (float) matchupResult.getPlayer1Wins() / totalGames * 100;
         builder.addField(
                 String.format("Win rate vs %s", player2), String.format("%.2f%%", winRate), false);
+        builder.addField("\u200B", "\u200B", false);
+        builder.addField("Recent Matchups", "", false);
+        int matchupNum = 1;
+        // TODO: Add date logic so we can tell WHEN the matchup was
+        for (VersusMatchupModel matchup : matchupResult.getRecentMatchups()) {
+            String field_value = String.format("Winner: %s", matchup.getWinner());
+            if (matchup.getGameReplayUrl() != null) {
+                field_value += String.format("\n[Watch Replay](%s)", matchup.getGameReplayUrl());
+            }
+            builder.addField(matchupNum + ". " + matchup.getGameName(), field_value, false);
+        }
         return event.reply().withEmbeds(builder.build()).retry(3);
     }
 

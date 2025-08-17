@@ -7,6 +7,7 @@ import com.oddlabs.matchmaking.Participant;
 import com.oddlabs.matchmaking.PlayerTypes;
 
 import discord4j.core.spec.EmbedCreateSpec;
+import discord4j.rest.util.Color;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -126,10 +127,15 @@ public final strictfp class TimestampedGameSession {
                                         + ": all joined game "
                                         + getParticipantStates());
 
-                // saving rated player info (someone could lose and delete a profile before the game
+                // saving rated player info (someone could lose and delete a profile before the
+                // game
                 // ends)
                 all_5_wins = true;
                 player_ratings = new int[participants.length];
+
+                // Add game started here
+                SendGameStartedDiscordEmbed();
+
                 for (int i = 0; i < participants.length; i++) {
                     String nick = participants[i].getNick();
                     try {
@@ -496,12 +502,17 @@ public final strictfp class TimestampedGameSession {
 
         Map<Integer, String> playerData = this.getTeamLineup(session.getPlayerInfo());
 
+        String replayUrl = getReplayUrl(database_id);
+        String description =
+                getFormattedHumanNicks(session.getPlayerInfo()) + " lost playing against AI";
+        if (replayUrl != null) {
+            description += String.format("\n[Watch here](%s)", replayUrl);
+        }
         discord4j.core.spec.EmbedCreateSpec.Builder builder =
                 EmbedCreateSpec.builder()
-                        .title(game_name + " ended")
-                        .description(
-                                getFormattedHumanNicks(session.getPlayerInfo())
-                                        + " lost playing against AI");
+                        .color(Color.GREEN)
+                        .title(game_name)
+                        .description(description);
 
         // Add fields for each team
         for (Map.Entry<Integer, String> entry : playerData.entrySet()) {
@@ -527,10 +538,16 @@ public final strictfp class TimestampedGameSession {
 
         Map<Integer, String> playerData = this.getTeamLineup(session.getPlayerInfo());
 
+        String replayUrl = getReplayUrl(database_id);
+        String description = "Team " + (winning_team_index + 1) + " won";
+        if (replayUrl != null) {
+            description += String.format("\n[Watch here](%s)", replayUrl);
+        }
         discord4j.core.spec.EmbedCreateSpec.Builder builder =
                 EmbedCreateSpec.builder()
-                        .title(game_name + " ended")
-                        .description("Team " + (winning_team_index + 1) + " won");
+                        .color(Color.GREEN)
+                        .title(game_name)
+                        .description(description);
 
         // Add fields for each team
         for (Map.Entry<Integer, String> entry : playerData.entrySet()) {
@@ -552,11 +569,16 @@ public final strictfp class TimestampedGameSession {
 
         Map<Integer, String> playerData = this.getTeamLineup(session.getPlayerInfo());
 
+        String replayUrl = getReplayUrl(database_id);
+        String description = "Team " + (winning_team_index + 1) + " won playing against AI";
+        if (replayUrl != null) {
+            description += String.format("\n[Watch here](%s)", replayUrl);
+        }
         discord4j.core.spec.EmbedCreateSpec.Builder builder =
                 EmbedCreateSpec.builder()
-                        .title(game_name + " ended")
-                        .description(
-                                "Team " + (winning_team_index + 1) + " won playing against AI");
+                        .color(Color.GREEN)
+                        .title(game_name)
+                        .description(description);
 
         // Add fields for each team
         for (Map.Entry<Integer, String> entry : playerData.entrySet()) {
@@ -575,13 +597,17 @@ public final strictfp class TimestampedGameSession {
         if (!DiscordBotService.getInstance().isInitialized()) return;
         GameData data = DBInterface.getGame(database_id, true);
         String game_name = data.getName();
-
         Map<Integer, String> playerData = this.getTeamLineup(session.getPlayerInfo());
-
+        String replayUrl = getReplayUrl(database_id);
+        String description = "The game was invalidated. Someone may have cheated!";
+        if (replayUrl != null) {
+            description += String.format("\n[Watch here](%s)", replayUrl);
+        }
         discord4j.core.spec.EmbedCreateSpec.Builder builder =
                 EmbedCreateSpec.builder()
-                        .title(game_name + " ended")
-                        .description("The game was invalidated. Someone may have cheated!");
+                        .color(Color.RED)
+                        .title(game_name)
+                        .description(description);
 
         // Add fields for each team
         for (Map.Entry<Integer, String> entry : playerData.entrySet()) {
@@ -593,5 +619,40 @@ public final strictfp class TimestampedGameSession {
         EmbedCreateSpec embed = builder.build();
 
         ((ChatRoom) ChatRoom.getChatRooms().values().iterator().next()).trySendDiscordEmbed(embed);
+    }
+
+    private void SendGameStartedDiscordEmbed() {
+        if (!DiscordBotService.getInstance().isInitialized()) return;
+        GameData data = DBInterface.getGame(database_id, false);
+        String game_name = data.getName();
+
+        Map<Integer, String> playerData = this.getTeamLineup(session.getPlayerInfo());
+
+        String replayUrl = getReplayUrl(database_id);
+        String description = "Game started!";
+        if (replayUrl != null) {
+            description += String.format("\n[Watch here](%s)", replayUrl);
+        }
+        discord4j.core.spec.EmbedCreateSpec.Builder builder =
+                EmbedCreateSpec.builder().title(game_name).description(description);
+
+        // Add fields for each team
+        for (Map.Entry<Integer, String> entry : playerData.entrySet()) {
+            int teamId = entry.getKey();
+            String playerList = entry.getValue();
+            builder.addField("Team " + (teamId + 1), playerList, false);
+        }
+
+        EmbedCreateSpec embed = builder.build();
+
+        ((ChatRoom) ChatRoom.getChatRooms().values().iterator().next()).trySendDiscordEmbed(embed);
+    }
+
+    private String getReplayUrl(int game_id) {
+        File spectatorFile = new File("/var/games/" + game_id);
+        boolean exists = spectatorFile.exists();
+        String domain = System.getenv("TT_WEBSITE_DOMAIN");
+        if (domain == null) domain = "tribaltrouble.org";
+        return true ? String.format("https://%s/watch.html#%d", domain, game_id) : null;
     }
 }
