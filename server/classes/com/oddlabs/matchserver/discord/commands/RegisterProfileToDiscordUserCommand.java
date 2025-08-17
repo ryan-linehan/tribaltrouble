@@ -55,7 +55,7 @@ public class RegisterProfileToDiscordUserCommand extends DiscordCommand {
                                     profile_name);
                             event.createFollowup(
                                             "No response from tribal trouble user. Profile"
-                                                + " registration timed out.")
+                                                    + " registration timed out.")
                                     .then()
                                     .subscribe();
                             System.out.println(
@@ -90,11 +90,15 @@ public class RegisterProfileToDiscordUserCommand extends DiscordCommand {
                         .map(ApplicationCommandInteractionOptionValue::asString)
                         .orElse(null);
         if (profileToRegisterName == null)
-            return event.createFollowup("Unable to retrieve profile name to register.").withEphemeral(true).then();
+            return event.createFollowup("Unable to retrieve profile name to register.")
+                    .withEphemeral(true)
+                    .then();
         profileToRegisterName = profileToRegisterName.toLowerCase();
         long discord_user_id = event.getInteraction().getUser().getId().asLong();
         if (DBInterface.isProfileRegisteredToDiscord(profileToRegisterName)) {
-            return event.createFollowup("Profile is already registered to a Discord user.").withEphemeral(true).then();
+            return event.createFollowup("Profile is already registered to a Discord user.")
+                    .withEphemeral(true)
+                    .then();
         }
         com.oddlabs.matchserver.Client client =
                 (com.oddlabs.matchserver.Client)
@@ -128,7 +132,7 @@ public class RegisterProfileToDiscordUserCommand extends DiscordCommand {
                             "Sent registration request to profile: "
                                     + profileToRegisterName
                                     + ". Please respond in-game.")
-                        .withEphemeral(true)
+                    .withEphemeral(true)
                     .then();
         } else {
             // Handle not found

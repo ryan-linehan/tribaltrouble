@@ -1118,6 +1118,54 @@ public final strictfp class DBInterface {
         return false;
     }
 
+    public static final long getDiscordUserIdForProfile(String nick) {
+        try {
+            PreparedStatement stmt =
+                    DBUtils.createStatement(
+                            "SELECT discord_id FROM discord_to_profiles WHERE nick = ?");
+            try {
+                stmt.setString(1, nick);
+                ResultSet rs = stmt.executeQuery();
+                if (rs.next()) {
+                    return rs.getLong("discord_id");
+                }
+            } finally {
+                stmt.getConnection().close();
+            }
+        } catch (SQLException e) {
+            System.out.println("Exception: " + e);
+            MatchmakingServer.getLogger()
+                    .throwing(DBInterface.class.getName(), "getDiscordUserIdForProfile", e);
+        }
+        return -1L;
+    }
+
+    public static final String[] getProfilesRegisteredToDiscordUser(long discord_user_id) {
+        try {
+            PreparedStatement stmt =
+                    DBUtils.createStatement(
+                            "SELECT nick FROM discord_to_profiles WHERE discord_id = ?");
+            try {
+                stmt.setLong(1, discord_user_id);
+                ResultSet result = stmt.executeQuery();
+                List<String> nicks = new ArrayList<String>();
+                while (result.next()) {
+                    String nick = result.getString("nick").trim();
+                    nicks.add(nick);
+                }
+
+                return nicks.toArray(new String[0]);
+            } finally {
+                stmt.getConnection().close();
+            }
+        } catch (Exception e) {
+            System.out.println("Exception: " + e);
+            MatchmakingServer.getLogger()
+                    .throwing(DBInterface.class.getName(), "registerProfileToDiscordUser", e);
+        }
+        return new String[0];
+    }
+
     public static final void registerProfileToDiscordUser(String nick, long discord_user_id) {
         try {
             PreparedStatement stmt =
