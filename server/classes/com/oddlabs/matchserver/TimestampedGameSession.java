@@ -524,8 +524,15 @@ public final strictfp class TimestampedGameSession {
         }
 
         EmbedCreateSpec embed = builder.build();
-
-        ((ChatRoom) ChatRoom.getChatRooms().values().iterator().next()).trySendDiscordEmbed(embed);
+        ChatRoom chatRoom =
+                (ChatRoom)
+                        ChatRoom.getChatRooms()
+                                .values()
+                                .iterator()
+                                .next(); // Get any chatroom (for now)
+        DiscordBotService.getInstance()
+                .getChatroomCoordinator()
+                .ifPresent(coordinator -> coordinator.sendDiscordEmbed(chatRoom, embed));
     }
 
     /**
@@ -559,8 +566,15 @@ public final strictfp class TimestampedGameSession {
         }
 
         EmbedCreateSpec embed = builder.build();
-
-        ((ChatRoom) ChatRoom.getChatRooms().values().iterator().next()).trySendDiscordEmbed(embed);
+        ChatRoom chatRoom =
+                (ChatRoom)
+                        ChatRoom.getChatRooms()
+                                .values()
+                                .iterator()
+                                .next(); // Get any chatroom (for now)
+        DiscordBotService.getInstance()
+                .getChatroomCoordinator()
+                .ifPresent(coordinator -> coordinator.sendDiscordEmbed(chatRoom, embed));
     }
 
     /** Sends a Discord embed message when humans win against bots. */
@@ -591,7 +605,15 @@ public final strictfp class TimestampedGameSession {
 
         EmbedCreateSpec embed = builder.build();
 
-        ((ChatRoom) ChatRoom.getChatRooms().values().iterator().next()).trySendDiscordEmbed(embed);
+        ChatRoom chatRoom =
+                (ChatRoom)
+                        ChatRoom.getChatRooms()
+                                .values()
+                                .iterator()
+                                .next(); // Get any chatroom (for now)
+        DiscordBotService.getInstance()
+                .getChatroomCoordinator()
+                .ifPresent(coordinator -> coordinator.sendDiscordEmbed(chatRoom, embed));
     }
 
     /** Sends a Discord embed message when the game was invalidated. */
@@ -620,7 +642,15 @@ public final strictfp class TimestampedGameSession {
 
         EmbedCreateSpec embed = builder.build();
 
-        ((ChatRoom) ChatRoom.getChatRooms().values().iterator().next()).trySendDiscordEmbed(embed);
+        ChatRoom chatRoom =
+                (ChatRoom)
+                        ChatRoom.getChatRooms()
+                                .values()
+                                .iterator()
+                                .next(); // Get any chatroom (for now)
+        DiscordBotService.getInstance()
+                .getChatroomCoordinator()
+                .ifPresent(coordinator -> coordinator.sendDiscordEmbed(chatRoom, embed));
     }
 
     private void SendGameStartedDiscordEmbed() {
@@ -647,7 +677,15 @@ public final strictfp class TimestampedGameSession {
 
         EmbedCreateSpec embed = builder.build();
 
-        ((ChatRoom) ChatRoom.getChatRooms().values().iterator().next()).trySendDiscordEmbed(embed);
+        ChatRoom chatRoom =
+                (ChatRoom)
+                        ChatRoom.getChatRooms()
+                                .values()
+                                .iterator()
+                                .next(); // Get any chatroom (for now)
+        DiscordBotService.getInstance()
+                .getChatroomCoordinator()
+                .ifPresent(coordinator -> coordinator.sendDiscordEmbed(chatRoom, embed));
     }
 
     private String getReplayUrl(int game_id) {

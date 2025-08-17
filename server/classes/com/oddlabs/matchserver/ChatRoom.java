@@ -4,15 +4,7 @@ import com.oddlabs.matchmaking.ChatRoomUser;
 import com.oddlabs.matchmaking.MatchmakingClientInterface;
 import com.oddlabs.matchmaking.MatchmakingServerInterface;
 import com.oddlabs.matchserver.discord.DiscordBotService;
-import com.oddlabs.matchserver.discord.DiscordChatroomCoordinator;
 import com.oddlabs.matchserver.models.ChatRoomMessageModel;
-
-import discord4j.core.event.domain.message.MessageCreateEvent;
-import discord4j.core.object.entity.Message;
-import discord4j.core.object.entity.channel.TextChannel;
-import discord4j.core.spec.EmbedCreateSpec;
-
-import reactor.core.Disposable;
 
 import java.util.*;
 
@@ -24,19 +16,15 @@ public final strictfp class ChatRoom {
     private int messageCount = 0;
     private final Set<Client> users = new HashSet();
     private final String name;
-    private TextChannel discordChannel = null;
-    private Disposable discordSubscription = null;
 
     public ChatRoom(String name) {
         this.name = name;
-        DiscordChatroomCoordinator discordCoordinator = DiscordBotService.getInstance().getChatroomCoordinator();
-        discordChannel = discordCoordinator != null ? discordCoordinator.getDiscordChannelForRoom(name) : null;
-        if (discordChannel == null) {
-            System.err.println("Discord channel for " + name + " not found!");
-        } else {
-            discordSubscription = discordCoordinator.subscribeToDiscordMessages(discordChannel, this);
-            System.out.println("Discord channel for " + name + " found: " + discordChannel.getName());
-        }
+        DiscordBotService.getInstance()
+                .getChatroomCoordinator()
+                .ifPresent(
+                        x -> {
+                            x.AddChatroom(this);
+                        });
     }
 
     public static final Map getChatRooms() {
@@ -66,23 +54,16 @@ public final strictfp class ChatRoom {
         }
     }
 
-    /**
-     * Sends any messages already in the chat room to a client that just joined
-     */
+    /** Sends any messages already in the chat room to a client that just joined */
     private static final void sendExistingMessagesToClient(Client client, ChatRoom room) {
         // Send existing messages to the new client
         for (int j = 0; j < room.messageCount; j++) {
-            int index =
-                    (room.currentIndex - room.messageCount + j + MAX_MESSAGES) % MAX_MESSAGES;
+            int index = (room.currentIndex - room.messageCount + j + MAX_MESSAGES) % MAX_MESSAGES;
             ChatRoomMessageModel message = room.messages[index];
             if (message != null) {
                 System.out.println(
-                        "Sending message to client: "
-                                + message.author
-                                + ": "
-                                + message.message);
-                client.getClientInterface()
-                        .receiveChatRoomMessage(message.author, message.message);
+                        "Sending message to client: " + message.author + ": " + message.message);
+                client.getClientInterface().receiveChatRoomMessage(message.author, message.message);
             }
         }
     }
@@ -141,10 +122,6 @@ public final strictfp class ChatRoom {
         }
     }
 
-    private String formatChat(String owner, String message) {
-        return "<" + owner + "> " + message;
-    }
-
     /**
      * Sends a message to all connected users in the chat room.
      *
@@ -167,23 +144,6 @@ public final strictfp class ChatRoom {
         }
     }
 
-    /**
-     * Sends a discord message into the discord channel associated with this tribal trouble chat room
-     */
-    public final void trySendDiscordMessage(String owner, String msg) {
-        DiscordChatroomCoordinator discordCoordinator = DiscordBotService.getInstance().getChatroomCoordinator();
-        if (discordCoordinator != null) {
-            discordCoordinator.sendDiscordMessage(discordChannel, owner, msg);
-        }
-    }
-
-    public final void trySendDiscordEmbed(EmbedCreateSpec embed) {
-        DiscordChatroomCoordinator discordCoordinator = DiscordBotService.getInstance().getChatroomCoordinator();
-        if (discordCoordinator != null) {
-            discordCoordinator.sendDiscordEmbed(discordChannel, embed, name);
-        }
-    }
-
     public final Set getUsers() {
         return users;
     }
@@ -193,25 +153,13 @@ public final strictfp class ChatRoom {
             users.remove(client);
             if (users.size() == 0) {
                 chat_rooms.remove(getName());
-                cleanup();
             } else {
                 sendUsers();
             }
         }
     }
 
-    /** Cleanup method to dispose of Discord subscription and prevent memory leaks */
-    public final void cleanup() {
-        if (discordSubscription != null && !discordSubscription.isDisposed()) {
-            System.out.println("Disposing Discord subscription for chat room " + name);
-            discordSubscription.dispose();
-            discordSubscription = null;
-        }
-    }
-
     public final String getName() {
         return name;
     }
-
-    // Discord message handling is now delegated to DiscordChatroomCoordinator
 }

@@ -9,6 +9,7 @@ import com.oddlabs.matchmaking.MatchmakingServerInterface;
 import com.oddlabs.matchmaking.Participant;
 import com.oddlabs.matchmaking.Profile;
 import com.oddlabs.matchmaking.RankingEntry;
+import com.oddlabs.matchserver.discord.DiscordBotService;
 import com.oddlabs.matchserver.discord.commands.RegisterProfileToDiscordUserCommand;
 import com.oddlabs.net.ARMIEvent;
 import com.oddlabs.net.ARMIInterfaceMethods;
@@ -592,7 +593,12 @@ public final strictfp class Client implements MatchmakingServerInterface, Connec
                                 + "\".";
                 server.getChatLogger().info(formatted_message);
                 current_room.sendMessage("Server", formatted_message);
-                current_room.trySendDiscordMessage("Server", formatted_message);
+                DiscordBotService.getInstance()
+                        .getChatroomCoordinator()
+                        .ifPresent(
+                                coordinator ->
+                                        coordinator.sendDiscordMessage(
+                                                current_room, "Server", formatted_message));
             }
         }
     }
@@ -712,7 +718,14 @@ public final strictfp class Client implements MatchmakingServerInterface, Connec
             String formatted_message = formatChat(msg);
             server.getChatLogger().info(formatted_message);
             current_room.sendMessage(getProfile().getNick(), msg);
-            current_room.trySendDiscordMessage(getProfile().getNick(), formatted_message);
+            DiscordBotService.getInstance()
+                    .getChatroomCoordinator()
+                    .ifPresent(
+                            coordinator ->
+                                    coordinator.sendDiscordMessage(
+                                            current_room,
+                                            getProfile().getNick(),
+                                            formatted_message));
         }
     }
 
