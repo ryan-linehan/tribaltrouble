@@ -653,6 +653,6 @@ public final strictfp class TimestampedGameSession {
         boolean exists = spectatorFile.exists();
         String domain = System.getenv("TT_WEBSITE_DOMAIN");
         if (domain == null) domain = "tribaltrouble.org";
-        return true ? String.format("https://%s/watch.html#%d", domain, game_id) : null;
+        return exists ? String.format("https://%s/watch.html#%d", domain, game_id) : null;
     }
 }
