@@ -151,7 +151,7 @@ public final strictfp class NetworkSelector {
         if (deterministic.log(selector != null && selector.select(next_timeout) > 0)) doTick();
     }
 
-    /** Blocks until the network traffic is recieved */
+    /** Blocks until the network traffic is received */
     public final void tickBlocking() throws IOException {
         tickBlocking(0);
     }

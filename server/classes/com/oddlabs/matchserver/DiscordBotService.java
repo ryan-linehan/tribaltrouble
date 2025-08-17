@@ -3,6 +3,7 @@ package com.oddlabs.matchserver;
 import com.oddlabs.matchserver.discord.commands.DiscordCommand;
 import com.oddlabs.matchserver.discord.commands.LeaderboardsCommand;
 import com.oddlabs.matchserver.discord.commands.MatchupCommand;
+import com.oddlabs.matchserver.discord.commands.RegisterProfileToDiscordUserCommand;
 
 import discord4j.common.util.Snowflake;
 import discord4j.core.DiscordClient;
@@ -52,6 +53,7 @@ public class DiscordBotService {
                             setupEventHandlers(serverId);
                             commands.add(new LeaderboardsCommand());
                             commands.add(new MatchupCommand());
+                            commands.add(new RegisterProfileToDiscordUserCommand());
                             registerCommands();
                             // deleteCommands();
                             return gateway.onDisconnect();

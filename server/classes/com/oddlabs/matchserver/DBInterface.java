@@ -1096,6 +1096,47 @@ public final strictfp class DBInterface {
         }
     }
 
+    public static final boolean isProfileRegisteredToDiscord(String nick) {
+        try {
+            PreparedStatement stmt =
+                    DBUtils.createStatement(
+                            "SELECT COUNT(*) FROM discord_to_profiles WHERE nick = ?");
+            try {
+                stmt.setString(1, nick);
+                ResultSet rs = stmt.executeQuery();
+                if (rs.next()) {
+                    return rs.getInt(1) > 0;
+                }
+            } finally {
+                stmt.getConnection().close();
+            }
+        } catch (SQLException e) {
+            System.out.println("Exception: " + e);
+            MatchmakingServer.getLogger()
+                    .throwing(DBInterface.class.getName(), "isProfileRegistered", e);
+        }
+        return false;
+    }
+
+    public static final void registerProfileToDiscordUser(String nick, long discord_user_id) {
+        try {
+            PreparedStatement stmt =
+                    DBUtils.createStatement(
+                            "INSERT INTO discord_to_profiles (nick, discord_id) VALUES (?, ?)");
+            try {
+                stmt.setString(1, nick);
+                stmt.setLong(2, discord_user_id);
+                int row_count = stmt.executeUpdate();
+            } finally {
+                stmt.getConnection().close();
+            }
+        } catch (Exception e) {
+            System.out.println("Exception: " + e);
+            MatchmakingServer.getLogger()
+                    .throwing(DBInterface.class.getName(), "registerProfileToDiscordUser", e);
+        }
+    }
+
     public static final void profileOnline(String nick) {
         MatchmakingServer.getLogger().info("profileOnline '" + nick + "'");
         try {

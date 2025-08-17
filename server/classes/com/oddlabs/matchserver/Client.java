@@ -9,6 +9,7 @@ import com.oddlabs.matchmaking.MatchmakingServerInterface;
 import com.oddlabs.matchmaking.Participant;
 import com.oddlabs.matchmaking.Profile;
 import com.oddlabs.matchmaking.RankingEntry;
+import com.oddlabs.matchserver.discord.commands.RegisterProfileToDiscordUserCommand;
 import com.oddlabs.net.ARMIEvent;
 import com.oddlabs.net.ARMIInterfaceMethods;
 import com.oddlabs.net.AbstractConnection;
@@ -651,6 +652,11 @@ public final strictfp class Client implements MatchmakingServerInterface, Connec
             }
             Client client = (Client) active_clients.get(nick.toLowerCase());
             if (client != null) {
+                // Only if messaging themselves
+                if (getProfile().getNick().toLowerCase().equals(nick.toLowerCase())) {
+                    checkForRegisterProfileToDiscordResponse(nick, msg);
+                }
+
                 server.getChatLogger().info("To " + nick + ": " + formatChat(msg));
                 client.getClientInterface().receivePrivateMessage(getProfile().getNick(), msg);
                 if (client != this) {
@@ -658,6 +664,18 @@ public final strictfp class Client implements MatchmakingServerInterface, Connec
                 }
             } else {
                 getClientInterface().error(MatchmakingClientInterface.CHAT_ERROR_NO_SUCH_NICK);
+            }
+        }
+    }
+
+    private void checkForRegisterProfileToDiscordResponse(String nick, String msg) {
+        if (RegisterProfileToDiscordUserCommand.processingProfiles.containsKey(
+                nick.toLowerCase())) {
+            msg = msg.trim().toLowerCase();
+            if (msg.equals("/y") || msg.equals("/yes")) {
+                RegisterProfileToDiscordUserCommand.processingProfiles
+                        .get(nick.toLowerCase())
+                        .run();
             }
         }
     }
@@ -696,6 +714,10 @@ public final strictfp class Client implements MatchmakingServerInterface, Connec
             current_room.sendMessage(getProfile().getNick(), msg);
             current_room.trySendDiscordMessage(getProfile().getNick(), formatted_message);
         }
+    }
+
+    public static Map<String, Client> getActiveClients() {
+        return active_clients;
     }
 
     public final void leaveRoom() {
