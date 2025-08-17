@@ -1,6 +1,5 @@
 package com.oddlabs.matchserver.discord.commands;
 
-
 import com.oddlabs.matchmaking.Profile;
 import com.oddlabs.matchserver.DBInterface;
 import com.oddlabs.matchserver.db_models.VersusMatchupModel;
