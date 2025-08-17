@@ -3,6 +3,7 @@ package com.oddlabs.matchserver;
 import com.oddlabs.matchmaking.ChatRoomUser;
 import com.oddlabs.matchmaking.MatchmakingClientInterface;
 import com.oddlabs.matchmaking.MatchmakingServerInterface;
+import com.oddlabs.matchserver.discord.DiscordBotService;
 import com.oddlabs.matchserver.models.ChatRoomMessageModel;
 
 import discord4j.core.event.domain.message.MessageCreateEvent;

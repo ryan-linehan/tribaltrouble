@@ -3,6 +3,7 @@ package com.oddlabs.matchserver;
 import com.oddlabs.event.Deterministic;
 import com.oddlabs.event.NotDeterministic;
 import com.oddlabs.matchmaking.MatchmakingServerInterface;
+import com.oddlabs.matchserver.discord.DiscordBotService;
 import com.oddlabs.net.AbstractConnection;
 import com.oddlabs.net.AbstractConnectionListener;
 import com.oddlabs.net.ConnectionListener;

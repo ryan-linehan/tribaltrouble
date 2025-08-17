@@ -1,4 +1,4 @@
-package com.oddlabs.matchserver;
+package com.oddlabs.matchserver.discord;
 
 import com.oddlabs.matchserver.discord.commands.DiscordCommand;
 import com.oddlabs.matchserver.discord.commands.LeaderboardsCommand;
@@ -191,7 +191,7 @@ public class DiscordBotService {
 
     /**
      * Creates or validates that each command in {@link
-     * com.oddlabs.matchserver.DiscordBotService#commands} is registered with Discord.
+     * com.oddlabs.matchserver.discord.DiscordBotService#commands} is registered with Discord.
      */
     private void registerCommands() {
         gateway.getRestClient()
