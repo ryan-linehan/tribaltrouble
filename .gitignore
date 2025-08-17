@@ -1,6 +1,8 @@
 .svn
 build
 /bin/
+.project
+.classpath
 server/logs
 !server/logs/donot-delete.txt
 ivy_lib/*
