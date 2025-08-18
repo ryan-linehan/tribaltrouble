@@ -23,7 +23,7 @@ public final strictfp class ChatRoom {
                 .getChatroomCoordinator()
                 .ifPresent(
                         x -> {
-                            x.AddChatroom(this);
+                            x.addChatroom(this);
                         });
     }
 
@@ -152,6 +152,12 @@ public final strictfp class ChatRoom {
         if (users.contains(client)) {
             users.remove(client);
             if (users.size() == 0) {
+                DiscordBotService.getInstance()
+                        .getChatroomCoordinator()
+                        .ifPresent(
+                                x -> {
+                                    x.removeChatroom(this);
+                                });
                 chat_rooms.remove(getName());
             } else {
                 sendUsers();

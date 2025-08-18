@@ -23,7 +23,7 @@ public class DiscordChatroomCoordinator {
      *
      * @param chatroom
      */
-    public void AddChatroom(ChatRoom chatroom) {
+    public void addChatroom(ChatRoom chatroom) {
         TextChannel discordChannel = getDiscordChannelForRoom(chatroom.getName());
         if (discordChannel == null) {
             LogDebug("Discord channel for " + chatroom.getName() + " not found!");
@@ -44,7 +44,7 @@ public class DiscordChatroomCoordinator {
      *
      * @param chatroom
      */
-    public void RemoveChatroom(ChatRoom chatroom) {
+    public void removeChatroom(ChatRoom chatroom) {
         discordMessageSubscriptions.get(chatroom).dispose();
         discordMessageSubscriptions.remove(chatroom);
         chatRoomChannels.remove(chatroom);
