@@ -22,6 +22,7 @@ import reactor.core.publisher.Mono;
 
 import java.util.ArrayList;
 import java.util.Map;
+import java.util.Optional;
 
 public class DiscordBotService {
 
@@ -78,9 +79,12 @@ public class DiscordBotService {
         return bot_id;
     }
 
-    /** Gets the chatroom coordinator for managing discord to tribal trouble chatrooms */
-    public DiscordChatroomCoordinator getChatroomCoordinator() {
-        return chatroomCoordinator;
+    /**
+     * Gets the chatroom coordinator for managing discord to tribal trouble chatrooms. Returns
+     * Optional.empty() if not initialized.
+     */
+    public Optional<DiscordChatroomCoordinator> getChatroomCoordinator() {
+        return Optional.ofNullable(chatroomCoordinator);
     }
 
     private ArrayList<TextChannel> message_channels = new ArrayList<TextChannel>();

@@ -1,22 +1,14 @@
 package com.oddlabs.matchserver;
 
-import com.oddlabs.matchmaking.GamePlayer;
 import com.oddlabs.matchmaking.GameSession;
 import com.oddlabs.matchmaking.MatchmakingServerInterface;
 import com.oddlabs.matchmaking.Participant;
-import com.oddlabs.matchmaking.PlayerTypes;
-import com.oddlabs.matchserver.discord.DiscordBotService;
-import com.oddlabs.matchserver.models.GameDataModel;
-
-import discord4j.core.spec.EmbedCreateSpec;
-import discord4j.rest.util.Color;
+import com.oddlabs.matchserver.discord.DiscordEmbedCreator;
 
 import java.io.File;
 import java.io.FileWriter;
 import java.sql.SQLException;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 
 public final strictfp class TimestampedGameSession {
     private static final long JOIN_MAX_TIME = 3 * 60 * 1000;
@@ -136,7 +128,7 @@ public final strictfp class TimestampedGameSession {
                 player_ratings = new int[participants.length];
 
                 // Add game started here
-                SendGameStartedDiscordEmbed();
+                DiscordEmbedCreator.SendGameStartedDiscordEmbed(database_id, session);
 
                 for (int i = 0; i < participants.length; i++) {
                     String nick = participants[i].getNick();
@@ -342,7 +334,7 @@ public final strictfp class TimestampedGameSession {
             MatchmakingServer.getLogger()
                     .info("Game " + database_id + ". No winning teams " + getParticipantStates());
             DBInterface.endGame(this, end_time, -1);
-            SendHumansLoseToBotsDiscordEmbed();
+            DiscordEmbedCreator.SendHumansLoseToBotsDiscordEmbed(database_id, session);
             game_ended = true;
             return; // last players disconnected
         }
@@ -387,7 +379,7 @@ public final strictfp class TimestampedGameSession {
                                         + " winning teams. "
                                         + getParticipantStates());
                 DBInterface.endGame(this, end_time, -1);
-                SendInvalidatedGameDiscordEmbed();
+                DiscordEmbedCreator.SendInvalidatedGameDiscordEmbed(session, database_id);
                 game_ended = true;
                 return;
             }
@@ -402,12 +394,14 @@ public final strictfp class TimestampedGameSession {
                                     + ". No one lost. Playing agains AI "
                                     + getParticipantStates());
             DBInterface.endGame(this, end_time, winning_team_index);
-            SendHumansWinAgainstBotsDiscordEmbed(winning_team_index);
+            DiscordEmbedCreator.SendHumansWinAgainstBotsDiscordEmbed(
+                    winning_team_index, database_id, session);
             game_ended = true;
             return;
         }
 
-        SendHumansWinAgainstOtherHumans(winning_team_index);
+        DiscordEmbedCreator.SendHumansWinAgainstOtherHumans(
+                winning_team_index, database_id, session);
         DBInterface.endGame(this, end_time, winning_team_index);
         game_ended = true;
     }
@@ -459,240 +453,5 @@ public final strictfp class TimestampedGameSession {
             Client client = server.getClientFromID(participants[i].getMatchID());
             if (client != null) client.updateProfile();
         }
-    }
-
-    /**
-     * Returns a map of team index to a comma-separated string of player nicknames. Example: {0:
-     * "Alice, Bob", 1: "Charlie, Dave"}
-     */
-    private Map<Integer, String> getTeamLineup(GamePlayer[] players) {
-        Map<Integer, String> teamPlayers = new HashMap<>();
-        for (GamePlayer player : players) {
-            int team = player.getTeam();
-
-            // Add player to their team's list
-            String currentTeamList = teamPlayers.getOrDefault(team, "");
-            if (!currentTeamList.isEmpty()) {
-                currentTeamList += ", ";
-            }
-            currentTeamList += player.getNick();
-            teamPlayers.put(team, currentTeamList);
-        }
-        return teamPlayers;
-    }
-
-    /** Returns a formatted string of all human player nicknames. */
-    public String getFormattedHumanNicks(GamePlayer[] players) {
-        StringBuilder allNicks = new StringBuilder();
-
-        for (GamePlayer player : players) {
-            if (player.getPlayerType() == PlayerTypes.Human) {
-                if (allNicks.length() > 0) {
-                    allNicks.append(", ");
-                }
-                allNicks.append(player.getNick());
-            }
-        }
-        return allNicks.toString();
-    }
-
-    /** Sends a Discord embed message when humans lose to bots. */
-    private void SendHumansLoseToBotsDiscordEmbed() {
-        if (!DiscordBotService.getInstance().isInitialized()) return;
-        GameDataModel data = DBInterface.getGame(database_id, true);
-        String game_name = data.getName();
-
-        Map<Integer, String> playerData = this.getTeamLineup(session.getPlayerInfo());
-
-        String replayUrl = getReplayUrl(database_id);
-        String description =
-                getFormattedHumanNicks(session.getPlayerInfo()) + " lost playing against AI";
-        if (replayUrl != null) {
-            description += String.format("\n[Watch here](%s)", replayUrl);
-        }
-        discord4j.core.spec.EmbedCreateSpec.Builder builder =
-                EmbedCreateSpec.builder()
-                        .color(Color.GREEN)
-                        .title(game_name)
-                        .description(description);
-
-        // Add fields for each team
-        for (Map.Entry<Integer, String> entry : playerData.entrySet()) {
-            int teamId = entry.getKey();
-            String playerList = entry.getValue();
-            builder.addField("Team " + (teamId + 1), playerList, false);
-        }
-
-        EmbedCreateSpec embed = builder.build();
-        ChatRoom chatRoom =
-                (ChatRoom)
-                        ChatRoom.getChatRooms()
-                                .values()
-                                .iterator()
-                                .next(); // Get any chatroom (for now)
-        DiscordBotService.getInstance()
-                .getChatroomCoordinator()
-                .ifPresent(coordinator -> coordinator.sendDiscordEmbed(chatRoom, embed));
-    }
-
-    /**
-     * Humans win against humans (and possibly bots)
-     *
-     * @param winning_team_index
-     */
-    private void SendHumansWinAgainstOtherHumans(int winning_team_index) {
-        if (!DiscordBotService.getInstance().isInitialized()) return;
-        GameDataModel data = DBInterface.getGame(database_id, false);
-        String game_name = data.getName();
-
-        Map<Integer, String> playerData = this.getTeamLineup(session.getPlayerInfo());
-
-        String replayUrl = getReplayUrl(database_id);
-        String description = "Team " + (winning_team_index + 1) + " won";
-        if (replayUrl != null) {
-            description += String.format("\n[Watch here](%s)", replayUrl);
-        }
-        discord4j.core.spec.EmbedCreateSpec.Builder builder =
-                EmbedCreateSpec.builder()
-                        .color(Color.GREEN)
-                        .title(game_name)
-                        .description(description);
-
-        // Add fields for each team
-        for (Map.Entry<Integer, String> entry : playerData.entrySet()) {
-            int teamId = entry.getKey();
-            String playerList = entry.getValue();
-            builder.addField("Team " + (teamId + 1), playerList, false);
-        }
-
-        EmbedCreateSpec embed = builder.build();
-        ChatRoom chatRoom =
-                (ChatRoom)
-                        ChatRoom.getChatRooms()
-                                .values()
-                                .iterator()
-                                .next(); // Get any chatroom (for now)
-        DiscordBotService.getInstance()
-                .getChatroomCoordinator()
-                .ifPresent(coordinator -> coordinator.sendDiscordEmbed(chatRoom, embed));
-    }
-
-    /** Sends a Discord embed message when humans win against bots. */
-    private void SendHumansWinAgainstBotsDiscordEmbed(int winning_team_index) {
-        if (!DiscordBotService.getInstance().isInitialized()) return;
-        GameDataModel data = DBInterface.getGame(database_id, true);
-        String game_name = data.getName();
-
-        Map<Integer, String> playerData = this.getTeamLineup(session.getPlayerInfo());
-
-        String replayUrl = getReplayUrl(database_id);
-        String description = "Team " + (winning_team_index + 1) + " won playing against AI";
-        if (replayUrl != null) {
-            description += String.format("\n[Watch here](%s)", replayUrl);
-        }
-        discord4j.core.spec.EmbedCreateSpec.Builder builder =
-                EmbedCreateSpec.builder()
-                        .color(Color.GREEN)
-                        .title(game_name)
-                        .description(description);
-
-        // Add fields for each team
-        for (Map.Entry<Integer, String> entry : playerData.entrySet()) {
-            int teamId = entry.getKey();
-            String playerList = entry.getValue();
-            builder.addField("Team " + (teamId + 1), playerList, false);
-        }
-
-        EmbedCreateSpec embed = builder.build();
-
-        ChatRoom chatRoom =
-                (ChatRoom)
-                        ChatRoom.getChatRooms()
-                                .values()
-                                .iterator()
-                                .next(); // Get any chatroom (for now)
-        DiscordBotService.getInstance()
-                .getChatroomCoordinator()
-                .ifPresent(coordinator -> coordinator.sendDiscordEmbed(chatRoom, embed));
-    }
-
-    /** Sends a Discord embed message when the game was invalidated. */
-    private void SendInvalidatedGameDiscordEmbed() {
-        if (!DiscordBotService.getInstance().isInitialized()) return;
-        GameDataModel data = DBInterface.getGame(database_id, true);
-        String game_name = data.getName();
-        Map<Integer, String> playerData = this.getTeamLineup(session.getPlayerInfo());
-        String replayUrl = getReplayUrl(database_id);
-        String description = "The game was invalidated. Someone may have cheated!";
-        if (replayUrl != null) {
-            description += String.format("\n[Watch here](%s)", replayUrl);
-        }
-        discord4j.core.spec.EmbedCreateSpec.Builder builder =
-                EmbedCreateSpec.builder()
-                        .color(Color.RED)
-                        .title(game_name)
-                        .description(description);
-
-        // Add fields for each team
-        for (Map.Entry<Integer, String> entry : playerData.entrySet()) {
-            int teamId = entry.getKey();
-            String playerList = entry.getValue();
-            builder.addField("Team " + (teamId + 1), playerList, false);
-        }
-
-        EmbedCreateSpec embed = builder.build();
-
-        ChatRoom chatRoom =
-                (ChatRoom)
-                        ChatRoom.getChatRooms()
-                                .values()
-                                .iterator()
-                                .next(); // Get any chatroom (for now)
-        DiscordBotService.getInstance()
-                .getChatroomCoordinator()
-                .ifPresent(coordinator -> coordinator.sendDiscordEmbed(chatRoom, embed));
-    }
-
-    private void SendGameStartedDiscordEmbed() {
-        if (!DiscordBotService.getInstance().isInitialized()) return;
-        GameDataModel data = DBInterface.getGame(database_id, false);
-        String game_name = data.getName();
-
-        Map<Integer, String> playerData = this.getTeamLineup(session.getPlayerInfo());
-
-        String replayUrl = getReplayUrl(database_id);
-        String description = "Game started!";
-        if (replayUrl != null) {
-            description += String.format("\n[Watch here](%s)", replayUrl);
-        }
-        discord4j.core.spec.EmbedCreateSpec.Builder builder =
-                EmbedCreateSpec.builder().title(game_name).description(description);
-
-        // Add fields for each team
-        for (Map.Entry<Integer, String> entry : playerData.entrySet()) {
-            int teamId = entry.getKey();
-            String playerList = entry.getValue();
-            builder.addField("Team " + (teamId + 1), playerList, false);
-        }
-
-        EmbedCreateSpec embed = builder.build();
-
-        ChatRoom chatRoom =
-                (ChatRoom)
-                        ChatRoom.getChatRooms()
-                                .values()
-                                .iterator()
-                                .next(); // Get any chatroom (for now)
-        DiscordBotService.getInstance()
-                .getChatroomCoordinator()
-                .ifPresent(coordinator -> coordinator.sendDiscordEmbed(chatRoom, embed));
-    }
-
-    private String getReplayUrl(int game_id) {
-        File spectatorFile = new File("/var/games/" + game_id);
-        boolean exists = spectatorFile.exists();
-        String domain = System.getenv("TT_WEBSITE_DOMAIN");
-        if (domain == null) domain = "tribaltrouble.org";
-        return exists ? String.format("https://%s/watch.html#%d", domain, game_id) : null;
     }
 }
