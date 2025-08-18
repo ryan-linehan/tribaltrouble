@@ -5,6 +5,7 @@ import com.oddlabs.matchmaking.GameSession;
 import com.oddlabs.matchmaking.PlayerTypes;
 import com.oddlabs.matchserver.ChatRoom;
 import com.oddlabs.matchserver.DBInterface;
+import com.oddlabs.matchserver.WebsiteLinkHelper;
 import com.oddlabs.matchserver.models.GameDataModel;
 
 import discord4j.core.spec.EmbedCreateSpec;
@@ -59,7 +60,7 @@ public class DiscordEmbedCreator {
 
         Map<Integer, String> playerData = getTeamLineup(session.getPlayerInfo());
 
-        String replayUrl = getReplayUrl(game_id);
+        String replayUrl = WebsiteLinkHelper.getReplayUrl(game_id);
         String description =
                 getFormattedHumanNicks(session.getPlayerInfo()) + " lost playing against AI";
         if (replayUrl != null) {
@@ -104,7 +105,7 @@ public class DiscordEmbedCreator {
 
         Map<Integer, String> playerData = getTeamLineup(session.getPlayerInfo());
 
-        String replayUrl = getReplayUrl(game_id);
+        String replayUrl = WebsiteLinkHelper.getReplayUrl(game_id);
         String description = "Team " + (winning_team_index + 1) + " won";
         if (replayUrl != null) {
             description += String.format("\n[Watch here](%s)", replayUrl);
@@ -143,7 +144,7 @@ public class DiscordEmbedCreator {
 
         Map<Integer, String> playerData = getTeamLineup(session.getPlayerInfo());
 
-        String replayUrl = getReplayUrl(game_id);
+        String replayUrl = WebsiteLinkHelper.getReplayUrl(game_id);
         String description = "Team " + (winning_team_index + 1) + " won playing against AI";
         if (replayUrl != null) {
             description += String.format("\n[Watch here](%s)", replayUrl);
@@ -180,7 +181,7 @@ public class DiscordEmbedCreator {
         GameDataModel data = DBInterface.getGame(database_id, true);
         String game_name = data.getName();
         Map<Integer, String> playerData = getTeamLineup(session.getPlayerInfo());
-        String replayUrl = getReplayUrl(database_id);
+        String replayUrl = WebsiteLinkHelper.getReplayUrl(database_id);
         String description = "The game was invalidated. Someone may have cheated!";
         if (replayUrl != null) {
             description += String.format("\n[Watch here](%s)", replayUrl);
@@ -218,7 +219,7 @@ public class DiscordEmbedCreator {
 
         Map<Integer, String> playerData = getTeamLineup(session.getPlayerInfo());
 
-        String replayUrl = getReplayUrl(game_id);
+        String replayUrl = WebsiteLinkHelper.getReplayUrl(game_id);
         String description = "Game started!";
         if (replayUrl != null) {
             description += String.format("\n[Watch here](%s)", replayUrl);
@@ -244,13 +245,5 @@ public class DiscordEmbedCreator {
         DiscordBotService.getInstance()
                 .getChatroomCoordinator()
                 .ifPresent(coordinator -> coordinator.sendDiscordEmbed(chatRoom, embed));
-    }
-
-    private static String getReplayUrl(int game_id) {
-        File spectatorFile = new File("/var/games/" + game_id);
-        boolean exists = spectatorFile.exists();
-        String domain = System.getenv("TT_WEBSITE_DOMAIN");
-        if (domain == null) domain = "tribaltrouble.org";
-        return exists ? String.format("https://%s/watch.html#%d", domain, game_id) : null;
     }
 }

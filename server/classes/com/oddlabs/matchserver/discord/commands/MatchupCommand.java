@@ -2,6 +2,7 @@ package com.oddlabs.matchserver.discord.commands;
 
 import com.oddlabs.matchmaking.Profile;
 import com.oddlabs.matchserver.DBInterface;
+import com.oddlabs.matchserver.WebsiteLinkHelper;
 import com.oddlabs.matchserver.models.VersusMatchupModel;
 import com.oddlabs.matchserver.models.VersusMatchupResultModel;
 
@@ -49,11 +50,13 @@ public class MatchupCommand extends DiscordCommand {
         }
 
         VersusMatchupResultModel matchupResult =
-                DBInterface.getMatchupStats(player1, player2, false);
+                DBInterface.getMatchupStats(player1, player2, true);
         EmbedCreateSpec.Builder builder =
                 EmbedCreateSpec.builder()
                         .color(Color.ORANGE)
-                        .title(String.format("%s vs %s", player1, player2));
+                        .title(String.format("%s vs %s", player1, player2))
+                        .description(String.format("Comparing 1v1 stats for %s and %s", player1, player2));
+
         int totalGames = matchupResult.getTotalGamesPlayed();
         builder.addField("Games played: ", Integer.toString(totalGames), false);
         builder.addField(
@@ -64,7 +67,7 @@ public class MatchupCommand extends DiscordCommand {
                 String.format("Losses vs %s", player2),
                 Integer.toString(matchupResult.getPlayer2Wins()),
                 false);
-        float winRate = (float) matchupResult.getPlayer1Wins() / totalGames * 100;
+        float winRate = ((float) matchupResult.getPlayer1Wins() / totalGames) * 100;
         builder.addField(
                 String.format("Win rate vs %s", player2), String.format("%.2f%%", winRate), false);
         builder.addField("\u200B", "\u200B", false);
@@ -77,6 +80,7 @@ public class MatchupCommand extends DiscordCommand {
                 field_value += String.format("\n[Watch Replay](%s)", matchup.getGameReplayUrl());
             }
             builder.addField(matchupNum + ". " + matchup.getGameName(), field_value, false);
+            matchupNum++;
         }
         return event.reply().withEmbeds(builder.build()).retry(3);
     }

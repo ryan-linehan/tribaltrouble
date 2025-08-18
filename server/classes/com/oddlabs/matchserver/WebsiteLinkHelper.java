@@ -1,0 +1,29 @@
+package com.oddlabs.matchserver;
+
+import java.io.File;
+import java.net.URLEncoder;
+
+public class WebsiteLinkHelper {
+    public static String GetPlayerHighscoreUrl(String nick) {
+        String domain = System.getenv("TT_WEBSITE_DOMAIN");
+        if (domain == null)
+            domain = "tribaltrouble.org";
+
+        try {
+            nick = URLEncoder.encode(nick, "UTF-8");
+        } catch (Exception e) {
+            // Fallback in case of error
+            nick = "";
+        }
+        return String.format("https://%s/#player#%s#0", domain, nick);
+    }
+
+    public static String getReplayUrl(int game_id) {
+        File spectatorFile = new File("/var/games/" + game_id);
+        boolean exists = spectatorFile.exists();
+        String domain = System.getenv("TT_WEBSITE_DOMAIN");
+        if (domain == null)
+            domain = "tribaltrouble.org";
+        return exists ? String.format("https://%s/watch.html#%d", domain, game_id) : null;
+    }
+}

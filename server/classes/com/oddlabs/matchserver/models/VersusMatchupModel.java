@@ -1,6 +1,6 @@
 package com.oddlabs.matchserver.models;
 
-import java.io.File;
+import com.oddlabs.matchserver.WebsiteLinkHelper;
 
 public class VersusMatchupModel {
     private String player1;
@@ -57,11 +57,6 @@ public class VersusMatchupModel {
     }
 
     public String getGameReplayUrl() {
-        // spectator_file = new File("/var/games/" + database_id);
-        File spectatorFile = new File("/var/games/" + game_id);
-        boolean exists = spectatorFile.exists();
-        String domain = System.getenv("TT_WEBSITE_DOMAIN");
-        if (domain == null) domain = "tribaltrouble.org";
-        return exists ? String.format("https://%s/watch.html#%d", domain, game_id) : null;
+        return WebsiteLinkHelper.getReplayUrl(game_id);
     }
 }

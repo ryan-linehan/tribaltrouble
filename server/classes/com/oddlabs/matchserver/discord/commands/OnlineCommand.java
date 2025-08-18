@@ -1,6 +1,7 @@
 package com.oddlabs.matchserver.discord.commands;
 
 import com.oddlabs.matchserver.DBInterface;
+import com.oddlabs.matchserver.WebsiteLinkHelper;
 
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
 import discord4j.core.spec.EmbedCreateSpec;
@@ -32,7 +33,8 @@ public class OnlineCommand extends DiscordCommand {
             int end = Math.min(i + 10, totalOnline);
             StringBuilder fieldValue = new StringBuilder();
             for (int j = i; j < end; j++) {
-                fieldValue.append(onlineProfiles[j]);
+                String linkedName = String.format("[%s](%s)", onlineProfiles[j], WebsiteLinkHelper.GetPlayerHighscoreUrl(onlineProfiles[j]));
+                fieldValue.append(linkedName);
                 if (j < end - 1) fieldValue.append(", ");
             }
             builder.addField("", fieldValue.toString(), false);
