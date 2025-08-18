@@ -11,7 +11,6 @@ import com.oddlabs.matchserver.models.GameDataModel;
 import discord4j.core.spec.EmbedCreateSpec;
 import discord4j.rest.util.Color;
 
-import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 

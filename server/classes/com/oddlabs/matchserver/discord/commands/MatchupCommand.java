@@ -17,6 +17,8 @@ import discord4j.rest.util.Color;
 
 import reactor.core.publisher.Mono;
 
+import java.text.SimpleDateFormat;
+
 public class MatchupCommand extends DiscordCommand {
     private String command_name = "matchup";
     private String command_description =
@@ -55,7 +57,11 @@ public class MatchupCommand extends DiscordCommand {
                 EmbedCreateSpec.builder()
                         .color(Color.ORANGE)
                         .title(String.format("%s vs %s", player1, player2))
-                        .description(String.format("Comparing 1v1 stats for %s and %s", WebsiteLinkHelper.getProfileLink(player1, player1), WebsiteLinkHelper.getProfileLink(player2, player2)));
+                        .description(
+                                String.format(
+                                        "Comparing 1v1 stats for %s and %s",
+                                        WebsiteLinkHelper.getProfileLink(player1, player1),
+                                        WebsiteLinkHelper.getProfileLink(player2, player2)));
 
         int totalGames = matchupResult.getTotalGamesPlayed();
         builder.addField("Games played: ", Integer.toString(totalGames), false);
@@ -75,10 +81,16 @@ public class MatchupCommand extends DiscordCommand {
         int matchupNum = 1;
         // TODO: Add date logic so we can tell WHEN the matchup was
         for (VersusMatchupModel matchup : matchupResult.getRecentMatchups()) {
+            java.sql.Timestamp startTime = matchup.getStartTime();
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd hh:mm a");
+            String formattedTime = sdf.format(startTime);
+
             String field_value = String.format("Winner: %s", matchup.getWinner());
+            field_value += String.format("\nMatch played at: %s", formattedTime);
             if (matchup.getGameReplayUrl() != null) {
                 field_value += String.format("\n[Watch Replay](%s)", matchup.getGameReplayUrl());
             }
+
             builder.addField(matchupNum + ". " + matchup.getGameName(), field_value, false);
             matchupNum++;
         }
