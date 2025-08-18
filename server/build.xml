@@ -22,7 +22,7 @@
 		<ivy:retrieve pattern="../ivy_lib/[artifact]-[revision](-[classifier]).[ext]" />
 	</target>
 
-	<target name="compiledeps" depends="compile-common">
+	<target name="compiledeps" depends="compile-common, resolve">
 	</target>
 
 	<target name="compile" depends="init,compiledeps">
