@@ -55,7 +55,7 @@ public class MatchupCommand extends DiscordCommand {
                 EmbedCreateSpec.builder()
                         .color(Color.ORANGE)
                         .title(String.format("%s vs %s", player1, player2))
-                        .description(String.format("Comparing 1v1 stats for %s and %s", player1, player2));
+                        .description(String.format("Comparing 1v1 stats for %s and %s", WebsiteLinkHelper.getProfileLink(player1, player1), WebsiteLinkHelper.getProfileLink(player2, player2)));
 
         int totalGames = matchupResult.getTotalGamesPlayed();
         builder.addField("Games played: ", Integer.toString(totalGames), false);

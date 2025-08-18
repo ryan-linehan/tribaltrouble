@@ -27,8 +27,8 @@ public class WebsiteLinkHelper {
         return exists ? String.format("https://%s/watch.html#%d", domain, game_id) : null;
     }
 
-    public static String getProfileLink(String text, String nick) {
+    public static String getProfileLink(String display_text, String nick) {
         String url = getPlayerHighscoreUrl(nick);
-        return String.format("[%s](%s)", text, url);
+        return String.format("[%s](%s)", display_text, url);
     }
 }
