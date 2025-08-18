@@ -33,7 +33,7 @@ public class OnlineCommand extends DiscordCommand {
             int end = Math.min(i + 10, totalOnline);
             StringBuilder fieldValue = new StringBuilder();
             for (int j = i; j < end; j++) {
-                String linkedName = String.format("[%s](%s)", onlineProfiles[j], WebsiteLinkHelper.GetPlayerHighscoreUrl(onlineProfiles[j]));
+                String linkedName = WebsiteLinkHelper.getProfileLink(onlineProfiles[j], onlineProfiles[j]);
                 fieldValue.append(linkedName);
                 if (j < end - 1) fieldValue.append(", ");
             }

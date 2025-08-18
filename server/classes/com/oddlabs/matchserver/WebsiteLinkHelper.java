@@ -4,7 +4,7 @@ import java.io.File;
 import java.net.URLEncoder;
 
 public class WebsiteLinkHelper {
-    public static String GetPlayerHighscoreUrl(String nick) {
+    public static String getPlayerHighscoreUrl(String nick) {
         String domain = System.getenv("TT_WEBSITE_DOMAIN");
         if (domain == null)
             domain = "tribaltrouble.org";
@@ -25,5 +25,10 @@ public class WebsiteLinkHelper {
         if (domain == null)
             domain = "tribaltrouble.org";
         return exists ? String.format("https://%s/watch.html#%d", domain, game_id) : null;
+    }
+
+    public static String getProfileLink(String text, String nick) {
+        String url = getPlayerHighscoreUrl(nick);
+        return String.format("[%s](%s)", text, url);
     }
 }

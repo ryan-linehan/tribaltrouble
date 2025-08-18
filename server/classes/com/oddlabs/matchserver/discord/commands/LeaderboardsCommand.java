@@ -82,11 +82,12 @@ public class LeaderboardsCommand extends DiscordCommand {
                                         + "-"
                                         + Math.min(i + startInt + 25, i + startInt + ranks.length));
                 for (int j = i; j < Math.min(i + 25, ranks.length); j++) {
-                    String name = String.format("[%s](%s)",  ranks[j].getName(), WebsiteLinkHelper.GetPlayerHighscoreUrl(ranks[j].getName()));
+                    String name = String.format("%s",  ranks[j].getName());
                     String title = String.format("%d. %s", j + startInt + 1, name);
                     String message = String.format(
-                            "Rating: %s, Wins: %s, Losses: %s",
-                            ranks[j].getRating(), ranks[j].getWins(), ranks[j].getLosses());
+                            "Rating: %s, Wins: %s, Losses: %s, %s",
+                            ranks[j].getRating(), ranks[j].getWins(), ranks[j].getLosses(),
+                            WebsiteLinkHelper.getProfileLink("Profile", ranks[j].getName()));
                     builder.addField(title, message, false);
                     System.out.println("Added rank " + title + " to embed.");
                 }
