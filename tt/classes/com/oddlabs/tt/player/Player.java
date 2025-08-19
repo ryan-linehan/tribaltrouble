@@ -39,7 +39,8 @@ public final strictfp class Player implements PlayerInterface {
         {1f, 0f, .25f, 1f},
         {0f, 1f, .75f, 1f},
         {.75f, 0f, 1f, 1f},
-        {.75f, 1f, 0f, 1f}
+        {.75f, 1f, 0f, 1f},
+        {.25f, 1f, 0f, 1f}
     };
 
     private final World world;

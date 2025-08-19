@@ -53,6 +53,8 @@ public final strictfp class Server implements ConnectionListenerInterface {
         this.game = game;
         this.generator = generator;
         this.register_server = register_server;
+        System.out.println("dumping stack");
+        Thread.dumpStack();
         this.ai_names = ai_names;
         this.random = new Random(LocalEventQueue.getQueue().getHighPrecisionManager().getTick());
         players = new PlayerSlot[MatchmakingServerInterface.MAX_PLAYERS];

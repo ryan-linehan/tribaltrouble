@@ -744,7 +744,8 @@ public final strictfp class TerrainMenu extends Group {
                             ai_string + "2",
                             ai_string + "3",
                             ai_string + "4",
-                            ai_string + "5"
+                            ai_string + "5",
+                            ai_string + "6",
                         });
         game_network
                 .getClient()

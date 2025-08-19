@@ -48,6 +48,7 @@ public final strictfp class NativeIsland0 extends Island {
                     Utils.getBundleString(bundle, "name3"),
                     Utils.getBundleString(bundle, "name4"),
                     Utils.getBundleString(bundle, "name5")
+                    // TODO: X players for all the campaign ones? Maybe unneccessary since no campaign map has 6 ai
                 };
         // gametype, owner, game, meters_per_world, hills, vegetation_amount, supplies_amount, seed,
         // speed, map_code
