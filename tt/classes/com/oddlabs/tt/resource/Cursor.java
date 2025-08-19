@@ -44,32 +44,37 @@ public final strictfp class Cursor {
         GLIntImage img_32_8 = new GLIntImage(width, height, image.getPixels(), GL11.GL_RGBA);
 
         Image image_16_1 = Image.read(url_16_1);
-        GLIntImage img_16_1 = new GLIntImage(
-                image_16_1.getWidth(),
-                image_16_1.getHeight(),
-                image_16_1.getPixels(),
-                GL11.GL_RGBA);
+        GLIntImage img_16_1 =
+                new GLIntImage(
+                        image_16_1.getWidth(),
+                        image_16_1.getHeight(),
+                        image_16_1.getPixels(),
+                        GL11.GL_RGBA);
         Image image_32_1 = Image.read(url_32_1);
-        GLIntImage img_32_1 = new GLIntImage(
-                image_32_1.getWidth(),
-                image_32_1.getHeight(),
-                image_32_1.getPixels(),
-                GL11.GL_RGBA);
+        GLIntImage img_32_1 =
+                new GLIntImage(
+                        image_32_1.getWidth(),
+                        image_32_1.getHeight(),
+                        image_32_1.getPixels(),
+                        GL11.GL_RGBA);
 
-        texture = new Texture(
-                new GLImage[] { img_32_8 },
-                GL11.GL_RGBA,
-                GL11.GL_NEAREST,
-                GL11.GL_NEAREST,
-                GL11.GL_REPEAT,
-                GL11.GL_REPEAT);
+        texture =
+                new Texture(
+                        new GLImage[] {img_32_8},
+                        GL11.GL_RGBA,
+                        GL11.GL_NEAREST,
+                        GL11.GL_NEAREST,
+                        GL11.GL_REPEAT,
+                        GL11.GL_REPEAT);
         cursor = new Quad(0, 0, 1, 1, 32, 32);
 
         // TODO: Lazy load this potentially?
         ByteBuffer buffer = img_32_8.getPixels();
         GLFWImage glfwImage = GLFWImage.malloc();
-        // glfwCreateCursor expects the image data origin at top-left we're getting it from the bottom left
-        ByteBuffer flippedBuffer = flipVertically(buffer, img_32_8.getWidth(), img_32_8.getHeight());
+        // glfwCreateCursor expects the image data origin at top-left we're getting it from the
+        // bottom left
+        ByteBuffer flippedBuffer =
+                flipVertically(buffer, img_32_8.getWidth(), img_32_8.getHeight());
 
         glfwImage.width(img_32_8.getWidth());
         glfwImage.height(img_32_8.getHeight());

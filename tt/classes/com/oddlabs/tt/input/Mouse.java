@@ -81,7 +81,8 @@ public final strictfp class Mouse {
                             int clampedX = Math.max(0, Math.min(ix, Display.getWidth() - 1));
                             int clampedY = Math.max(0, Math.min(iy, Display.getHeight() - 1));
 
-                            // If coordinates were clamped, reset GLFW cursor position to prevent drift
+                            // If coordinates were clamped, reset GLFW cursor position to prevent
+                            // drift
                             if (clampedX != ix || clampedY != iy) {
                                 // Convert back to GLFW coordinate space and reset cursor
                                 double newGlfwX = clampedX;
@@ -250,6 +251,5 @@ public final strictfp class Mouse {
         }
     }
 
-    public static void update() {
-    }
+    public static void update() {}
 }
