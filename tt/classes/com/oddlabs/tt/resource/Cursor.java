@@ -67,7 +67,7 @@ public final strictfp class Cursor {
                         GL11.GL_REPEAT,
                         GL11.GL_REPEAT);
         cursor = new Quad(0, 0, 1, 1, 32, 32);
-        
+
         // TODO: Lazy load this potentially?
         ByteBuffer buffer = img_32_8.getPixels();
         GLFWImage glfwImage = GLFWImage.malloc();

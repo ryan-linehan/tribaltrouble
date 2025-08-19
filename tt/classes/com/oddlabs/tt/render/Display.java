@@ -61,8 +61,15 @@ public final strictfp class Display {
             window = GLFW.glfwCreateWindow(width, height, title, 0, 0);
         }
 
-        int cursor_mode = Settings.getSettings().use_native_cursor ? GLFW.GLFW_CURSOR_NORMAL : GLFW.GLFW_CURSOR_DISABLED;
-        System.out.println("Cursor mode: " + (cursor_mode == GLFW.GLFW_CURSOR_NORMAL ? "Normal (native)" : "Disabled (game)"));
+        int cursor_mode =
+                Settings.getSettings().use_native_cursor
+                        ? GLFW.GLFW_CURSOR_NORMAL
+                        : GLFW.GLFW_CURSOR_DISABLED;
+        System.out.println(
+                "Cursor mode: "
+                        + (cursor_mode == GLFW.GLFW_CURSOR_NORMAL
+                                ? "Normal (native)"
+                                : "Disabled (game)"));
         GLFW.glfwSetInputMode(window, GLFW.GLFW_CURSOR, cursor_mode);
 
         GLFW.glfwShowWindow(window);
