@@ -395,6 +395,14 @@ public abstract strictfp class AbstractOptionsMenu extends Form {
         group_fullscreen.addChild(cb_fullscreen);
         cb_fullscreen.place();
         group_fullscreen.compileCanvas();
+        // Hardware cursor
+		Group group_hardware_cursor = new Group();
+		display.addChild(group_hardware_cursor);
+		CheckBox cb_hardware_cursor = new CheckBox(Settings.getSettings().getNativeCursor(), Utils.getBundleString(bundle, "hardware_cursor"), Utils.getBundleString(bundle, "hardware_cursor_tip", new Object[]{"Ctrl-H"}));
+		cb_hardware_cursor.addCheckBoxListener(new CBHardwareCursor());
+		group_hardware_cursor.addChild(cb_hardware_cursor);
+		cb_hardware_cursor.place();
+		group_hardware_cursor.compileCanvas();
 
         Group display_apply = CreateDisplayApply();
         display.addChild(display_apply);
@@ -407,7 +415,8 @@ public abstract strictfp class AbstractOptionsMenu extends Form {
 
         mode_group.place();
         group_detail.place(mode_group, RIGHT_TOP);
-        group_fullscreen.place(group_detail, BOTTOM_LEFT);
+        group_hardware_cursor.place(group_detail, BOTTOM_LEFT);
+        group_fullscreen.place(group_hardware_cursor, BOTTOM_LEFT);
         display_apply.place(display, BOTTOM_LEFT, 10);
         refreshrate_group.place(group_fullscreen, BOTTOM_LEFT);
         display.compileCanvas();
@@ -702,6 +711,12 @@ public abstract strictfp class AbstractOptionsMenu extends Form {
             gui_root.setToolTipTimer();
         }
     }
+
+    private final strictfp class CBHardwareCursor implements CheckBoxListener {
+		public final void checked(boolean marked) {
+			Settings.getSettings().setNativeCursor(marked);
+		}
+	}
 
     private final strictfp class OptionsCloseListener implements CloseListener {
 

@@ -76,7 +76,7 @@ public final strictfp class Mouse {
                     public void invoke(long win, double xpos, double ypos) {
                         int ix = (int) xpos;
                         int iy = Display.getHeight() - (int) ypos;
-                        if (!Settings.getSettings().use_native_cursor) {
+                        if (!Settings.getSettings().getNativeCursor()) {
                             // Clamp coordinates to stay within game bounds
                             int clampedX = Math.max(0, Math.min(ix, Display.getWidth() - 1));
                             int clampedY = Math.max(0, Math.min(iy, Display.getHeight() - 1));

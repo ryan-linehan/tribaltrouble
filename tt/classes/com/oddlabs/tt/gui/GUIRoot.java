@@ -569,7 +569,7 @@ public final strictfp class GUIRoot extends GUIObject implements Updatable {
         GL11.glTexEnvf(GL11.GL_TEXTURE_ENV, GL11.GL_TEXTURE_ENV_MODE, GL11.GL_REPLACE);
         if (cursor_object.getCursorIndex() != CURSOR_NULL) {
             if (getModalDelegate() != null || getDelegate().renderCursor()) {
-                if (Settings.getSettings().use_native_cursor) {
+                if (Settings.getSettings().getNativeCursor()) {
                     if (cursors[cursor_object.getCursorIndex()] == current_cursor) return;
                     GLFW.glfwSetCursor(
                             Display.getWindow(),
