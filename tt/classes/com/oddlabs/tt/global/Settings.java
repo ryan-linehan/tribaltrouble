@@ -63,6 +63,7 @@ public final strictfp class Settings implements Serializable {
     // control
     public boolean invert_camera_pitch = false;
     public boolean aggressive_units = false;
+    public boolean use_native_cursor = true;
 
     public float mapmode_delay = .5f;
     public float tooltip_delay = .5f;
