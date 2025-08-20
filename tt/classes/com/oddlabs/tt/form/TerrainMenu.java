@@ -770,9 +770,7 @@ public final strictfp class TerrainMenu extends Group {
         return true;
     }
 
-    /**
-     * Creates an array of translated AI names based on the number of max_players
-     */
+    /** Creates an array of translated AI names based on the number of max_players */
     private String[] generateAINames() {
         String ai_string = Utils.getBundleString(bundle, "ai");
         String[] ai_names = new String[MatchmakingServerInterface.MAX_PLAYERS];
