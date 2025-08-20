@@ -96,8 +96,16 @@ public class DiscordChatroomCoordinator {
             LogDebug("Discord channel for chat room " + chatroom.getName() + " not found!");
             return;
         }
+        sendDiscordEmbed(discordChannel, embed);
+    }
 
-        String roomName = chatroom.getName();
+    /**
+     * Sends a discord embed to a specific discord channel
+     *
+     * @param discordChannel
+     * @param embed
+     */
+    public void sendDiscordEmbed(TextChannel discordChannel, EmbedCreateSpec embed) {
         try {
             if (discordChannel != null) {
                 discordChannel
@@ -111,8 +119,7 @@ public class DiscordChatroomCoordinator {
                                                         + error.getMessage()));
             }
         } catch (Exception e) {
-            LogDebug(
-                    "Error sending discord embed in chat room " + roomName + ": " + e.getMessage());
+            LogDebug("Error sending discord embed: " + e.getMessage());
         }
     }
 

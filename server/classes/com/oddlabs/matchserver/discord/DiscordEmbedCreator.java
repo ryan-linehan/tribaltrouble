@@ -3,11 +3,11 @@ package com.oddlabs.matchserver.discord;
 import com.oddlabs.matchmaking.GamePlayer;
 import com.oddlabs.matchmaking.GameSession;
 import com.oddlabs.matchmaking.PlayerTypes;
-import com.oddlabs.matchserver.ChatRoom;
 import com.oddlabs.matchserver.DBInterface;
 import com.oddlabs.matchserver.WebsiteLinkHelper;
 import com.oddlabs.matchserver.models.GameDataModel;
 
+import discord4j.core.object.entity.channel.TextChannel;
 import discord4j.core.spec.EmbedCreateSpec;
 import discord4j.rest.util.Color;
 
@@ -79,15 +79,11 @@ public class DiscordEmbedCreator {
         }
 
         EmbedCreateSpec embed = builder.build();
-        ChatRoom chatRoom =
-                (ChatRoom)
-                        ChatRoom.getChatRooms()
-                                .values()
-                                .iterator()
-                                .next(); // Get any chatroom (for now)
+        TextChannel gameActivityChannel =
+                DiscordBotService.getInstance().getGameActivityChannel().orElse(null);
         DiscordBotService.getInstance()
                 .getChatroomCoordinator()
-                .ifPresent(coordinator -> coordinator.sendDiscordEmbed(chatRoom, embed));
+                .ifPresent(coordinator -> coordinator.sendDiscordEmbed(gameActivityChannel, embed));
     }
 
     /**
@@ -123,15 +119,11 @@ public class DiscordEmbedCreator {
         }
 
         EmbedCreateSpec embed = builder.build();
-        ChatRoom chatRoom =
-                (ChatRoom)
-                        ChatRoom.getChatRooms()
-                                .values()
-                                .iterator()
-                                .next(); // Get any chatroom (for now)
+        TextChannel gameActivityChannel =
+                DiscordBotService.getInstance().getGameActivityChannel().orElse(null);
         DiscordBotService.getInstance()
                 .getChatroomCoordinator()
-                .ifPresent(coordinator -> coordinator.sendDiscordEmbed(chatRoom, embed));
+                .ifPresent(coordinator -> coordinator.sendDiscordEmbed(gameActivityChannel, embed));
     }
 
     /** Sends a Discord embed message when humans win against bots. */
@@ -162,16 +154,11 @@ public class DiscordEmbedCreator {
         }
 
         EmbedCreateSpec embed = builder.build();
-
-        ChatRoom chatRoom =
-                (ChatRoom)
-                        ChatRoom.getChatRooms()
-                                .values()
-                                .iterator()
-                                .next(); // Get any chatroom (for now)
+        TextChannel gameActivityChannel =
+                DiscordBotService.getInstance().getGameActivityChannel().orElse(null);
         DiscordBotService.getInstance()
                 .getChatroomCoordinator()
-                .ifPresent(coordinator -> coordinator.sendDiscordEmbed(chatRoom, embed));
+                .ifPresent(coordinator -> coordinator.sendDiscordEmbed(gameActivityChannel, embed));
     }
 
     /** Sends a Discord embed message when the game was invalidated. */
@@ -200,20 +187,17 @@ public class DiscordEmbedCreator {
 
         EmbedCreateSpec embed = builder.build();
 
-        ChatRoom chatRoom =
-                (ChatRoom)
-                        ChatRoom.getChatRooms()
-                                .values()
-                                .iterator()
-                                .next(); // Get any chatroom (for now)
+        TextChannel gameActivityChannel =
+                DiscordBotService.getInstance().getGameActivityChannel().orElse(null);
         DiscordBotService.getInstance()
                 .getChatroomCoordinator()
-                .ifPresent(coordinator -> coordinator.sendDiscordEmbed(chatRoom, embed));
+                .ifPresent(coordinator -> coordinator.sendDiscordEmbed(gameActivityChannel, embed));
     }
 
     public static void SendGameStartedDiscordEmbed(int game_id, GameSession session) {
         if (!DiscordBotService.getInstance().isInitialized()) return;
         GameDataModel data = DBInterface.getGame(game_id, false);
+        if (data == null) return; // If the game name is null, we can't send an embed
         String game_name = data.getName();
 
         Map<Integer, String> playerData = getTeamLineup(session.getPlayerInfo());
@@ -235,14 +219,10 @@ public class DiscordEmbedCreator {
 
         EmbedCreateSpec embed = builder.build();
 
-        ChatRoom chatRoom =
-                (ChatRoom)
-                        ChatRoom.getChatRooms()
-                                .values()
-                                .iterator()
-                                .next(); // Get any chatroom (for now)
+        TextChannel gameActivityChannel =
+                DiscordBotService.getInstance().getGameActivityChannel().orElse(null);
         DiscordBotService.getInstance()
                 .getChatroomCoordinator()
-                .ifPresent(coordinator -> coordinator.sendDiscordEmbed(chatRoom, embed));
+                .ifPresent(coordinator -> coordinator.sendDiscordEmbed(gameActivityChannel, embed));
     }
 }

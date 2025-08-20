@@ -84,10 +84,22 @@ public class DiscordBotService {
      * Optional.empty() if not initialized.
      */
     public Optional<DiscordChatroomCoordinator> getChatroomCoordinator() {
+        if (!isInitialized) return Optional.empty();
         return Optional.ofNullable(chatroomCoordinator);
     }
 
+    /**
+     * Gets the channel used for game activity updates.
+     *
+     * @return
+     */
+    public Optional<TextChannel> getGameActivityChannel() {
+        if (!isInitialized) return Optional.empty();
+        return Optional.ofNullable(game_activity_channel);
+    }
+
     private ArrayList<TextChannel> message_channels = new ArrayList<TextChannel>();
+    private TextChannel game_activity_channel;
 
     /** Sets up event handlers for the Discord bot */
     private void setupEventHandlers(long serverId) {
@@ -165,6 +177,9 @@ public class DiscordBotService {
                                 if (channel.getType() == Channel.Type.GUILD_TEXT) {
                                     if (channel.getName().indexOf("tt_chatroom_") != -1) {
                                         message_channels.add((TextChannel) channel);
+                                        System.out.println("Added channel: " + channel.getName());
+                                    } else if (channel.getName().equals("game-activity")) {
+                                        game_activity_channel = (TextChannel) channel;
                                         System.out.println("Added channel: " + channel.getName());
                                     }
                                 }
