@@ -9,6 +9,7 @@ import com.oddlabs.matchmaking.Participant;
 import com.oddlabs.matchmaking.Profile;
 import com.oddlabs.matchmaking.RankingEntry;
 import com.oddlabs.matchserver.models.GameDataModel;
+import com.oddlabs.matchserver.models.GamePlayerModel;
 import com.oddlabs.matchserver.models.VersusMatchupModel;
 import com.oddlabs.matchserver.models.VersusMatchupResultModel;
 import com.oddlabs.util.CryptUtils;
@@ -631,7 +632,7 @@ public final strictfp class DBInterface {
             PreparedStatement stmt =
                     DBUtils.createStatement(
                             "SELECT"
-                                + " time_create,name,rated,speed,size,hills,trees,resources,mapcode,status,id,winner,time_stop,player1_name,player1_race,player1_team,player2_name,player2_race,player2_team,player3_name,player3_race,player3_team,player4_name,player4_race,player4_team,player5_name,player5_race,player5_team,player6_name,player6_race,player6_team,player7_name,player7_race,player7_team,player8_name,player8_race,player8_team,time_start"
+                                + " time_create,name,rated,speed,size,hills,trees,resources,mapcode,status,id,winner,time_stop,time_start"
                                 + " FROM games G WHERE G.id = ?");
             try {
                 stmt.setInt(1, game_id);
@@ -672,151 +673,48 @@ public final strictfp class DBInterface {
                         if (!result.wasNull()) {
                             gameData.setWinner(winner);
                         }
-                        gameData.setTimeStop(result.getTimestamp("time_stop"));
-                        gameData.setPlayer1Name(result.getString("player1_name"));
-                        gameData.setPlayer1Race(result.getString("player1_race"));
-                        Integer[] slotToProfileId = new Integer[8];
-                        int player1_team = result.getInt("player1_team");
-                        if (!result.wasNull()) {
-                            gameData.setPlayer1Team(player1_team);
-                            slotToProfileId[0] = player1_team;
-                        }
-                        gameData.setPlayer2Name(result.getString("player2_name"));
-                        gameData.setPlayer2Race(result.getString("player2_race"));
-                        int player2_team = result.getInt("player2_team");
-                        if (!result.wasNull()) {
-                            gameData.setPlayer2Team(player2_team);
-                            slotToProfileId[1] = player2_team;
-                        }
-                        gameData.setPlayer3Name(result.getString("player3_name"));
-                        gameData.setPlayer3Race(result.getString("player3_race"));
-                        int player3_team = result.getInt("player3_team");
-                        if (!result.wasNull()) {
-                            gameData.setPlayer3Team(player3_team);
-                            slotToProfileId[2] = player3_team;
-                        }
-                        gameData.setPlayer4Name(result.getString("player4_name"));
-                        gameData.setPlayer4Race(result.getString("player4_race"));
-                        int player4_team = result.getInt("player4_team");
-                        if (!result.wasNull()) {
-                            gameData.setPlayer4Team(player4_team);
-                            slotToProfileId[3] = player4_team;
-                        }
-                        gameData.setPlayer5Name(result.getString("player5_name"));
-                        gameData.setPlayer5Race(result.getString("player5_race"));
-                        int player5_team = result.getInt("player5_team");
-                        if (!result.wasNull()) {
-                            gameData.setPlayer5Team(player5_team);
-                            slotToProfileId[4] = player5_team;
-                        }
-                        gameData.setPlayer6Name(result.getString("player6_name"));
-                        gameData.setPlayer6Race(result.getString("player6_race"));
-                        int player6_team = result.getInt("player6_team");
-                        if (!result.wasNull()) {
-                            gameData.setPlayer6Team(player6_team);
-                            slotToProfileId[5] = player6_team;
-                        }
-                        gameData.setPlayer7Name(result.getString("player7_name"));
-                        gameData.setPlayer7Race(result.getString("player7_race"));
-                        int player7_team = result.getInt("player7_team");
-                        if (!result.wasNull()) {
-                            gameData.setPlayer7Team(player7_team);
-                            slotToProfileId[6] = player7_team;
-                        }
-                        gameData.setPlayer8Name(result.getString("player8_name"));
-                        gameData.setPlayer8Race(result.getString("player8_race"));
-                        int player8_team = result.getInt("player8_team");
-                        if (!result.wasNull()) {
-                            gameData.setPlayer8Team(player8_team);
-                            slotToProfileId[7] = player8_team;
-                        }
+                        gameData.setTimeStop(result.getTimestamp("time_stop"));                        
                         gameData.setTimeStart(result.getTimestamp("time_start"));
 
 
                         if (get_player_data) {
                             System.out.println("Fetching player data for game ID: " + game_id);
-                            // Collect unique, non-null player names (nicks)
-                            String[] nicks = new String[8];
-                            nicks[0] =
-                                    (gameData.getPlayer1Name() != null)
-                                            ? gameData.getPlayer1Name()
-                                            : null;
-                            nicks[1] =
-                                    (gameData.getPlayer2Name() != null)
-                                            ? gameData.getPlayer2Name()
-                                            : null;
-                            nicks[2] =
-                                    (gameData.getPlayer3Name() != null)
-                                            ? gameData.getPlayer3Name()
-                                            : null;
-                            nicks[3] =
-                                    (gameData.getPlayer4Name() != null)
-                                            ? gameData.getPlayer4Name()
-                                            : null;
-                            nicks[4] =
-                                    (gameData.getPlayer5Name() != null)
-                                            ? gameData.getPlayer5Name()
-                                            : null;
-                            nicks[5] =
-                                    (gameData.getPlayer6Name() != null)
-                                            ? gameData.getPlayer6Name()
-                                            : null;
-                            nicks[6] =
-                                    (gameData.getPlayer7Name() != null)
-                                            ? gameData.getPlayer7Name()
-                                            : null;
-                            nicks[7] =
-                                    (gameData.getPlayer8Name() != null)
-                                            ? gameData.getPlayer8Name()
-                                            : null;
+                            PreparedStatement game_players_stmt = DBUtils.createStatement("SELECT * FROM game_players WHERE game_id = ?");
+                            game_players_stmt.setInt(1, game_id);
+                            ResultSet game_players_result = game_players_stmt.executeQuery();
+                            ArrayList<GamePlayerModel> nicks = new ArrayList<>();
+                            while (game_players_result.next()) {
+                                GamePlayerModel player = new GamePlayerModel(
+                                        game_players_result.getString("nick"),
+                                        game_players_result.getString("race"),
+                                        game_players_result.getInt("team")
+                                );
+                                nicks.add(player);
+                            }
                             com.oddlabs.matchmaking.Profile[] fetchedProfiles =
-                                    DBInterface.getProfilesByNick(nicks);
+                                    DBInterface.getProfilesByNick(nicks.stream().map(GamePlayerModel::getPlayerName).toArray(String[]::new));
                             System.out.println(
                                     "Fetched "
                                             + fetchedProfiles.length
                                             + " profiles for game ID: "
                                             + game_id);
                             // Map nick to Profile
-                            java.util.Map<String, com.oddlabs.matchmaking.Profile> nickToProfile =
+                            java.util.Map<String, Profile> nickToProfile =
                                     new java.util.HashMap<>();
-                            for (com.oddlabs.matchmaking.Profile pf : fetchedProfiles) {
+                            for (Profile pf : fetchedProfiles) {
                                 if (pf != null && pf.getNick() != null) {
                                     nickToProfile.put(pf.getNick(), pf);
                                 }
                             }
 
-                            // Assign to GameDataModel fields
-                            for (int i = 0; i < 8; i++) {
-                                String nick = nicks[i];
-                                com.oddlabs.matchmaking.Profile pf =
-                                        (nick != null) ? nickToProfile.get(nick) : null;
-                                switch (i) {
-                                    case 0:
-                                        gameData.setProfile1(pf);
-                                        break;
-                                    case 1:
-                                        gameData.setProfile2(pf);
-                                        break;
-                                    case 2:
-                                        gameData.setProfile3(pf);
-                                        break;
-                                    case 3:
-                                        gameData.setProfile4(pf);
-                                        break;
-                                    case 4:
-                                        gameData.setProfile5(pf);
-                                        break;
-                                    case 5:
-                                        gameData.setProfile6(pf);
-                                        break;
-                                    case 6:
-                                        gameData.setProfile7(pf);
-                                        break;
-                                    case 7:
-                                        gameData.setProfile8(pf);
-                                        break;
+                            // Map player names to their profiles
+                            for (GamePlayerModel player : nicks) {
+                                Profile profile = nickToProfile.get(player.getPlayerName());
+                                if (profile != null) {
+                                    player.setProfile(profile);
                                 }
                             }
+
                         }
 
                         return gameData;
