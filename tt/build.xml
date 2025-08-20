@@ -384,11 +384,9 @@
 			<arg
 				value="-ea -XstartOnFirstThread -cp $APPDIR:$APPDIR/* -Djdk.crypto.KeyAgreement.legacyKDF=true" />
 			<!-- add the below values for dmg installer to be produced instead -->
-			<!-- <arg value="-type" /> add a dash back if uncommenting
-			<arg value="app-image" /> -->
+			<arg value="--type" />
+			<arg value="dmg" />
 			<!-- Note: The process will complain about signing but the application can still run -->
-			<!-- Note: - After release version of mac is installed user needs to drop registration
-			file at /user/<your_user>/ or MP will not work -->
 		</exec>
 	</target>
 	<target name="build-mac-arm64" depends="dist">
@@ -413,8 +411,6 @@
 			<!-- <arg value="-type" /> add a dash back when uncommented
 			<arg value="app-image" /> -->
 			<!-- Note: The process will complain about signing but the application can still run -->
-			<!-- Note: - After release version of mac is installed user needs to drop registration
-			 file at /user/<your_user>/ or MP will not work -->
 		</exec>
 	</target>
 
