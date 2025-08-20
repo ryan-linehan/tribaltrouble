@@ -7,13 +7,6 @@
 
 	<property name="main_class_server" value="com.oddlabs.matchserver.MatchmakingServer" />
 	<property name="main_class_router" value="com.oddlabs.routerserver.RouterServer" />
-	<!-- Classpath -->
-	<path id="build.classpath">
-		<pathelement location="${build}" />
-		<pathelement location="${commonstatic}" />
-		<pathelement location="i18n" />
-		<pathelement location="static" />
-	</path>
 
 	<!-- Ivy resolve target to fetch dependencies -->
 	<target name="resolve">
@@ -87,8 +80,6 @@
 			<classpath refid="build.classes.classpath" />
 			<classpath refid="common.static.classpath" />
 			<classpath refid="common.classes.classpath" />
-
-			<jvmarg value="-Djdk.crypto.KeyAgreement.legacyKDF=true" />
 		</java>
 	</target>
 
