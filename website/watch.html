@@ -596,9 +596,6 @@
                 if (curr_tick_index >= ticks.length) {
                     curr_tick_index = ticks.length - 1;
                     jump_to_end = true;
-                    if (!ended) {
-                        pullMoreData();
-                    }
                 }
                 const tick = ticks[curr_tick_index];
                 timeCursor.style.width = (tick * 100.0 / biggest_tick) + "%";
@@ -614,7 +611,18 @@
             }
         }
 
+        function fetchThread() {
+            if (!ended) {
+                pullMoreData();
+                setTimeout(fetchThread, 20);
+            }
+        }
+
+        fetchThread();
+
         setTimeout(nextTick, 20);
+
+        var leftovers = '';
 
         function parseRows(text) {
             if (text.length == 0) {
@@ -623,10 +631,11 @@
             } else {
                 buffering = false;
                 byte_offset += text.length;
-                const rows = text.split("\n");
-                for (var i = 0; i < rows.length; i++) {
+                const rows = (leftovers + text).split("\n");
+                for (var i = 0; i < rows.length - 1; i++) {
                     parseRow(rows[i]);
                 }
+                leftovers = rows[rows.length - 1];
                 fetch_lock = false;
                 if (jump_to_end) {
                     curr_tick_index = ticks.length - 1;
@@ -752,7 +761,7 @@
         function pullMoreData() {
             if (!fetch_lock) {
                 fetch_lock = true;
-                fetch('stream.php?gid=' + gameId + '&offset=' + byte_offset).then(res => res.text()).then(res => parseRows(res));
+                fetch('stream.php?gid=' + gameId + '&offset=' + byte_offset + '&size=1000000').then(res => res.text()).then(res => parseRows(res));
             }
         }
 

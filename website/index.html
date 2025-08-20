@@ -8,10 +8,16 @@
             background-size: cover;
             background-color: rgba(255, 255, 255, 0.2);
             background-blend-mode: lighten;
-            font-family: Tahoma, "Trebuchet MS", sans-serif;
+            font-family: "Tahoma";
             text-shadow: 1px 1px #ddda;
             cursor: url("cursor.png"), auto;
             font-size: 20px;
+            color: white;
+            text-shadow: 1px 1px black;
+        }
+
+        h2 {
+            font-family: Impact, Charcoal, sans-serif;
         }
 
         .nav_button {
@@ -24,6 +30,8 @@
             height: 50px;
             border-radius: 7px;
             border: none;
+            color: black;
+            text-shadow: 2px 2px #FFF9;
         }
 
         .nav_button:hover {
@@ -68,9 +76,12 @@
             margin-right: 10px;
             -webkit-backdrop-filter: blur(7px);
             backdrop-filter: blur(7px);
-            background: #fffa;
+            background: #0007;
             vertical-align: center;
             min-height: 50%;
+            color: white;
+            text-shadow: 2px 2px black;
+
         }
 
         .popup {
@@ -83,7 +94,7 @@
             margin-right: 10px;
             -webkit-backdrop-filter: blur(7px);
             backdrop-filter: blur(7px);
-            background: #fffa;
+            background: #0007;
             vertical-align: center;
             left: 50%;
             top: 50%;
@@ -91,6 +102,8 @@
             min-width: 10vw;
             min-height: 10vh;
             position: fixed;
+            color: white;
+            text-shadow: 1px 1px black;
         }
 
         .popup-btn {
@@ -99,20 +112,45 @@
             right: 5px;
         }
 
-        .popup-btn:hover {
-            background-color: red;
-        }
-
         .tableheader {
-            background: #99f9;
+            background-color: #836353;
+            background-image: linear-gradient(#836353, #b69686);
             padding: 2px;
             min-width: 200px;
             padding-left: 5px;
-            font-weight: bold;
+            color: white;
+            text-shadow: 2px 2px black;
+            border-style: outset;
+            border-color: #a99489;
+            border-width: 1px;
+        }
+
+        tr.inforow:nth-child(odd) {
+            background-color: #FFFFFF19;
+        }
+
+        tr.inforow:nth-child(even) {
+            background-color: #c8c8c819;
+        }
+
+        a {
+            color: white;
+            text-shadow: 1px 1px black;
+        }
+
+        a:visited {
+            color: #FFFA;
+            text-shadow: 1px 1px #000A;
+        }
+
+        tr.inforow {
+            color: white;
+            text-shadow: 1px 1px black;
         }
 
         .pname,
         .pscore {
+            background-color: #482b04;
             padding: 2px;
             padding-left: 5px;
             background: #99f2;
@@ -181,7 +219,7 @@
         }
 
         function processLocalTimes(container) {
-            (container || document).querySelectorAll('.localtime').forEach(function (el) {
+            (container || document).querySelectorAll('.localtime').forEach(function(el) {
                 var utcTime = el.getAttribute('data-time');
                 if (utcTime) {
                     var date = new Date(utcTime.replace(' ', 'T') + 'Z');
@@ -211,6 +249,7 @@
         }
 
         let players_offset = 0;
+
         function updatePlayers() {
             if (players_offset < 0) {
                 players_offset = 0;
@@ -234,6 +273,7 @@
                         let wins = row.insertCell();
                         let losses = row.insertCell();
                         let rating = row.insertCell();
+                        row.className = 'inforow';
                         num.className = 'pscore';
                         num.innerHTML = (i + players_offset + 1);
                         nick.className = 'pscore';
@@ -284,6 +324,7 @@
         }
 
         let games_offset = 0;
+
         function updateGames() {
             if (games_offset < 0) {
                 games_offset = 0;
@@ -308,6 +349,7 @@
                         let winner = row.insertCell();
                         let link = row.insertCell();
                         let info = gameInfo(res[i]);
+                        row.className = 'inforow';
                         num.innerHTML = (i + games_offset + 1);
                         num.className = 'pscore';
                         if (res[i].status == 'completed') {
@@ -329,6 +371,7 @@
                     processLocalTimes(gamesTable);
                 });
         }
+
         function showScores() {
             const about = document.getElementById("about");
             const download = document.getElementById("download");
@@ -353,6 +396,7 @@
 
         var games_of_offset = 0;
         var shown_player = '';
+
         function showPlayer() {
             if (games_of_offset < 0) {
                 games_of_offset = 0;
@@ -510,9 +554,9 @@
                 <th class='tableheader'>Rating</th>
             </tr>
         </table>
-        <a href='javascript:players_offset = 0; updatePlayers()'>|&lt;</a>
-        <a href='javascript:players_offset -= 10; updatePlayers()'>&lt;&lt;</a>
-        <a href='javascript:players_offset += 10; updatePlayers()'>&gt;&gt;</a>
+        <img src='reset-btn.png' onclick='players_offset = 0; updatePlayers()' />
+        <img src='prev-btn.png' onclick='players_offset -= 10; updatePlayers()' />
+        <img src='next-btn.png' onclick='players_offset += 10; updatePlayers()' />
         <h2>Recent Games</h2>
         <table id='gamestable'>
             <tr>
@@ -523,13 +567,13 @@
                 <th class='tableheader'>Watch Link</th>
             </tr>
         </table>
-        <a href='javascript:games_offset = 0; updateGames()'>|&lt;</a>
-        <a href='javascript:games_offset -= 10; updateGames()'>&lt;&lt;</a>
-        <a href='javascript:games_offset += 10; updateGames()'>&gt;&gt;</a>
+        <img src='reset-btn.png' onclick='games_offset = 0; updateGames()' />
+        <img src='prev-btn.png' onclick='games_offset -= 10; updateGames()' />
+        <img src='next-btn.png' onclick='games_offset += 10; updateGames()' />
     </div>
 
     <div id="player" class="popup">
-        <button class='popup-btn' onclick='closePopup()'>X</button>
+        <img src='x-btn.png' class='popup-btn' onclick='closePopup()' />
         <h2 id='games-of-name'></h2>
         <table id='player-games'>
             <tr>
@@ -540,9 +584,9 @@
                 <th class='tableheader'>Watch Link</th>
             </tr>
         </table>
-        <a href='javascript:games_of_offset = 0; showPlayer()'>|&lt;</a>
-        <a href='javascript:games_of_offset -= 10; showPlayer()'>&lt;&lt;</a>
-        <a href='javascript:games_of_offset += 10; showPlayer()'>&gt;&gt;</a>
+        <img src='reset-btn.png' onclick='games_of_offset = 0; showPlayer()' />
+        <img src='prev-btn.png' onclick='games_of_offset -= 10; showPlayer()' />
+        <img src="next-btn.png" onclick='games_of_offset += 10; showPlayer()' />
     </div>
 
     <div id="contribute" class="content">
