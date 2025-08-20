@@ -218,8 +218,7 @@ public final strictfp class TutorialForm extends Form {
                     ai_string + "2",
                     ai_string + "3",
                     ai_string + "4",
-                    ai_string + "5",
-                    ai_string + "6"
+                    ai_string + "5"
                 });
     }
 
