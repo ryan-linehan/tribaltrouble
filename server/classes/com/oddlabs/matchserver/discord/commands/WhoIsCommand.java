@@ -14,6 +14,7 @@ import reactor.core.publisher.Mono;
 
 public class WhoIsCommand extends DiscordCommand {
 
+    private boolean debug = false;
     private String command_name = "whois";
     private String command_description =
             "Displays tribal trouble profiles associated with the discord user and vice versa.";
@@ -26,19 +27,20 @@ public class WhoIsCommand extends DiscordCommand {
         return command_name;
     }
 
-    // TODO: Make this less 'pingy' with the mentions - maybe making ephemeral replies would be the
+    // TODO: Make this less 'pingy' with the mentions - maybe making ephemeral
+    // replies would be the
     // easiest way
     @Override
     public Mono<Void> executeCommand(ChatInputInteractionEvent event) {
-
         String user_name =
                 event.getOption(command_option_lookup_name)
                         .flatMap(ApplicationCommandInteractionOption::getValue)
                         .map(ApplicationCommandInteractionOptionValue::asString)
                         .orElse("");
 
-        System.out.println("Looking up user: " + user_name);
-        // If a discord user was mentioned, extract their ID by removing non-numeric characters
+        printDebug("Looking up user: " + user_name);
+        // If a discord user was mentioned, extract their ID by removing non-numeric
+        // characters
         // (string will be <@long>)
         String idStr = user_name.replaceAll("[^0-9]", "");
         long discordUserId = -1;
@@ -106,5 +108,11 @@ public class WhoIsCommand extends DiscordCommand {
                 .getGuild()
                 .flatMap(guild -> guild.getMemberById(Snowflake.of(discordId)))
                 .map(member -> member.getNickname().orElse(member.getUsername()));
+    }
+
+    private void printDebug(String message) {
+        if (debug) {
+            System.out.println(message);
+        }
     }
 }

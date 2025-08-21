@@ -16,6 +16,7 @@ import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class RegisterProfileToDiscordUserCommand extends DiscordCommand {
+    private boolean debug = false;
     private String command_name = "register-user";
     private String command_description =
             "Registers a tribal trouble user profile to the Discord user. TT user must reply in"
@@ -47,7 +48,7 @@ public class RegisterProfileToDiscordUserCommand extends DiscordCommand {
                     new TimerTask() {
                         @Override
                         public void run() {
-                            System.out.println(
+                            printDebug(
                                     "Timeout: Removing profile "
                                             + profile_name
                                             + " from processingProfiles");
@@ -58,7 +59,7 @@ public class RegisterProfileToDiscordUserCommand extends DiscordCommand {
                                                     + " registration timed out.")
                                     .then()
                                     .subscribe();
-                            System.out.println(
+                            printDebug(
                                     "Timeout: Removed "
                                             + profile_name
                                             + " from processingProfiles");
@@ -107,7 +108,7 @@ public class RegisterProfileToDiscordUserCommand extends DiscordCommand {
         if (client != null) {
             // Found the client with the matching profile name
             // You can now send a private message or perform other actions
-            System.out.println("Found active client with profile name: " + profileToRegisterName);
+            printDebug("Found active client with profile name: " + profileToRegisterName);
             final ProfileRegistrationTimeout registration =
                     new ProfileRegistrationTimeout(discord_user_id, profileToRegisterName, event);
             processingProfiles.put(
@@ -136,8 +137,7 @@ public class RegisterProfileToDiscordUserCommand extends DiscordCommand {
                     .then();
         } else {
             // Handle not found
-            System.out.println(
-                    "Could not find active client with profile name: " + profileToRegisterName);
+            printDebug("Could not find active client with profile name: " + profileToRegisterName);
             return event.createFollowup("Failed to register profile: " + profileToRegisterName)
                     .withEphemeral(true)
                     .then();
@@ -158,11 +158,19 @@ public class RegisterProfileToDiscordUserCommand extends DiscordCommand {
                                                         + " Discord user")
                                         .type(
                                                 ApplicationCommandOption.Type.STRING
-                                                        .getValue()) // 3 is STRING type
+                                                        .getValue()) // 3 is
+                                        // STRING
+                                        // type
                                         .required(true)
                                         .build())
                         .build();
 
         return registerUserCommand;
+    }
+
+    private void printDebug(String message) {
+        if (debug) {
+            System.out.println(message);
+        }
     }
 }

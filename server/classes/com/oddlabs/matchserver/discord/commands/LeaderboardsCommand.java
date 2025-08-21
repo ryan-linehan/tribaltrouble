@@ -20,6 +20,7 @@ import java.util.List;
 
 public class LeaderboardsCommand extends DiscordCommand {
 
+    private boolean debug = false;
     private String command_name = "leaderboard";
     private String command_description = "Displays the current leaderboard";
     private String command_option_start = "start";
@@ -62,14 +63,13 @@ public class LeaderboardsCommand extends DiscordCommand {
         if (countInt <= 0) {
             countInt = 25;
         }
-        System.out.println("Fetching leaderboards from " + startInt + " count " + countInt);
+        printDebug("Fetching leaderboards from " + startInt + " count " + countInt);
         RankingEntry[] ranks = DBInterface.getRankings(startInt, countInt);
-        System.out.println("Fetched " + ranks.length + " ranks from the database.");
+        printDebug("Fetched " + ranks.length + " ranks from the database.");
         List<EmbedCreateSpec> embeds = new ArrayList<>();
         try {
-
             for (int i = 0; i < ranks.length; i += 25) {
-                System.out.println(
+                printDebug(
                         "Creating embed for leaderboard "
                                 + (i + startInt)
                                 + "-"
@@ -97,12 +97,12 @@ public class LeaderboardsCommand extends DiscordCommand {
                                     WebsiteLinkHelper.getProfileLink(
                                             "Profile", ranks[j].getName()));
                     builder.addField(title, message, false);
-                    System.out.println("Added rank " + title + " to embed.");
+                    printDebug("Added rank " + title + " to embed.");
                 }
                 embeds.add(builder.build());
             }
         } catch (Exception e) {
-            System.out.println("Exception occurred while creating embeds: " + e.getMessage());
+            printDebug("Exception occurred while creating embeds: " + e.getMessage());
         }
         if (embeds.size() == 0) {
             return event.reply("No rankings available to display.");
@@ -138,5 +138,11 @@ public class LeaderboardsCommand extends DiscordCommand {
                         .build();
 
         return leaderboardCommand;
+    }
+
+    private void printDebug(String message) {
+        if (debug) {
+            System.out.println(message);
+        }
     }
 }
