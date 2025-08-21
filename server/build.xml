@@ -18,14 +18,6 @@
 	<target name="compiledeps" depends="compile-common, resolve">
 	</target>
 
-	<target name="compile" depends="init,compiledeps">
-		<javac debug="yes" source="${java_source_version}" target="${java_source_version}"
-			srcdir="classes" destdir="${build}/classes">
-			<classpath refid="_common.combined.compile.javasvn.classpath" />
-			<classpath refid="server.classpath" />
-		</javac>
-	</target>
-
 	<target name="bugreporter" depends="compile">
 		<jar destfile="${build}/bugreport.jar">
 			<fileset dir="../common/build/classes" includes="com/oddlabs/net/**/*class" />
