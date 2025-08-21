@@ -43,7 +43,9 @@ public class RankCommand extends DiscordCommand {
                         .flatMap(ApplicationCommandInteractionOption::getValue)
                         .map(ApplicationCommandInteractionOptionValue::asLong)
                         .orElse(2L);
-
+        if (range > 10) {
+            range = 10;
+        }
         if (nick == null) {
             return event.reply("Please provide a valid user profile name.").then();
         }
