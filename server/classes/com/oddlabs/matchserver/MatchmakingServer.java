@@ -56,18 +56,6 @@ public final class MatchmakingServer implements ConnectionListenerInterface {
         }
     }
 
-    static {
-        try {
-            Handler fh = new FileHandler("logs/matchserver.%g.log", 10 * 1024 * 1024, 50);
-            fh.setFormatter(new SimpleFormatter());
-            logger.addHandler(fh);
-            logger.setLevel(Level.ALL);
-        } catch (Exception e) {
-            System.out.println("Exception: " + e);
-            e.printStackTrace();
-        }
-    }
-
     private MatchmakingServer() throws Exception {
         Deterministic deterministic = new NotDeterministic();
         this.network = new NetworkSelector(deterministic);
