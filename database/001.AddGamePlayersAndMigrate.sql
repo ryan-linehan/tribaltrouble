@@ -1,3 +1,5 @@
+-- Select database
+USE oddlabs;
 
 -- Create the game players table
 CREATE TABLE `game_players` (
@@ -6,7 +8,7 @@ CREATE TABLE `game_players` (
   `nick` varchar(128) NOT NULL,
   `team` int NOT NULL,
   `race` varchar(1) NOT NULL
-)
+);
 
 -- Migrate the players from the games table to the game_players table
 INSERT INTO
@@ -81,8 +83,7 @@ SELECT
     player8_race
 FROM games
 WHERE
-    player8_name IS NOT NULL AND player8_team IS NOT NULL AND player8_race IS NOT NULL
-
+    player8_name IS NOT NULL AND player8_team IS NOT NULL AND player8_race IS NOT NULL;
 
 ALTER TABLE games
     DROP COLUMN player1_name,
@@ -108,4 +109,4 @@ ALTER TABLE games
     DROP COLUMN player7_race,
     DROP COLUMN player8_name,
     DROP COLUMN player8_team,
-    DROP COLUMN player8_race
+    DROP COLUMN player8_race;

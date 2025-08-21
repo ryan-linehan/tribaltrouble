@@ -649,7 +649,7 @@ public final strictfp class Player implements PlayerInterface {
         float[][] colors = new float[MatchmakingServerInterface.MAX_PLAYERS][4];
         int currentIndex = 0;
         // Use the set colors while we have them
-        for (int i = 0; i < SET_COLORS.length; i++) {
+        for (int i = 0; i < Math.min(SET_COLORS.length, colors.length); i++) {
             colors[i] = SET_COLORS[i];
             currentIndex = i;
         }
