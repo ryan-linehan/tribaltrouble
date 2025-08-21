@@ -605,7 +605,7 @@ public final strictfp class DBInterface {
             PreparedStatement stmt =
                     DBUtils.createStatement(
                             "UPDATE games G inner join game_players GP on G.id = GP.id SET G.status"
-                                + " = ? WHERE GP.nick = ? AND G.status = ?");
+                                    + " = ? WHERE GP.nick = ? AND G.status = ?");
             try {
                 stmt.setString(1, "dropped");
                 stmt.setString(2, nick);
