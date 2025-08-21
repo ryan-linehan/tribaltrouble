@@ -79,14 +79,14 @@ public class MatchupCommand extends DiscordCommand {
         builder.addField("\u200B", "\u200B", false);
         builder.addField("Recent Matchups", "", false);
         int matchupNum = 1;
-        // TODO: Add date logic so we can tell WHEN the matchup was
+        
         for (VersusMatchupModel matchup : matchupResult.getRecentMatchups()) {
             java.sql.Timestamp startTime = matchup.getStartTime();
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd hh:mm a");
             String formattedTime = sdf.format(startTime);
 
             String field_value = String.format("Winner: %s", matchup.getWinner());
-            field_value += String.format("\nMatch played at: %s", formattedTime);
+            field_value += String.format("\nStart time: %s", formattedTime);
             if (matchup.getGameReplayUrl() != null) {
                 field_value += String.format("\n[Watch Replay](%s)", matchup.getGameReplayUrl());
             }
