@@ -29,7 +29,7 @@ public class RegisterProfileToDiscordUserCommand extends DiscordCommand {
 
     @Override
     public Mono<Void> executeCommand(ChatInputInteractionEvent event) {
-        return event.deferReply().withEphemeral(true).then(methodThatTakesALongTime(event));
+        return event.deferReply().withEphemeral(true).then(doRegistrationInteraction(event));
     }
 
     /** Static dicitonary of profiles awaiting to be processed by a user response. */
@@ -83,7 +83,7 @@ public class RegisterProfileToDiscordUserCommand extends DiscordCommand {
     public static ConcurrentHashMap<String, Runnable> processingProfiles =
             new ConcurrentHashMap<>();
 
-    public Mono<Void> methodThatTakesALongTime(ChatInputInteractionEvent event) {
+    public Mono<Void> doRegistrationInteraction(ChatInputInteractionEvent event) {
         String profileToRegisterName =
                 event.getOption(command_option_profile_name)
                         .flatMap(ApplicationCommandInteractionOption::getValue)
