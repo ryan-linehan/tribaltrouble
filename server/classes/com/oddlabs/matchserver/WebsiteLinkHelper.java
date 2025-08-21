@@ -5,7 +5,7 @@ import java.net.URLEncoder;
 
 public class WebsiteLinkHelper {
     public static String getPlayerHighscoreUrl(String nick) {
-        String domain = System.getenv("TT_WEBSITE_DOMAIN");
+        String domain = ServerConfiguration.getInstance().get(ServerConfiguration.WEBSITE_DOMAIN);
         if (domain == null) domain = "tribaltrouble.org";
 
         try {
