@@ -798,15 +798,14 @@ public final strictfp class DBInterface {
             String player1, String player2, boolean only1v1Matchups) {
         String query =
                 "WITH two_player_games AS (   SELECT game_id FROM game_players GROUP BY game_id"
-                    + " HAVING COUNT(*) = 2 ) SELECT g.id AS game_id, CASE   WHEN g.winner = gp.team THEN 'Player1' "
-                    + "  WHEN g.winner = gp2.team THEN 'Player2'   ELSE 'Neither' END AS vsResult,"
-                    + " gp.nick AS player1_name, gp2.nick AS player2_name, "
-                    + " g.name, g.mapcode, g.time_start"
-                    + " FROM game_players gp   INNER JOIN game_players gp2 ON gp.game_id ="
-                    + " gp2.game_id AND gp.team <> gp2.team   INNER JOIN games g ON g.id ="
-                    + " gp.game_id   INNER JOIN two_player_games tpg ON tpg.game_id = g.id WHERE"
-                    + " g.winner IS NOT NULL   AND gp.nick = ?   AND gp2.nick = ?   AND gp.team <>"
-                    + " gp2.team ORDER BY gp.game_id DESC;";
+                    + " HAVING COUNT(*) = 2 ) SELECT g.id AS game_id, CASE   WHEN g.winner ="
+                    + " gp.team THEN 'Player1'   WHEN g.winner = gp2.team THEN 'Player2'   ELSE"
+                    + " 'Neither' END AS vsResult, gp.nick AS player1_name, gp2.nick AS"
+                    + " player2_name,  g.name, g.mapcode, g.time_start FROM game_players gp   INNER"
+                    + " JOIN game_players gp2 ON gp.game_id = gp2.game_id AND gp.team <> gp2.team  "
+                    + " INNER JOIN games g ON g.id = gp.game_id   INNER JOIN two_player_games tpg"
+                    + " ON tpg.game_id = g.id WHERE g.winner IS NOT NULL   AND gp.nick = ?   AND"
+                    + " gp2.nick = ?   AND gp.team <> gp2.team ORDER BY gp.game_id DESC;";
         try {
             PreparedStatement stmt = DBUtils.createStatement(query);
             stmt.setString(1, player1);
