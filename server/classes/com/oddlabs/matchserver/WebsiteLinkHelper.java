@@ -20,7 +20,7 @@ public class WebsiteLinkHelper {
     public static String getReplayUrl(int game_id) {
         File spectatorFile = new File("/var/games/" + game_id);
         boolean exists = spectatorFile.exists();
-        String domain = System.getenv("TT_WEBSITE_DOMAIN");
+        String domain = ServerConfiguration.getInstance().get(ServerConfiguration.WEBSITE_DOMAIN);
         if (domain == null) domain = "tribaltrouble.org";
         return exists ? String.format("https://%s/watch.html#%d", domain, game_id) : null;
     }

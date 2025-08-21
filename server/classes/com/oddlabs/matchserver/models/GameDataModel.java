@@ -1,8 +1,5 @@
 package com.oddlabs.matchserver.models;
 
-import com.oddlabs.matchmaking.GamePlayer;
-import com.oddlabs.matchmaking.Profile;
-
 import java.sql.Timestamp;
 import java.util.ArrayList;
 

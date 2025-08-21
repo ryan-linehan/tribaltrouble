@@ -4,6 +4,7 @@ import com.oddlabs.matchserver.discord.commands.DiscordCommand;
 import com.oddlabs.matchserver.discord.commands.LeaderboardsCommand;
 import com.oddlabs.matchserver.discord.commands.MatchupCommand;
 import com.oddlabs.matchserver.discord.commands.OnlineCommand;
+import com.oddlabs.matchserver.discord.commands.RankCommand;
 import com.oddlabs.matchserver.discord.commands.RegisterProfileToDiscordUserCommand;
 import com.oddlabs.matchserver.discord.commands.WhoIsCommand;
 
@@ -61,6 +62,7 @@ public class DiscordBotService {
                             commands.add(new RegisterProfileToDiscordUserCommand());
                             commands.add(new WhoIsCommand());
                             commands.add(new OnlineCommand());
+                            commands.add(new RankCommand());
                             chatroomCoordinator = new DiscordChatroomCoordinator();
                             registerCommands();
                             // deleteCommands();
@@ -118,7 +120,20 @@ public class DiscordBotService {
                                                     event.getCommandName()
                                                             .equals(cmd.getCommandName()))
                                     .findFirst()
-                                    .map(cmd -> cmd.executeCommand(event))
+                                    .map(
+                                            cmd -> {
+                                                try {
+                                                    return cmd.executeCommand(event);
+                                                } catch (Exception e) {
+                                                    System.out.println(
+                                                            "Error executing command: "
+                                                                    + e.getMessage());
+                                                    return event.reply(
+                                                                    "An error occurred while"
+                                                                        + " executing the command.")
+                                                            .withEphemeral(true);
+                                                }
+                                            })
                                     .orElseGet(
                                             () -> {
                                                 System.out.println(

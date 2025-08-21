@@ -502,6 +502,48 @@ public final strictfp class DBInterface {
         }
     }
 
+    public static final RankingEntry[] getRankings(String nick, int radius) {
+        try {
+            String sql =
+                    "SELECT nick, rating, wins, losses, invalid, row_num FROM (  SELECT nick,"
+                        + " rating, wins, losses, invalid, ROW_NUMBER() OVER (ORDER BY rating DESC,"
+                        + " (wins - losses) DESC, wins DESC) AS row_num   FROM profiles) ranked"
+                        + " WHERE ABS(CAST(row_num AS SIGNED) - (  SELECT CAST(row_num AS SIGNED)"
+                        + " FROM (    SELECT nick, ROW_NUMBER() OVER (ORDER BY rating DESC, (wins -"
+                        + " losses) DESC, wins DESC) AS row_num FROM profiles  ) sub WHERE nick ="
+                        + " ?)) <= ? ORDER BY row_num";
+
+            PreparedStatement stmt = DBUtils.createStatement(sql);
+            stmt.setString(1, nick);
+            stmt.setInt(2, radius);
+            ResultSet result = stmt.executeQuery();
+            try {
+                List<RankingEntry> rankings = new ArrayList<>();
+                while (result.next()) {
+                    String nick_name = result.getString("nick");
+                    int rating = result.getInt("rating");
+                    int wins = result.getInt("wins");
+                    int losses = result.getInt("losses");
+                    int invalid = result.getInt("invalid");
+                    int ranking = result.getInt("row_num");
+                    rankings.add(
+                            new RankingEntry(ranking, nick_name, rating, wins, losses, invalid));
+                }
+                RankingEntry[] ranking_array = new RankingEntry[rankings.size()];
+                for (int i = 0; i < ranking_array.length; i++) ranking_array[i] = rankings.get(i);
+                return ranking_array;
+            } finally {
+                result.close();
+                stmt.getConnection().close();
+            }
+        } catch (SQLException e) {
+            System.out.println("Exception: " + e);
+            MatchmakingServer.getLogger()
+                    .throwing(DBInterface.class.getName(), "getRankings(nick, radius)", e);
+            return new RankingEntry[0];
+        }
+    }
+
     public static final RankingEntry[] getRankings(int start, int count) {
         try {
             PreparedStatement stmt =
@@ -673,26 +715,30 @@ public final strictfp class DBInterface {
                         if (!result.wasNull()) {
                             gameData.setWinner(winner);
                         }
-                        gameData.setTimeStop(result.getTimestamp("time_stop"));                        
+                        gameData.setTimeStop(result.getTimestamp("time_stop"));
                         gameData.setTimeStart(result.getTimestamp("time_start"));
-
 
                         if (get_player_data) {
                             System.out.println("Fetching player data for game ID: " + game_id);
-                            PreparedStatement game_players_stmt = DBUtils.createStatement("SELECT * FROM game_players WHERE game_id = ?");
+                            PreparedStatement game_players_stmt =
+                                    DBUtils.createStatement(
+                                            "SELECT * FROM game_players WHERE game_id = ?");
                             game_players_stmt.setInt(1, game_id);
                             ResultSet game_players_result = game_players_stmt.executeQuery();
                             ArrayList<GamePlayerModel> nicks = new ArrayList<>();
                             while (game_players_result.next()) {
-                                GamePlayerModel player = new GamePlayerModel(
-                                        game_players_result.getString("nick"),
-                                        game_players_result.getString("race"),
-                                        game_players_result.getInt("team")
-                                );
+                                GamePlayerModel player =
+                                        new GamePlayerModel(
+                                                game_players_result.getString("nick"),
+                                                game_players_result.getString("race"),
+                                                game_players_result.getInt("team"));
                                 nicks.add(player);
                             }
                             com.oddlabs.matchmaking.Profile[] fetchedProfiles =
-                                    DBInterface.getProfilesByNick(nicks.stream().map(GamePlayerModel::getPlayerName).toArray(String[]::new));
+                                    DBInterface.getProfilesByNick(
+                                            nicks.stream()
+                                                    .map(GamePlayerModel::getPlayerName)
+                                                    .toArray(String[]::new));
                             System.out.println(
                                     "Fetched "
                                             + fetchedProfiles.length
@@ -714,7 +760,6 @@ public final strictfp class DBInterface {
                                     player.setProfile(profile);
                                 }
                             }
-
                         }
 
                         return gameData;
@@ -752,33 +797,14 @@ public final strictfp class DBInterface {
     public static final VersusMatchupResultModel getMatchupStats(
             String player1, String player2, boolean only1v1Matchups) {
         String query =
-                "WITH game_players AS ( SELECT id AS GameId, player1_name AS Name, player1_team AS"
-                    + " Team, player1_race AS Race FROM games WHERE player1_name IS NOT NULL UNION"
-                    + " ALL SELECT id, player2_name, player2_team, player2_race FROM games WHERE"
-                    + " player2_name IS NOT NULL UNION ALL SELECT id, player3_name, player3_team,"
-                    + " player3_race FROM games WHERE player3_name IS NOT NULL UNION ALL SELECT id,"
-                    + " player4_name, player4_team, player4_race FROM games WHERE player4_name IS"
-                    + " NOT NULL UNION ALL SELECT id, player5_name, player5_team, player5_race FROM"
-                    + " games WHERE player5_name IS NOT NULL UNION ALL SELECT id, player6_name,"
-                    + " player6_team, player6_race FROM games WHERE player6_name IS NOT NULL UNION"
-                    + " ALL SELECT id, player7_name, player7_team, player7_race FROM games WHERE"
-                    + " player7_name IS NOT NULL UNION ALL SELECT id, player8_name, player8_team,"
-                    + " player8_race FROM games WHERE player8_name IS NOT NULL), two_player_games"
-                    + " AS ( SELECT GameId FROM game_players GROUP BY GameId HAVING COUNT(*) = 2)"
-                    + " SELECT CASE WHEN g.winner = gp.Team THEN 'Player1' WHEN g.winner = gp2.Team"
-                    + " THEN 'Player2' ELSE 'Neither' END AS vsResult, g.* FROM game_players gp"
-                    + " inner JOIN game_players as gp2 on gp.GameId = gp2.GameId and gp.Team <>"
-                    + " gp2.Team inner JOIN games g on g.id = gp.GameId"
-                        // 1v1 only
-                        + (only1v1Matchups
-                                ? " inner join two_player_games tpg on tpg.GameId = g.id"
-                                : "")
-                        + " WHERE"
-                        + " winner IS NOT NULL"
-                        + " AND gp.Name = ?"
-                        + " AND gp2.Name = ?"
-                        + " and gp.Team <> gp2.Team"
-                        + " order by gp.GameId DESC;";
+                "WITH two_player_games AS (   SELECT game_id FROM game_players GROUP BY game_id"
+                    + " HAVING COUNT(*) = 2 ) SELECT CASE   WHEN g.winner = gp.team THEN 'Player1' "
+                    + "  WHEN g.winner = gp2.team THEN 'Player2'   ELSE 'Neither' END AS vsResult"
+                    + " FROM game_players gp   INNER JOIN game_players gp2 ON gp.game_id ="
+                    + " gp2.game_id AND gp.team <> gp2.team   INNER JOIN games g ON g.id ="
+                    + " gp.game_id   INNER JOIN two_player_games tpg ON tpg.game_id = g.id WHERE"
+                    + " g.winner IS NOT NULL   AND gp.nick = ?   AND gp2.nick = ?   AND gp.team <>"
+                    + " gp2.team ORDER BY gp.game_id DESC;";
         try {
             PreparedStatement stmt = DBUtils.createStatement(query);
             stmt.setString(1, player1);
@@ -920,7 +946,7 @@ public final strictfp class DBInterface {
             PreparedStatement stmt =
                     DBUtils.createStatement(
                             "UPDATE games G inner join game_players GP on G.id = GP.id SET G.status"
-                                + " = ? WHERE GP.nick = ? AND G.status = ?");
+                                    + " = ? WHERE GP.nick = ? AND G.status = ?");
             try {
                 stmt.setString(1, "dropped");
                 stmt.setString(2, nick);

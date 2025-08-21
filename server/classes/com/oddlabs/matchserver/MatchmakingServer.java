@@ -77,7 +77,7 @@ public final class MatchmakingServer implements ConnectionListenerInterface {
         chat_logger.setLevel(Level.ALL);
 
         this.public_reg_key = RegistrationKey.loadPublicKey();
-        String password = System.getenv("TT_SERVER_PASSWORD");
+        String password = ServerConfiguration.getInstance().get(ServerConfiguration.SQL_PASS);
         DBUtils.initConnection("jdbc:mysql://localhost/oddlabs", "matchmaker", password);
         logger.info("Generating encryption keys.");
         this.param_spec = KeyManager.generateParameterSpec();
@@ -118,9 +118,9 @@ public final class MatchmakingServer implements ConnectionListenerInterface {
                 new Authenticator(this, secure_conn, (InetAddress) remote_address, id);
     }
 
-    //	public final boolean isKeyOnline(String key_encoded) {
-    //		return online_keys.contains(key_encoded);
-    //	}
+    // public final boolean isKeyOnline(String key_encoded) {
+    // return online_keys.contains(key_encoded);
+    // }
     public final void loginClient(
             InetAddress remote_address,
             InetAddress local_remote_address,
@@ -129,7 +129,7 @@ public final class MatchmakingServer implements ConnectionListenerInterface {
             String key_code_encoded,
             int revision,
             int host_id) {
-        //		online_keys.add(key_code_encoded);
+        // online_keys.add(key_code_encoded);
         Client old_logged_in = (Client) online_users.remove(username.toLowerCase());
         if (old_logged_in != null) {
             old_logged_in.close();
@@ -189,16 +189,30 @@ public final class MatchmakingServer implements ConnectionListenerInterface {
 
     public static final void main(String[] args) {
         try {
-            String token = System.getenv("TT_DISCORD_TOKEN");
-            String serverIdAsString = System.getenv("TT_SERVER_ID");
+            TryInitalizeDiscordBot();
+            new MatchmakingServer();
+        } catch (Exception e) {
+            System.out.println("Exception: " + e);
+            logger.throwing("MatchmakingServer", "main", e);
+            postPanic();
+            e.printStackTrace();
+        }
+    }
+
+    private static void TryInitalizeDiscordBot() {
+        try {
+            String token =
+                    ServerConfiguration.getInstance().get(ServerConfiguration.DISCORD_BOT_TOKEN);
+            String serverIdAsString =
+                    ServerConfiguration.getInstance().get(ServerConfiguration.DISCORD_SERVER_ID);
             if (token == null || token.isEmpty()) {
                 logger.info(
-                        "No discord bot token found at TT_DISCORD_TOKEN environment variable,"
-                                + " skipping Discord bot initialization.");
+                        "No discord bot token found in server config."
+                                + " Skipping Discord bot initialization.");
 
             } else if (serverIdAsString == null || serverIdAsString.isEmpty()) {
                 logger.info(
-                        "No discord guild name found at TT_SERVER_ID environment variable, skipping"
+                        "No discord guild name found in server config. Skipping"
                                 + " Discord bot initialization.");
             } else {
                 try {
@@ -206,7 +220,7 @@ public final class MatchmakingServer implements ConnectionListenerInterface {
                     if (serverId <= 0) {
                         logger.log(
                                 Level.INFO,
-                                "Invalid discord guild ID (must be positive): {0}, skipping Discord"
+                                "Invalid discord guild ID (must be positive): {0}. Skipping Discord"
                                         + " bot initialization.",
                                 serverIdAsString);
                     } else {
@@ -224,13 +238,8 @@ public final class MatchmakingServer implements ConnectionListenerInterface {
                             new Object[] {serverIdAsString, e.getMessage()});
                 }
             }
-
-            new MatchmakingServer();
         } catch (Exception e) {
-            System.out.println("Exception: " + e);
-            logger.throwing("MatchmakingServer", "main", e);
-            postPanic();
-            e.printStackTrace();
+            logger.log(Level.INFO, "Failed to initialize Discord bot due to an exception.", e);
         }
     }
 }
