@@ -14,8 +14,28 @@ if (!$conn) {
 }
 
 $offset = (int)$_GET['offset'];
+$column = (int)$_GET['column'];
 
-$sql = "select nick, wins, losses, rating from profiles where wins != 0 || losses != 0 ORDER BY wins desc, (wins/losses) desc limit 10 offset $offset";
+if ((int)$_GET['sort'] == 1) {
+    $sort = "";
+} else {
+    $sort = "desc";
+}
+
+switch ($column) {
+    case 0:
+        $orderby = "wins $sort, (wins/losses) $sort, rating $sort";
+        break;
+    case 1:
+        $orderby = "losses $sort";
+        break;
+    case 2:
+    default:
+        $orderby = "rating $sort, wins $sort, (wins/losses) $sort";
+        break;
+}
+
+$sql = "select nick, wins, losses, rating from profiles where wins != 0 || losses != 0 order by $orderby limit 10 offset $offset";
 
 $response = array();
 

@@ -112,6 +112,14 @@
             right: 5px;
         }
 
+        .sort-arrow {
+            position: relative;
+            right: 0px;
+            float: right;
+            align-items: center;
+            display: none;
+        }
+
         .tableheader {
             background-color: #836353;
             background-image: linear-gradient(#836353, #b69686);
@@ -249,13 +257,32 @@
         }
 
         let players_offset = 0;
+        let players_sort = 0;
+        let players_column = 2;
+
+        function sortBy(col) {
+            players_offset = 0;
+            if (players_column == col) {
+                players_sort = 1 - players_sort;
+            } else {
+                players_column = col;
+                players_sort = 0;
+            }
+            updatePlayers();
+        }
 
         function updatePlayers() {
             if (players_offset < 0) {
                 players_offset = 0;
             }
+            var elements = document.getElementsByClassName('sort-arrow');
+            for (var el of elements) {
+                el.style.display = 'none';
+            }
+            var arrow = document.getElementById("sort-" + players_column + "-" + players_sort);
+            arrow.style.display = 'block';
             const scoresTable = document.getElementById("scorestable");
-            fetch("players.php?offset=" + players_offset)
+            fetch("players.php?offset=" + players_offset + "&column=" + players_column + "&sort=" + players_sort)
                 .then((res) => res.json())
                 .then((res) => {
                     if (res.length == 0) {
@@ -549,9 +576,21 @@
             <tr>
                 <th></th>
                 <th class='tableheader'>Player</th>
-                <th class='tableheader'>Won games</th>
-                <th class='tableheader'>Lost games</th>
-                <th class='tableheader'>Rating</th>
+                <th class='tableheader' onclick='sortBy(0)'>
+                    Won games
+                    <img class='sort-arrow' id='sort-0-1' src='up-arrow.png' />
+                    <img class='sort-arrow' id='sort-0-0' src='down-arrow.png' />
+                </th>
+                <th class='tableheader' onclick='sortBy(1)'>
+                    Lost games
+                    <img class='sort-arrow' id='sort-1-1' src='up-arrow.png' />
+                    <img class='sort-arrow' id='sort-1-0' src='down-arrow.png' />
+                </th>
+                <th class='tableheader' onclick='sortBy(2)'>
+                    Rating
+                    <img class='sort-arrow' id='sort-2-1' src='up-arrow.png' />
+                    <img class='sort-arrow' id='sort-2-0' src='down-arrow.png' />
+                </th>
             </tr>
         </table>
         <img src='reset-btn.png' onclick='players_offset = 0; updatePlayers()' />
