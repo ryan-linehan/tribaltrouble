@@ -16,7 +16,7 @@ if (!$conn) {
 $n = $_GET['name'];
 $offset = (int)$_GET['offset'];
 
-$sql = "select * from games where player1_name='$n' or player2_name='$n' or player3_name='$n' or player4_name='$n' or player5_name='$n' or player6_name='$n' and status='completed' order by time_start desc limit 10 offset $offset";
+$sql = "select * from games where id in (select game_id from game_players where nick='$n') and status='completed' order by time_start desc limit 10 offset $offset";
 
 $response = array();
 $result = mysqli_query($conn, $sql);
@@ -34,6 +34,15 @@ while ($row = mysqli_fetch_assoc($result)) {
 
     $id = $row['id'];
     $row['watchable'] = file_exists("/var/games/$id");
+
+    $sql = "SELECT * from game_players where game_id=$id";
+    $players = mysqli_query($conn, $sql);
+    $players_response = array();
+    while ($player = mysqli_fetch_assoc($players)) {
+        array_push($players_response, $player);
+    }
+
+    $row['players'] = $players_response;
 
     array_push($response, $row);
 }

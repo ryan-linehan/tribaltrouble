@@ -321,10 +321,10 @@
             var winner = '';
             var teams = new Map();
             var winnerId = row['winner'];
-            for (var i = 1; i <= 6; i++) {
-                const name = row['player' + i + '_name'];
-                if (name == null) continue;
-                const team = row['player' + i + '_team'];
+            var players = row['players'];
+            for (var i = 0; i < players.length; i++) {
+                const name = players[i]['nick'];
+                const team = players[i]['team'];
                 if (!teams.has(team)) {
                     teams.set(team, "");
                 } else {
@@ -445,8 +445,8 @@
             fetch("gamesOf.php?name=" + name + "&offset=" + games_of_offset)
                 .then((res) => res.json())
                 .then((res) => {
-                    if (res.length == 0 && games_of_offset > 0) {
-                        games_of_offset -= 10;
+                    if (res.length == 0) {
+                        games_of_offset = Math.max(games_of_offset - 10, 0);
                         return;
                     }
                     const rows = gamesTable.getElementsByTagName('tr');

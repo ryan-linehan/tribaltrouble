@@ -32,6 +32,15 @@ while ($row = mysqli_fetch_assoc($result)) {
     $id = $row['id'];
     $row['watchable'] = file_exists("/var/games/$id");
 
+    $sql = "SELECT * from game_players where game_id=$id";
+    $players = mysqli_query($conn, $sql);
+    $players_response = array();
+    while ($player = mysqli_fetch_assoc($players)) {
+        array_push($players_response, $player);
+    }
+
+    $row['players'] = $players_response;
+
     array_push($response, $row);
 }
 
