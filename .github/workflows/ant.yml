@@ -133,10 +133,6 @@ jobs:
       with:
         name: linux
         path: tt/build/dist/linux/
-    - name: Unzip Mac Build
-      run: |
-        unzip -o build/mac/.zip -d build/mac/
-        rm build/mac/.zip
     - name: Upload to steam
       uses: game-ci/steam-deploy@v3
       with:
