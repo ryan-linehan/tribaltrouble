@@ -141,7 +141,7 @@ jobs:
         appId: ${{ vars.STEAM_APP_ID }}
         buildDescription: v1.2.3
         firstDepotIdOverride: 3945722
-        rootPath: build
+        rootPath: tt/build/dist/
         depot1Path: windows
         depot2Path: mac-arm64
         depot3Path: mac-x86
