@@ -144,8 +144,10 @@ jobs:
         configVdf: ${{ secrets.STEAM_CONFIG_VDF }}
         appId: ${{ vars.STEAM_APP_ID }}
         buildDescription: v1.2.3
+        firstDepotIdOverride: 3945722
         rootPath: build
         depot1Path: windows
-        depot2Path: mac
-        depot3Path: linux
+        depot2Path: mac-arm64
+        depot3Path: mac-x86
+        depot4Path: linux
         releaseBranch: prerelease
