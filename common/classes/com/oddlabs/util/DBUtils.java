@@ -21,7 +21,8 @@ public final strictfp class DBUtils {
             throws ClassNotFoundException {
         Class.forName("com.mysql.cj.jdbc.Driver");
         GenericObjectPool connectionPool = new GenericObjectPool(null);
-        connectionPool.setMaxWait(10000);
+        // connectionPool.setMaxWait(10000);
+        connectionPool.setMaxActive(100);
         // connectionPool.setMaxActive(50);
         ConnectionFactory connectionFactory =
                 new DriverManagerConnectionFactory(address, user, password);
