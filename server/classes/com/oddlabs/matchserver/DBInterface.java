@@ -916,7 +916,6 @@ public final strictfp class DBInterface {
             System.out.println("Exception: " + e);
             MatchmakingServer.getLogger()
                     .throwing(DBInterface.class.getName(), "getProfilesByNick", e);
-            throw new RuntimeException(e);
         }
     }
 
