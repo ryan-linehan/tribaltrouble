@@ -917,6 +917,7 @@ public final strictfp class DBInterface {
             MatchmakingServer.getLogger()
                     .throwing(DBInterface.class.getName(), "getProfilesByNick", e);
         }
+        return null;
     }
 
     /**
