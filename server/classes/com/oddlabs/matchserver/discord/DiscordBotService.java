@@ -212,12 +212,12 @@ public class DiscordBotService {
     /** Deletes all existing commands for the bot in the specified server. */
     private void deleteCommands() {
         long guildId = serverId; // Discord4J's server ID.
-
+        Long botId = getBotId().asLong();
         // Get the commands from discord as a Map
         Map<String, ApplicationCommandData> discordCommands =
                 gateway.getRestClient()
                         .getApplicationService()
-                        .getGuildApplicationCommands(1397851204410806363L, guildId)
+                        .getGuildApplicationCommands(botId, guildId)
                         .collectMap(ApplicationCommandData::name)
                         .block();
 
@@ -225,8 +225,7 @@ public class DiscordBotService {
             System.out.println("Deleting command: " + data.name());
             gateway.getRestClient()
                     .getApplicationService()
-                    .deleteGuildApplicationCommand(
-                            1397851204410806363L, guildId, data.id().asLong())
+                    .deleteGuildApplicationCommand(botId, guildId, data.id().asLong())
                     .subscribe();
         }
     }
@@ -236,10 +235,10 @@ public class DiscordBotService {
      * com.oddlabs.matchserver.discord.DiscordBotService#commands} is registered with Discord.
      */
     private void registerCommands() {
+        Long botId = getBotId().asLong();
         gateway.getRestClient()
                 .getApplicationService()
-                // TODO: Do not hard code the bot app id.
-                .getGuildApplicationCommands(1397851204410806363L, serverId)
+                .getGuildApplicationCommands(botId, serverId)
                 .collectList()
                 .subscribe(
                         existingCommands -> {
