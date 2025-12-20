@@ -71,6 +71,7 @@ public final strictfp class PeerHub implements Animated, RouterHandler {
     private final boolean is_multiplayer;
     private final boolean is_rated;
     private final StallHandler stall_handler;
+    private final ForfeitVoteManager forfeit_vote_manager;
 
     private int pause_ticks;
     private int server_millis;
@@ -105,6 +106,7 @@ public final strictfp class PeerHub implements Animated, RouterHandler {
         this.notification_manager = notification_manager;
         this.is_multiplayer = is_multiplayer;
         this.manager = manager;
+        this.forfeit_vote_manager = new ForfeitVoteManager(local_player.getWorld());
 
         GameArgumentReader argument_reader = new GameArgumentReader(distributable_table);
         List peer_index_to_peer_list = new ArrayList();
@@ -554,6 +556,118 @@ public final strictfp class PeerHub implements Animated, RouterHandler {
     public final void receiveBeacon(float x, float y, String owner) {
         if (!ChatCommand.isIgnoring(owner))
             notification_manager.newBeacon(manager, local_player, x, y);
+    }
+
+    public final void initiateForfeitVote() {
+        int team = local_player.getPlayerInfo().getTeam();
+
+        // Check cooldown
+        long cooldown_remaining = forfeit_vote_manager.getCooldownRemaining(team);
+        if (cooldown_remaining > 0) {
+            long seconds = cooldown_remaining / 1000;
+            long minutes = seconds / 60;
+            seconds = seconds % 60;
+            String cooldown_msg =
+                    Utils.getBundleString(
+                            bundle,
+                            "forfeit_cooldown",
+                            new Object[] {new Long(minutes), new Long(seconds)});
+            Network.getChatHub()
+                    .chat(new ChatMessage(SYSTEM_NAME, cooldown_msg, ChatMessage.CHAT_SYSTEM));
+            return;
+        }
+
+        // Initiate vote
+        if (forfeit_vote_manager.initiateVote(team)) {
+            // Send vote initiation message to team
+            String player_name = local_player.getPlayerInfo().getName();
+            String vote_msg =
+                    Utils.getBundleString(
+                            bundle, "forfeit_vote_initiated", new Object[] {player_name});
+            Network.getChatHub()
+                    .chat(new ChatMessage(SYSTEM_NAME, vote_msg, ChatMessage.CHAT_TEAM));
+
+            // Automatically cast initiator's vote
+            sendForfeitVote(player_name);
+        }
+    }
+
+    public final void sendForfeitVote(String player_name) {
+        Iterator it = getPeerIterator();
+        int local_team = local_player.getPlayerInfo().getTeam();
+        while (it.hasNext()) {
+            Peer peer = (Peer) it.next();
+            int peer_team = peer.getPlayerInfo().getTeam();
+            if (local_team == peer_team) peer.getPeerHubInterface().forfeitVote(player_name);
+        }
+    }
+
+    public final void receiveForfeitVote(String player_name) {
+        // Find the team of the voting player
+        int voter_team = -1;
+        Player[] players = local_player.getWorld().getPlayers();
+        for (int i = 0; i < players.length; i++) {
+            if (players[i] != null && players[i].getPlayerInfo().getName().equals(player_name)) {
+                voter_team = players[i].getPlayerInfo().getTeam();
+                break;
+            }
+        }
+
+        if (voter_team == -1) {
+            return; // Player not found
+        }
+
+        // Record the vote
+        ForfeitVoteManager.VoteResult result =
+                forfeit_vote_manager.castVote(player_name, voter_team);
+
+        switch (result) {
+            case NO_ACTIVE_VOTE:
+                // No active vote, ignore
+                break;
+            case VOTE_TIMED_OUT:
+                String timeout_msg = Utils.getBundleString(bundle, "forfeit_vote_timeout");
+                Network.getChatHub()
+                        .chat(new ChatMessage(SYSTEM_NAME, timeout_msg, ChatMessage.CHAT_TEAM));
+                break;
+            case ALREADY_VOTED:
+                // Player already voted, ignore
+                break;
+            case VOTE_RECORDED:
+                // Show vote progress
+                ForfeitVoteManager.VoteProgress progress =
+                        forfeit_vote_manager.getVoteProgress(voter_team);
+                if (progress != null) {
+                    String progress_msg =
+                            Utils.getBundleString(
+                                    bundle,
+                                    "forfeit_vote_progress",
+                                    new Object[] {
+                                        player_name,
+                                        new Integer(progress.votes_cast),
+                                        new Integer(progress.votes_needed)
+                                    });
+                    Network.getChatHub()
+                            .chat(
+                                    new ChatMessage(
+                                            SYSTEM_NAME, progress_msg, ChatMessage.CHAT_TEAM));
+                }
+                break;
+            case VOTE_PASSED:
+                // Vote passed - forfeit the game
+                String passed_msg = Utils.getBundleString(bundle, "forfeit_vote_passed");
+                Network.getChatHub()
+                        .chat(new ChatMessage(SYSTEM_NAME, passed_msg, ChatMessage.CHAT_TEAM));
+
+                // Trigger forfeit
+                forfeitGame();
+                break;
+        }
+    }
+
+    private void forfeitGame() {
+        // Leave the game - this will count as a loss (or quit if within free quit time)
+        leaveGame();
     }
 
     private void closeNetwork() {

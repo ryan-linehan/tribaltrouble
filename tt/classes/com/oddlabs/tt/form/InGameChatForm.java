@@ -150,6 +150,13 @@ public final strictfp class InGameChatForm extends Form implements ChatListener 
                             }
                         };
                 commands.put("iamacheater", cheat);
+                ChatMethod forfeit =
+                        new ChatMethod() {
+                            public final void execute(InfoPrinter info_printer, String text) {
+                                viewer.getPeerHub().initiateForfeitVote();
+                            }
+                        };
+                commands.put("forfeit", forfeit);
                 if (!ChatCommand.filterCommand(info_printer, commands, chat)) {
                     viewer.getPeerHub()
                             .sendChat(chat, radio_button_group.getMarked() == radio_team);

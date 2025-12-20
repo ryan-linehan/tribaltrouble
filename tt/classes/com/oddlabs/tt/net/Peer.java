@@ -62,6 +62,10 @@ public final strictfp class Peer implements PeerHubInterface {
         peer_hub.receiveBeacon(x, y, player.getPlayerInfo().getName());
     }
 
+    public final void forfeitVote(String player_name) {
+        peer_hub.receiveForfeitVote(player_name);
+    }
+
     public final PeerHubInterface getPeerHubInterface() {
         return peerhub_interface;
     }
