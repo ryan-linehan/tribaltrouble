@@ -258,6 +258,7 @@
 		<jar compress="false" destfile="${dist}/common/tt-i18n.jar">
 			<fileset dir="i18n">
 				<include name="com/oddlabs/tt/**/*properties" />
+				<include name="translations.csv" />
 			</fileset>
 		</jar>
 		<copy todir="${dist}/common">

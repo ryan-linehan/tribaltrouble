@@ -12,9 +12,13 @@ import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.nio.ShortBuffer;
 import java.text.MessageFormat;
+import java.util.Locale;
 import java.util.ResourceBundle;
 
 public final strictfp class Utils {
+    // Flag to enable CSV-based translations instead of .properties files
+    private static boolean useCSVTranslations =
+            Boolean.getBoolean("tribaltrouble.csv.translations");
     private static final ByteBuffer sqrtByteBuf = BufferUtils.createByteBuffer(4);
     private static final IntBuffer sqrtIntBuf = sqrtByteBuf.asIntBuffer();
     private static final FloatBuffer sqrtFloatBuf = sqrtByteBuf.asFloatBuffer();
@@ -35,6 +39,65 @@ public final strictfp class Utils {
     public static final String getBundleString(
             ResourceBundle bundle, String key, Object[] object_array) {
         return MessageFormat.format(bundle.getString(key), object_array);
+    }
+
+    /**
+     * Get a ResourceBundle for the given class, using either CSV or properties files
+     * depending on the system property "tribaltrouble.csv.translations".
+     *
+     * @param clazz The class to get translations for
+     * @return A ResourceBundle with translations for the class
+     */
+    public static final ResourceBundle getBundle(Class<?> clazz) {
+        return getBundle(clazz.getName());
+    }
+
+    /**
+     * Get a ResourceBundle for the given base name, using either CSV or properties files
+     * depending on the system property "tribaltrouble.csv.translations".
+     *
+     * @param baseName The fully qualified bundle name (e.g., "com.oddlabs.tt.form.GameMenu")
+     * @return A ResourceBundle with translations
+     */
+    public static final ResourceBundle getBundle(String baseName) {
+        if (useCSVTranslations) {
+            return CSVResourceBundle.createBundle(baseName);
+        }
+        return ResourceBundle.getBundle(baseName);
+    }
+
+    /**
+     * Get a ResourceBundle for the given base name and locale.
+     *
+     * @param baseName The fully qualified bundle name
+     * @param locale The locale to use
+     * @return A ResourceBundle with translations
+     */
+    public static final ResourceBundle getBundle(String baseName, Locale locale) {
+        if (useCSVTranslations) {
+            return CSVResourceBundle.createBundle(baseName, locale);
+        }
+        return ResourceBundle.getBundle(baseName, locale);
+    }
+
+    /**
+     * Enable or disable CSV-based translations.
+     * When enabled, translations are loaded from a single translations.csv file.
+     * When disabled (default), traditional .properties files are used.
+     *
+     * @param enabled true to use CSV translations, false to use properties files
+     */
+    public static final void setUseCSVTranslations(boolean enabled) {
+        useCSVTranslations = enabled;
+    }
+
+    /**
+     * Check if CSV-based translations are enabled.
+     *
+     * @return true if CSV translations are enabled
+     */
+    public static final boolean isUseCSVTranslations() {
+        return useCSVTranslations;
     }
 
     public static final File getInstallDir() {
