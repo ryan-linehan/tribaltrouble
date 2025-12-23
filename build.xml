@@ -20,6 +20,10 @@
 		<iterate target="compile" />
 	</target>
 
+	<target name="generate-i18n" description="Generate .properties files from translations.csv">
+		<ant dir="tools" target="generate-i18n" inheritAll="false" />
+	</target>
+
 	<target name="format" description="Format all Java files using google-java-format">
 		<!-- Define the path to google-java-format jar -->
 		<property name="gjf.jar" location="ci/google-java-format-1.28.0-all-deps.jar" />

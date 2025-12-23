@@ -8,7 +8,7 @@ Translations are managed using a **single CSV file** as the source of truth, whi
 
 ### Workflow
 1. Edit `tt/i18n/translations.csv` (single file with all translations)
-2. Run `python3 tools/convert_csv_to_properties.py` to generate `.properties` files
+2. Run `ant generate-i18n` to generate `.properties` files
 3. Build and run the game (uses standard Java ResourceBundle)
 
 ## Supported Languages
@@ -58,21 +58,15 @@ com.oddlabs.tt.form.GameMenu.start,Start,Start,Start,Iniciar,Avvia
 - **en, da, de, es, it**: Translation values for each language
 - Multi-line values are supported using standard CSV quoting
 
-## Scripts
+## Generating Properties Files
 
-### Generate Properties from CSV
-After editing `translations.csv`, run:
+After editing `translations.csv`, regenerate all `.properties` files:
+
 ```bash
-python3 tools/convert_csv_to_properties.py
+ant generate-i18n
 ```
 
-This regenerates all 485 `.properties` files from the CSV.
-
-### Generate CSV from Properties (One-time Migration)
-If you need to regenerate the CSV from existing properties files:
-```bash
-python3 tools/convert_properties_to_csv.py
-```
+This runs `com.oddlabs.translate.CSVToProperties` which regenerates all 485 `.properties` files.
 
 ## Adding New Translations
 
@@ -80,16 +74,16 @@ python3 tools/convert_properties_to_csv.py
 2. Add a new row with:
    - Key: `package.ClassName.property_key` (e.g., `com.oddlabs.tt.form.GameMenu.new_button`)
    - Values for each language column
-3. Run `python3 tools/convert_csv_to_properties.py`
+3. Run `ant generate-i18n`
 4. Commit both the CSV and generated `.properties` files
 
 ## Adding a New Language
 
 1. Add a new column to `translations.csv` (e.g., `fr` for French)
-2. Update `tools/convert_csv_to_properties.py`:
-   - Add the locale to `LOCALE_SUFFIXES` dict
+2. Update `tools/classes/com/oddlabs/translate/CSVToProperties.java`:
+   - Add the locale to `LOCALE_SUFFIXES` map
 3. Add translations in the new column
-4. Run the conversion script
+4. Run `ant generate-i18n`
 
 ## Using Translations in Code
 
@@ -121,5 +115,5 @@ String text = Utils.getBundleString(bundle, "player", new Object[]{playerName});
 - Use a spreadsheet editor for bulk edits
 - The CSV uses UTF-8 encoding
 - Empty cells mean "use English fallback"
-- Run the conversion script before committing
+- Run `ant generate-i18n` before committing
 - Commit both CSV and generated files together
