@@ -133,6 +133,15 @@
 		</java>
 	</target>
 
+	<target name="generate-i18n-csv" depends="compile-tools"
+		description="Generate translations.csv from .properties files">
+		<java failonerror="true" fork="yes" classname="com.oddlabs.translate.PropertiesToCSV">
+			<classpath refid="build.classes.classpath" />
+			<jvmarg value="-ea" />
+			<arg path="../tt/i18n" />
+		</java>
+	</target>
+
 	<target name="generatekeys" depends="compile-tools">
 		<input
 			message="Enter password for private registration key:"

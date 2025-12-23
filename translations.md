@@ -58,8 +58,9 @@ com.oddlabs.tt.form.GameMenu.start,Start,Start,Start,Iniciar,Avvia
 - **en, da, de, es, it**: Translation values for each language
 - Multi-line values are supported using standard CSV quoting
 
-## Generating Properties Files
+## Ant Targets
 
+### Generate Properties from CSV
 After editing `translations.csv`, regenerate all `.properties` files:
 
 ```bash
@@ -67,6 +68,15 @@ ant generate-i18n
 ```
 
 This runs `com.oddlabs.translate.CSVToProperties` which regenerates all 485 `.properties` files.
+
+### Generate CSV from Properties
+To regenerate `translations.csv` from the `.properties` files (useful for initial migration or sync):
+
+```bash
+ant generate-i18n-csv
+```
+
+This runs `com.oddlabs.translate.PropertiesToCSV` which reads all `.properties` files and creates the CSV.
 
 ## Adding New Translations
 
