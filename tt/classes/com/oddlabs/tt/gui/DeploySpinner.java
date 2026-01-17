@@ -175,7 +175,7 @@ public final strictfp class DeploySpinner extends IconSpinner {
         for (int i = 0; i < recall_count; i++) {
             Unit nearest = owner.findNearestHarvester(harvestType, buildingX, buildingY);
             if (nearest != null && !nearest.isDead()) {
-                player_interface.withdrawHarvester(nearest, current_building);
+                player_interface.recallHarvester(nearest, current_building);
             }
         }
     }

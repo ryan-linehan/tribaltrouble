@@ -540,7 +540,7 @@ public final strictfp class Player implements PlayerInterface {
         return nearest;
     }
 
-    public final void withdrawHarvester(Unit harvester, Building building) {
+    public final void recallHarvester(Unit harvester, Building building) {
         if (isValid(harvester) && isValid(building)) {
             harvester.initTarget(building, Target.ACTION_MOVE, false);
         }
