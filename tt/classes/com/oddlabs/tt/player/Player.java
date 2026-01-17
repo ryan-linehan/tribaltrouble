@@ -16,6 +16,7 @@ import com.oddlabs.tt.model.RubberSupply;
 import com.oddlabs.tt.model.Selectable;
 import com.oddlabs.tt.model.SupplyContainer;
 import com.oddlabs.tt.model.Unit;
+import com.oddlabs.tt.model.behaviour.GatherController;
 import com.oddlabs.tt.model.behaviour.NullController;
 import com.oddlabs.tt.model.weapon.IronAxeWeapon;
 import com.oddlabs.tt.model.weapon.RockAxeWeapon;
@@ -493,6 +494,55 @@ public final strictfp class Player implements PlayerInterface {
                         .findGridTargets(grid_x, grid_y, selection.length, selection.length != 1);
         for (int i = 0; i < selection.length; i++) {
             if (isValid(selection[i])) selection[i].initTarget(targets[i], action, aggressive);
+        }
+    }
+
+    public final int getHarvesterCount(Class supplyType) {
+        int count = 0;
+        Iterator it = units.getSet().iterator();
+        while (it.hasNext()) {
+            Selectable s = (Selectable) it.next();
+            if (s instanceof Unit) {
+                Unit u = (Unit) s;
+                if (u.getPrimaryController() instanceof GatherController) {
+                    GatherController gc = (GatherController) u.getPrimaryController();
+                    if (gc.getSupplyType() == supplyType) {
+                        count++;
+                    }
+                }
+            }
+        }
+        return count;
+    }
+
+    public final Unit findNearestHarvester(Class supplyType, float targetX, float targetY) {
+        Unit nearest = null;
+        float nearestDistSq = Float.MAX_VALUE;
+        Iterator it = units.getSet().iterator();
+        while (it.hasNext()) {
+            Selectable s = (Selectable) it.next();
+            if (s instanceof Unit) {
+                Unit u = (Unit) s;
+                if (u.getPrimaryController() instanceof GatherController) {
+                    GatherController gc = (GatherController) u.getPrimaryController();
+                    if (gc.getSupplyType() == supplyType) {
+                        float dx = u.getPositionX() - targetX;
+                        float dy = u.getPositionY() - targetY;
+                        float distSq = dx * dx + dy * dy;
+                        if (distSq < nearestDistSq) {
+                            nearestDistSq = distSq;
+                            nearest = u;
+                        }
+                    }
+                }
+            }
+        }
+        return nearest;
+    }
+
+    public final void withdrawHarvester(Unit harvester, Building building) {
+        if (isValid(harvester) && isValid(building)) {
+            harvester.initTarget(building, Target.ACTION_MOVE, false);
         }
     }
 
