@@ -13,7 +13,11 @@ public final strictfp class ARMIInterfaceMethods {
         this.armi_interface = armi_interface;
         this.methods = armi_interface.getMethods();
         Arrays.sort(methods, new MethodComparator());
-        for (int i = 0; i < methods.length; i++) assert isLegal(methods[i]);
+        System.out.println("ARMI methods for " + armi_interface.getName() + ":");
+        for (int i = 0; i < methods.length; i++) {
+            System.out.println("  " + i + ": " + methods[i].getName());
+            assert isLegal(methods[i]);
+        }
     }
 
     private final boolean isLegal(Method method) {
