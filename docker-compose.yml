@@ -1,0 +1,143 @@
+# Tribal Trouble - Docker Compose Configuration
+#
+# Usage:
+#   Build only:        docker compose run --rm build ant compile
+#   Full dev shell:    docker compose run --rm dev
+#   Run with MySQL:    docker compose up -d mysql && docker compose run --rm dev
+#   Server dev:        docker compose up mysql matchmaker
+#
+# See DOCKER.md for detailed instructions.
+
+services:
+  # =============================================================================
+  # BUILD-ONLY CONTAINER
+  # Lightweight container for compiling the project
+  # =============================================================================
+  build:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      # Mount source code for live editing
+      - .:/workspace
+      # Persist Ivy cache between builds
+      - ivy-cache:/home/developer/.ivy2
+    working_dir: /workspace
+    # Run as current user to avoid permission issues
+    user: "${UID:-1000}:${GID:-1000}"
+
+  # =============================================================================
+  # FULL DEVELOPMENT CONTAINER
+  # Includes X11/OpenGL support for running the game client
+  # =============================================================================
+  dev:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    volumes:
+      # Mount source code for live editing
+      - .:/workspace
+      # Persist Ivy cache
+      - ivy-cache:/home/developer/.ivy2
+      # X11 socket for display (Linux)
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw
+      # PulseAudio for sound (Linux)
+      - ${XDG_RUNTIME_DIR:-/run/user/1000}/pulse:/run/user/1000/pulse:rw
+    environment:
+      # Display for X11 forwarding
+      - DISPLAY=${DISPLAY:-:0}
+      # PulseAudio server
+      - PULSE_SERVER=unix:/run/user/1000/pulse/native
+      # Database connection for server development
+      - TT_SERVER_PASSWORD=${TT_SERVER_PASSWORD:-tribaltrouble}
+      - MYSQL_HOST=mysql
+      - MYSQL_DATABASE=oddlabs
+      - MYSQL_USER=matchmaker
+    working_dir: /workspace
+    user: "${UID:-1000}:${GID:-1000}"
+    # Network mode host can help with X11 on some systems
+    # Uncomment if you have display issues:
+    # network_mode: host
+    depends_on:
+      mysql:
+        condition: service_healthy
+    ports:
+      - "29463:29463"  # Game server port
+      - "29464:29464"  # Router port
+    stdin_open: true
+    tty: true
+
+  # =============================================================================
+  # MYSQL DATABASE
+  # Required for server components (matchmaker, router)
+  # =============================================================================
+  mysql:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-rootpassword}
+      MYSQL_DATABASE: oddlabs
+      MYSQL_USER: matchmaker
+      MYSQL_PASSWORD: ${TT_SERVER_PASSWORD:-tribaltrouble}
+    volumes:
+      # Initialize database with schema
+      - ./initmysql.sql:/docker-entrypoint-initdb.d/init.sql:ro
+      # Persist database data
+      - mysql-data:/var/lib/mysql
+    ports:
+      - "3306:3306"
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD:-rootpassword}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  # =============================================================================
+  # MATCHMAKER SERVER
+  # Run the game matchmaking server
+  # =============================================================================
+  matchmaker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - .:/workspace
+      - ivy-cache:/home/developer/.ivy2
+    working_dir: /workspace/server
+    environment:
+      - TT_SERVER_PASSWORD=${TT_SERVER_PASSWORD:-tribaltrouble}
+      - MYSQL_HOST=mysql
+    depends_on:
+      mysql:
+        condition: service_healthy
+    ports:
+      - "29463:29463"
+    command: ["ant", "run-matchmaker"]
+
+  # =============================================================================
+  # ROUTER SERVER
+  # Run the game routing server
+  # =============================================================================
+  router:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - .:/workspace
+      - ivy-cache:/home/developer/.ivy2
+    working_dir: /workspace/server
+    environment:
+      - TT_SERVER_PASSWORD=${TT_SERVER_PASSWORD:-tribaltrouble}
+      - MYSQL_HOST=mysql
+    depends_on:
+      mysql:
+        condition: service_healthy
+    ports:
+      - "29464:29464"
+    command: ["ant", "run-router"]
+
+volumes:
+  # Persist Ivy dependency cache
+  ivy-cache:
+  # Persist MySQL data
+  mysql-data:

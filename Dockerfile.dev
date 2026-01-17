@@ -1,0 +1,80 @@
+# Tribal Trouble - Full Development Container
+# This container supports building AND running the game client with X11/OpenGL.
+# Includes MySQL client, audio support, and development tools.
+
+FROM eclipse-temurin:21-jdk-jammy
+
+LABEL maintainer="Tribal Trouble Contributors"
+LABEL description="Full development environment for Tribal Trouble game with X11/OpenGL support"
+
+# Install all dependencies including X11, OpenGL, and audio support
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    # Build tools
+    apache-ant \
+    git \
+    curl \
+    unzip \
+    # X11 and display support
+    libx11-6 \
+    libxext6 \
+    libxrender1 \
+    libxtst6 \
+    libxi6 \
+    libxrandr2 \
+    libxxf86vm1 \
+    libxcursor1 \
+    libxinerama1 \
+    x11-utils \
+    # OpenGL support
+    libgl1-mesa-glx \
+    libgl1-mesa-dri \
+    libegl1-mesa \
+    # Audio support (LWJGL OpenAL)
+    libopenal1 \
+    libasound2 \
+    pulseaudio-utils \
+    # Fonts (required for AWT/Swing)
+    libfontconfig1 \
+    libfreetype6 \
+    fonts-dejavu-core \
+    # MySQL client for database operations
+    mysql-client \
+    # Useful development tools
+    vim \
+    less \
+    procps \
+    # Clean up
+    && rm -rf /var/lib/apt/lists/*
+
+# Set up Ant environment
+ENV ANT_HOME=/usr/share/ant
+ENV PATH="${ANT_HOME}/bin:${PATH}"
+
+# Configure Java for headless fallback (can be overridden at runtime)
+ENV JAVA_TOOL_OPTIONS="-Dsun.java2d.opengl=true"
+
+# Create a non-root user for development
+ARG USERNAME=developer
+ARG USER_UID=1000
+ARG USER_GID=$USER_UID
+
+RUN groupadd --gid $USER_GID $USERNAME \
+    && useradd --uid $USER_UID --gid $USER_GID -m $USERNAME \
+    # Add user to audio and video groups for hardware access
+    && usermod -aG audio,video $USERNAME
+
+# Set working directory
+WORKDIR /workspace
+
+# Copy the project files
+COPY --chown=$USERNAME:$USERNAME . .
+
+# Switch to non-root user
+USER $USERNAME
+
+# Expose port for game server (if running matchmaker/router)
+EXPOSE 29463
+EXPOSE 29464
+
+# Default command: start a shell for interactive development
+CMD ["/bin/bash"]
