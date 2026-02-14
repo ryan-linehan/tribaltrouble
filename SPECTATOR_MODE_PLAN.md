@@ -371,7 +371,7 @@ resources intact.
 mid-game connection acceptance, fast-forward replay). Phase 5 adds the logic to
 re-seat a player into their original slot instead of entering observer mode.
 
-### 5.1 Graceful disconnect: temporary vs permanent
+### 5.1 Graceful disconnect: always temporary
 
 Currently, when a player disconnects, `PeerHub.peerDisconnected()` (line 510) permanently
 removes them — their peer is nulled from `peer_index_to_peer`, removed from the
@@ -380,16 +380,22 @@ and buildings remain in the `World` but become headless (no one controls them), 
 `isAlive()` (line 282) immediately returns false because `locatePeerFromPlayer()` returns
 null.
 
+**Design decision:** A disconnected player can **always** rejoin, regardless of how long
+they've been gone. There is no grace period or timeout. The game continues normally while
+they are away — their units idle, buildings keep producing, and other players can attack
+them freely. When the disconnected player reconnects (whether 30 seconds or 30 minutes
+later), they rejoin and resume control of whatever is left.
+
 **File:** `tt/classes/com/oddlabs/tt/net/PeerHub.java`
 
 - Add a `Set<Player> temporarily_disconnected` field.
 - Modify `peerDisconnected()` (line 510): Instead of unconditionally removing the peer
-  from the maps and broadcasting "left game", check if rejoin is enabled for this game:
-  - If rejoin enabled: Add the `Player` to `temporarily_disconnected`. Null out the peer
-    in `peer_index_to_peer` (so events aren't executed for them), but preserve the peer
+  from the maps and broadcasting "left game":
+  - Add the `Player` to `temporarily_disconnected`. Null out the peer in
+    `peer_index_to_peer` (so events aren't executed for them), but preserve the peer
     index mapping so we know which slot to re-seat them into. Broadcast a system chat
-    message: "PlayerName disconnected. Waiting for reconnect..."
-  - If rejoin disabled (or grace period expired): Existing permanent removal behavior.
+    message: "PlayerName disconnected."
+  - Do NOT notify matchmaking server with `gameQuitNotify` — the player is still in-game.
 - Modify `isAlive()` (line 282): A temporarily disconnected player should still be
   considered alive (their units shouldn't be auto-eliminated):
   ```java
@@ -399,18 +405,7 @@ null.
          && player.isAlive();
   ```
 
-### 5.2 Disconnect grace period
-
-**File:** `tt/classes/com/oddlabs/tt/net/PeerHub.java`
-
-- Add `REJOIN_GRACE_PERIOD_SECONDS` constant (e.g., 120 seconds / 6000 ticks).
-- When a player is added to `temporarily_disconnected`, record the disconnect tick.
-- In `doTick()` (line 321): Check if any temporarily disconnected player has exceeded the
-  grace period. If so, convert to a permanent disconnect (remove from
-  `temporarily_disconnected`, broadcast "PlayerName has been dropped from the game",
-  notify matchmaking server with `gameQuitNotify`).
-
-### 5.3 Server accepts rejoin connections
+### 5.2 Server accepts rejoin connections
 
 **File:** `tt/classes/com/oddlabs/tt/net/Server.java`
 
@@ -418,18 +413,18 @@ null.
   game, check identity against disconnected players:
   - Match by `TunnelIdentifier.getProfile()` — compare the connecting player's profile
     nick and host ID against the original `PlayerSlot` entries.
-  - If the player is found in the disconnected list and within the grace period, this is
-    a rejoin. Send them the game params + event log + their original slot index.
+  - If the player is found in the disconnected list, this is a rejoin. Send them the
+    game params + event log + their original slot index.
   - If not found, treat as a spectator request (Phase 3 behavior).
-- Track which player slots have disconnected players eligible for rejoin in a
-  `Map<Integer, DisconnectInfo>` (slot index -> disconnect tick + player identity).
+- Track which player slots have disconnected players in a
+  `Map<Integer, PlayerIdentity>` (slot index -> player identity).
 
 **File:** `tt/classes/com/oddlabs/tt/net/GameClientInterface.java`
 
 - Add: `void startRejoin(Game game, WorldGenerator generator, PlayerSlot[] players,
   UnitInfo[] unit_infos, byte[] event_log, int current_tick, short original_player_slot);`
 
-### 5.4 Client handles rejoin
+### 5.3 Client handles rejoin
 
 **File:** `tt/classes/com/oddlabs/tt/net/Client.java`
 
@@ -437,7 +432,7 @@ null.
   slot index and sets `rejoin = true` so the `ReplayWorldStarter` knows to resume control
   instead of entering observer mode.
 
-### 5.5 ReplayWorldStarter rejoin path
+### 5.4 ReplayWorldStarter rejoin path
 
 **File:** `tt/classes/com/oddlabs/tt/net/ReplayWorldStarter.java` (created in Phase 3.3)
 
@@ -464,7 +459,7 @@ Key difference: the rejoining player's `local_player` is set to
 units and buildings. Since the fast-forward replayed all events identically, this Player
 has the exact same state as on every other peer's simulation.
 
-### 5.6 PeerHub re-registration
+### 5.5 PeerHub re-registration
 
 **File:** `tt/classes/com/oddlabs/tt/net/PeerHub.java`
 
@@ -478,7 +473,7 @@ has the exact same state as on every other peer's simulation.
   `ReplayWorldStarter`, with `is_spectator = false` and full checksum/command
   participation.
 
-### 5.7 Router session re-entry
+### 5.6 Router session re-entry
 
 **File:** `common/classes/com/oddlabs/router/Session.java`
 
@@ -496,19 +491,16 @@ the set. For rejoin, we need to add them back.
 
 **File:** `common/classes/com/oddlabs/router/RouterClient.java`
 
-- Modify `close()` (line 161): When a player disconnects and rejoin is possible, the
-  Router should NOT broadcast `playerDisconnected()` to other peers immediately. Instead,
-  hold the notification for the grace period. If the player rejoins within the grace
-  period, suppress the notification entirely. If they don't, then broadcast it.
-- Alternative (simpler): Always broadcast `playerDisconnected`, but add a corresponding
+- Modify `close()` (line 161): Always broadcast `playerDisconnected` immediately so all
+  peers know to move the player to `temporarily_disconnected`. Add a corresponding
   `playerReconnected(int client_id)` message to `RouterClientInterface` that peers handle
-  by re-activating the peer slot.
+  by re-activating the peer slot when the player rejoins.
 
 **File:** `common/classes/com/oddlabs/router/RouterClientInterface.java`
 
 - Add: `void playerReconnected(int client_id);`
 
-### 5.8 PeerHub handles reconnection notification
+### 5.7 PeerHub handles reconnection notification
 
 **File:** `tt/classes/com/oddlabs/tt/net/PeerHub.java`
 
@@ -517,7 +509,7 @@ the set. For rejoin, we need to add them back.
   - Move the player from `temporarily_disconnected` back to the active peer maps.
   - Broadcast system chat: "PlayerName has reconnected."
 
-### 5.9 Matchmaking server: disconnect vs quit
+### 5.8 Matchmaking server: disconnect vs quit
 
 **File:** `server/classes/com/oddlabs/matchserver/TimestampedGameSession.java`
 
@@ -526,19 +518,20 @@ Currently has participant states: `PARTICIPANT_UNKNOWN`, `PARTICIPANT_JOINED`,
 
 - Add `PARTICIPANT_DISCONNECTED` state.
 - Modify `gameQuit()` (line 248): Don't transition from `PARTICIPANT_JOINED` to
-  `PARTICIPANT_QUIT` immediately on disconnect if rejoin is enabled. Instead, transition
-  to `PARTICIPANT_DISCONNECTED`.
+  `PARTICIPANT_QUIT` immediately on disconnect. Instead, transition to
+  `PARTICIPANT_DISCONNECTED`. The player remains in this state until they rejoin or the
+  game ends.
 - Add `participantRejoined()`: Transition from `PARTICIPANT_DISCONNECTED` back to
   `PARTICIPANT_JOINED`.
-- When the grace period expires without rejoin, transition from `PARTICIPANT_DISCONNECTED`
-  to `PARTICIPANT_QUIT` (unrated) or `PARTICIPANT_LOST` (rated).
+- When the game ends, any player still in `PARTICIPANT_DISCONNECTED` transitions to
+  `PARTICIPANT_QUIT` (unrated) or `PARTICIPANT_LOST` (rated).
 
 **File:** `common/classes/com/oddlabs/matchmaking/MatchmakingServerInterface.java`
 
 - Add: `void playerDisconnectedNotify(String nick);`
 - Add: `void playerReconnectedNotify(String nick);`
 
-### 5.10 Headless units during disconnect
+### 5.9 Headless units during disconnect
 
 While a player is temporarily disconnected, their units and buildings exist but receive
 no commands. This is actually fine for the game's design:
@@ -558,7 +551,7 @@ This is a nice-to-have but adds complexity (the AI's commands need to be recorde
 event log and replayed by the rejoining player). Recommend deferring to a future
 iteration.
 
-### 5.11 Rejoin UI
+### 5.10 Rejoin UI
 
 **Client-side reconnect flow:**
 
@@ -566,31 +559,30 @@ When a player is disconnected (network error, `PeerHub.routerFailed()` at line 1
 `closeNetwork()` at line 559):
 
 - Instead of immediately returning to main menu, show a "Disconnected — Reconnect?"
-  dialog with a countdown timer matching the grace period.
+  dialog.
 - If the player clicks "Reconnect", attempt to reconnect to the matchmaking server, then
   request a rejoin for the same game session.
-- If the timer expires or player clicks "Leave", proceed to main menu with normal quit
-  behavior.
+- If the player clicks "Leave", proceed to main menu with normal quit behavior.
+- The player can return to this dialog later from the main menu (e.g., a "Rejoin Game"
+  button) as long as the game is still running.
 
 **File (new or modify):** `tt/classes/com/oddlabs/tt/form/ReconnectForm.java`
 
-- Show disconnect reason, countdown timer, "Reconnect" and "Leave" buttons.
+- Show disconnect reason, "Reconnect" and "Leave" buttons.
 - On "Reconnect": Create a new `Client` with `rejoin = true` targeting the same game.
 
-### 5.12 Rated game rejoin rules
+### 5.11 Rated game rejoin rules
 
 **File:** `tt/classes/com/oddlabs/tt/net/Server.java`
 
 - Rejoin should be allowed in rated games (it prevents unfair losses from network issues).
-- The grace period for rated games could be shorter (e.g., 60 seconds vs 120 seconds for
-  unrated) to prevent stalling.
-- If a player disconnects and reconnects multiple times, apply a penalty: each subsequent
-  disconnect halves the remaining grace period.
+- No special restrictions — a disconnected player can always rejoin regardless of game
+  type.
 
 **File:** `server/classes/com/oddlabs/matchserver/TimestampedGameSession.java`
 
-- If a player in a rated game transitions from `PARTICIPANT_DISCONNECTED` to
-  `PARTICIPANT_QUIT` (grace period expired), treat it as a loss for rating purposes.
+- If the game ends while a player is still in `PARTICIPANT_DISCONNECTED` state in a rated
+  game, treat it as a loss for rating purposes.
 
 ---
 
@@ -831,7 +823,7 @@ The late-joining human inherits the AI's team assignment. This means:
 | `tt/classes/com/oddlabs/tt/viewer/SpectatorInGameInfo.java` | InGameInfo implementation for spectator mode |
 | `tt/classes/com/oddlabs/tt/net/EventLog.java` | Records and serializes game events for catch-up replay |
 | `tt/classes/com/oddlabs/tt/net/ReplayWorldStarter.java` | Fast-forward world construction for mid-game spectate, rejoin, and late join |
-| `tt/classes/com/oddlabs/tt/form/ReconnectForm.java` | Disconnect dialog with reconnect countdown |
+| `tt/classes/com/oddlabs/tt/form/ReconnectForm.java` | Disconnect dialog with reconnect/leave options |
 
 ### Modified Files
 
@@ -844,7 +836,7 @@ The late-joining human inherits the AI's team assignment. This means:
 | `tt/net/GameClientInterface.java` | Add `startSpectating()`, `startRejoin()`, and `startLateJoin()` methods |
 | `tt/net/GameServerInterface.java` | Add spectator join method |
 | `tt/net/WorldStarter.java` | Support spectator viewer creation with observer mode from tick 0 |
-| `tt/net/PeerHub.java` | Add `is_spectator` flag; skip checksum sending; no-op player interface; event logging on host; `temporarily_disconnected` set; grace period timer; `rejoinPeer()` method; `playerReconnected()` handler; `handleTakeoverSlot()` for AI->human transition |
+| `tt/net/PeerHub.java` | Add `is_spectator` flag; skip checksum sending; no-op player interface; event logging on host; `temporarily_disconnected` set (no timeout — always rejoinable); `rejoinPeer()` method; `playerReconnected()` handler; `handleTakeoverSlot()` for AI->human transition |
 | `tt/net/PeerHubInterface.java` | Add `takeoverSlot(int slot_index)` and optionally `renamePlayer(int slot, String name)` |
 | `tt/net/Peer.java` | No changes needed (events execute the same way) |
 | `tt/player/AI.java` | No code changes needed (cleanup via existing `removeAnimation` + `setAI(null)`) |
@@ -894,18 +886,17 @@ Phase 4 (Spectator polish)
   4.6  Rated game considerations
 
 Phase 5 (Player rejoin — builds on Phases 2 & 3)
-  5.1  Graceful disconnect (temporarily_disconnected set in PeerHub)
-  5.2  Disconnect grace period timer
-  5.3  Server accepts rejoin connections (identity matching)
-  5.4  Client handles startRejoin()
-  5.5  ReplayWorldStarter rejoin path (resume control vs observer)
-  5.6  PeerHub re-registration (rejoinPeer method)
-  5.7  Router session re-entry (add player to started session)
-  5.8  PeerHub handles playerReconnected notification
-  5.9  Matchmaking server: PARTICIPANT_DISCONNECTED state
-  5.10 Headless units during disconnect (no-op; optional AI deferred)
-  5.11 Rejoin UI (ReconnectForm with countdown)
-  5.12 Rated game rejoin rules
+  5.1  Graceful disconnect (temporarily_disconnected set in PeerHub; always rejoinable)
+  5.2  Server accepts rejoin connections (identity matching)
+  5.3  Client handles startRejoin()
+  5.4  ReplayWorldStarter rejoin path (resume control vs observer)
+  5.5  PeerHub re-registration (rejoinPeer method)
+  5.6  Router session re-entry (add player to started session)
+  5.7  PeerHub handles playerReconnected notification
+  5.8  Matchmaking server: PARTICIPANT_DISCONNECTED state
+  5.9  Headless units during disconnect (no-op; optional AI deferred)
+  5.10 Rejoin UI (ReconnectForm)
+  5.11 Rated game rejoin rules
 
 Phase 6 (Late join: human takes over AI slot — builds on Phases 2 & 3)
   6.1  takeoverSlot event protocol (PeerHubInterface or PlayerInterface)
@@ -934,10 +925,9 @@ Phase 6 (Late join: human takes over AI slot — builds on Phases 2 & 3)
 | Spectators leak game information in rated games | Competitive integrity | Add optional spectator delay (30-60 second buffer); allow hosts to disable spectating for rated games |
 | Network bandwidth for sending event log | Slow spectator/rejoin connect | Event logs are small (~1MB for 30-min game); compress before sending |
 | Rejoin player desyncs after catch-up | Player kicks or game corruption | Rejoin player computes checksum after fast-forward and compares against host's checksum at same tick before connecting to Router; abort rejoin if mismatch |
-| Grace period stalls the game for other players | Frustrating UX for remaining players | Keep game running during disconnect; units idle naturally; other players can vote to kick after grace period; short default timer (120s) |
 | Router `Session` re-entry breaks checksum coordination | Checksum comparisons fail during rejoin transition | Skip checksum comparison for one cycle after rejoin; rejoin player sends first checksum only after processing at least one full live tick |
-| Multiple disconnects/rejoins by same player | Event log ordering issues; slot confusion | Track rejoin count per player; reduce grace period on repeated disconnects; preserve original peer_index across all reconnections |
-| Disconnected player's units get destroyed while away | Poor experience on rejoin | Intentional design — this is part of the game. Players should reconnect quickly. The grace period timer communicates urgency |
+| Multiple disconnects/rejoins by same player | Event log ordering issues; slot confusion | Preserve original peer_index across all reconnections; each rejoin replays from tick 0 so state is always consistent |
+| Disconnected player's units get destroyed while away | Poor experience on rejoin | Intentional design — this is part of the game. The game continues normally; the player's units idle and can be attacked. The player can rejoin at any time and resume control of whatever remains |
 | AI->human transition desync (Phase 6) | All peers must stop AI at exact same tick | Use timestamped Router event (`takeoverSlot`) so all peers execute the transition at the same tick; this is the same mechanism used for all other synchronized commands |
 | AI random state diverges during fast-forward (Phase 6) | Late-joiner's AI produces different commands than live peers' AI | AI uses `world.getRandom()` which is deterministic from the world seed; `World.tick()` runs both animation managers, so AI ticks identically during fast-forward; already proven correct by existing checksum system |
 | Late-joiner inherits bad AI state | Frustrating experience (AI spent all resources, built poorly) | Intentional — this is the trade-off for joining late. Show the AI's current unit/building count in the join UI so players can make an informed choice |
