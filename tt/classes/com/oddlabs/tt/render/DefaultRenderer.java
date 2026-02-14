@@ -113,6 +113,10 @@ public final strictfp class DefaultRenderer implements UIRenderer {
     }
 
     public final void renderGUI(GUIRoot gui_root) {
+        if (gui_root.getDelegate() != null && gui_root.getDelegate().getCamera() != null) {
+            float horiz_angle = gui_root.getDelegate().getCamera().getState().getHorizAngle();
+            CompassRenderer.render(horiz_angle, gui_root.getWidth(), gui_root.getHeight());
+        }
         if (cheat.isEnabled())
             Icons.getIcons()
                     .getCheatIcon()
