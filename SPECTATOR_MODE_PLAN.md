@@ -594,6 +594,234 @@ When a player is disconnected (network error, `PeerHub.routerFailed()` at line 1
 
 ---
 
+## Phase 6: Late Join (Human Takes Over AI Slot)
+
+**Goal:** A human player can join a running game and take control of a slot currently
+occupied by an AI, inheriting all of the AI's units, buildings, and resources.
+
+**Prerequisite:** Phases 2 and 3 (event recording + fast-forward catch-up). Phase 6
+reuses `ReplayWorldStarter` but adds a synchronized AI-to-human transition that must
+happen at the exact same tick on every peer.
+
+### How AI Players Work Today
+
+Understanding this is critical to the design:
+
+1. **AI doesn't use the network.** The `AI` class (`tt/player/AI.java:27`) is an
+   `Animated` object registered with `world.getAnimationManagerRealTime()` (line 54).
+   It calls `Player` methods directly — `owner.setTarget()`, `owner.buildBuilding()`,
+   etc. — without going through the Router.
+
+2. **Every peer runs the AI independently.** Since all game logic uses `strictfp` and the
+   world's seeded `Random` (`AI.java:293`), every peer computes the same AI decisions and
+   reaches the same state. This is already validated by the checksum system.
+
+3. **AI players are in `nonhuman_players`.** In `PeerHub` constructor (line 131-136),
+   non-HUMAN slots are added to a `Set nonhuman_players` and get no `Peer` object. They
+   have no Router presence at all.
+
+4. **`player.setAI(ai)` / `player.setAI(null)`.** `Player.java:265-270` has a simple
+   setter. Setting AI to null stops AI decisions; setting it to an AI instance starts
+   them. The AI self-registers with the animation manager on construction.
+
+### The Synchronization Challenge
+
+This is the hardest part of late join and what makes it different from spectator/rejoin:
+
+When a human takes over an AI slot, **every peer must simultaneously**:
+- Stop running the AI for that player (`player.setAI(null)`)
+- Remove the player from `nonhuman_players`
+- Create a new `Peer` for this player
+- Start routing commands through the Router
+
+If this transition doesn't happen at the **exact same tick** on every peer, determinism
+breaks: one peer would execute an AI command that another peer skips (or vice versa),
+causing an immediate checksum mismatch.
+
+**Solution:** Use a synchronized game event. The host broadcasts a `takeoverSlot` event
+through the Router, timestamped to a specific tick. When each peer processes this event
+at that tick, they all perform the AI->Human transition atomically.
+
+### 6.1 Takeover event protocol
+
+**File:** `tt/classes/com/oddlabs/tt/net/PeerHubInterface.java`
+
+- Add: `void takeoverSlot(int slot_index);`
+
+This is a new peer hub event (like `chat` and `beacon`) that flows through the Router to
+all peers. When executed at the designated tick:
+1. `player.getAI()` is unregistered from the animation manager and set to null
+2. The player is removed from `nonhuman_players`
+3. A new `Peer` is created for this player at an appropriate `peer_index`
+4. The `peer_index_to_peer`, `player_to_peer`, and `peer_to_player` maps are updated
+
+### 6.2 PeerHub handles takeover
+
+**File:** `tt/classes/com/oddlabs/tt/net/PeerHub.java`
+
+- Add `handleTakeoverSlot(int slot_index)` method, called when the `takeoverSlot` event
+  is executed at its designated tick:
+  ```
+  1. Player player = world.getPlayers()[slot_index]
+  2. AI ai = player.getAI()
+  3. if (ai != null):
+       world.getAnimationManagerRealTime().removeAnimation(ai)
+       player.setAI(null)
+  4. nonhuman_players.remove(player)
+  5. Allocate a new peer_index for this player
+  6. Create a new Peer and insert into peer_index_to_peer
+  7. Add to player_to_peer / peer_to_player maps
+  8. If this is the local joining player:
+       - Set local_player = player
+       - Exit observer mode, enable full controls
+  9. Broadcast system chat: "PlayerName has taken over from AI"
+  ```
+
+- **Key detail:** The `takeoverSlot` event must be processed *before* `world.tick()`
+  in `doTick()`. Currently events are executed at lines 345-355, then `world.tick(t)` at
+  line 356. Since `takeoverSlot` is a `PeerHubInterface` event (not a `PlayerInterface`
+  event), it goes through `receiveEvent()` (line 208) rather than
+  `receiveGameStateEvent()` (line 222). These are processed in `Peer.executeEvents()`
+  which runs before `world.tick()` — so the ordering is already correct.
+
+  But actually, `takeoverSlot` isn't a per-peer event — it's a global event that all
+  peers must execute. It should flow through `relayGameStateEvent()` (timestamped) rather
+  than `relayEvent()` (untimestamped), so it's executed at a specific tick.
+
+  **Alternative:** Add a new event type to `PlayerInterface`:
+  `void takeoverSlot(int slot_index);` — since `PlayerInterface` events are already
+  timestamped and executed synchronously at specific ticks via the `Peer.executeEvents()`
+  mechanism. This is cleaner because it reuses the existing synchronization infrastructure.
+
+### 6.3 Server accepts late-join connections
+
+**File:** `tt/classes/com/oddlabs/tt/net/Server.java`
+
+- Modify `incomingConnection()`: When a mid-game connection arrives that is neither a
+  rejoin (no matching disconnected player) nor explicitly a spectator request, check if
+  there are AI slots eligible for takeover.
+- Track which slots are AI-controlled and whether the host has enabled late join
+  (new `boolean allow_late_join` on `Game`).
+- Send the late-joiner the same catch-up data as spectator/rejoin: world seed + event log
+  + target slot index.
+
+**File:** `tt/classes/com/oddlabs/tt/net/GameClientInterface.java`
+
+- Add: `void startLateJoin(Game game, WorldGenerator generator, PlayerSlot[] players,
+  UnitInfo[] unit_infos, byte[] event_log, int current_tick, short takeover_slot);`
+
+### 6.4 Client handles late join
+
+**File:** `tt/classes/com/oddlabs/tt/net/Client.java`
+
+- Implement `startLateJoin()`: Invoke `ReplayWorldStarter` with `mode = LATE_JOIN` and
+  the target `takeover_slot`.
+
+### 6.5 ReplayWorldStarter late-join path
+
+**File:** `tt/classes/com/oddlabs/tt/net/ReplayWorldStarter.java` (created in Phase 3.3)
+
+During fast-forward, the AI runs normally as part of `world.tick()` — the AI is an
+`Animated` registered with `animationManagerRealTime`, and `World.tick()` (line 159-165)
+runs both game-time and real-time animation managers. So during catch-up, the AI produces
+the same commands it did on every other peer. No special handling needed.
+
+After fast-forward completes:
+
+```
+1. Connect to the Router (same as spectator/rejoin)
+2. Host broadcasts takeoverSlot(takeover_slot) event through the Router
+3. All peers (including the late-joiner) process the event at the designated tick:
+   - AI is stopped
+   - Player removed from nonhuman_players
+   - New Peer created
+4. Late-joiner's local_player is set to world.getPlayers()[takeover_slot]
+5. Late-joiner exits observer mode, gets full controls
+6. Late-joiner gets an active PlayerInterface (can send commands)
+```
+
+**Gap handling:** Same as spectator Phase 3.4 — buffer Router events during catch-up,
+process them after fast-forward.
+
+### 6.6 AI cleanup on takeover
+
+**File:** `tt/classes/com/oddlabs/tt/player/AI.java`
+
+The AI registers itself with the real-time animation manager in its constructor (line 54):
+```java
+owner.getWorld().getAnimationManagerRealTime().registerAnimation(this);
+```
+
+When the takeover happens:
+- Call `world.getAnimationManagerRealTime().removeAnimation(ai)` to stop the AI from
+  ticking.
+- Call `player.setAI(null)` to clear the reference.
+- The AI's internal state (sleep timer, construction flags) is abandoned — it's no longer
+  needed.
+
+**No cleanup of AI-issued commands needed.** Commands the AI already issued (e.g., "build
+weapons infinitely") persist as normal game state. The human player inherits exactly what
+the AI was doing: units mid-task, buildings mid-production, everything. This is
+intentional — the human picks up where the AI left off.
+
+### 6.7 Player name and identity
+
+When a human takes over an AI slot, the `PlayerInfo` for that slot still has the AI's
+name (e.g., "Rolf", "Bjorn" from `ai_names` in `Server.java:56`).
+
+Options:
+- **Option A (simpler):** Keep the AI's name. The player is known by the AI's name for
+  the rest of the game. Chat and stats use this name.
+- **Option B:** Update `PlayerInfo.name` to the human's nick. This requires broadcasting
+  the name change to all peers. Since `PlayerInfo` is used in the `Player` object
+  everywhere, this is straightforward but requires a new event type.
+
+Recommend **Option B** for clarity. Add a `renamePlayer(int slot, String name)` event to
+`PeerHubInterface`, broadcast alongside `takeoverSlot`.
+
+### 6.8 Lobby UI for late join
+
+**File:** `tt/classes/com/oddlabs/tt/form/SelectGameMenu.java`
+
+- When listing in-progress games (Phase 4.4's `TYPE_SPECTATABLE_GAME`), indicate which
+  games have AI slots available for takeover.
+- Add a "Join" option (distinct from "Spectate") for games with available AI slots.
+- If a game has both AI slots and spectating enabled, show both options.
+
+**File:** `common/classes/com/oddlabs/matchmaking/Game.java`
+
+- Add `boolean allow_late_join` field.
+- Matchmaking server includes AI slot count in game listing data.
+
+### 6.9 Rated game restrictions
+
+Late join should NOT be allowed in rated games. The rating system assumes a fixed set of
+players from game start. Replacing an AI mid-game introduces rating complications:
+- The AI's early-game performance affects the late-joiner's rating outcome.
+- The game was balanced for a specific number of human players.
+
+For unrated/casual games, late join adds a fun social dynamic — a friend can jump into
+your game and take over a bot.
+
+### 6.10 Multiple AI slots
+
+If a game has multiple AI slots, late join can happen for each one independently. Each
+`takeoverSlot` event is a separate synchronized event at potentially different ticks.
+
+The `Server` should track which AI slots have been taken over and which are still
+available. A second late-joiner can take a different AI slot.
+
+### 6.11 Team considerations
+
+The late-joining human inherits the AI's team assignment. This means:
+- They can only join on a team that currently has an AI player.
+- If the game is 2v2 with 2 humans vs 2 AIs, a late-joiner takes an AI slot on the AI
+  team.
+- The host could optionally allow the late-joiner to pick which AI slot to take (if
+  multiple are available), presented as a slot selection in the join UI.
+
+---
+
 ## File Change Summary
 
 ### New Files
@@ -602,7 +830,7 @@ When a player is disconnected (network error, `PeerHub.routerFailed()` at line 1
 |------|---------|
 | `tt/classes/com/oddlabs/tt/viewer/SpectatorInGameInfo.java` | InGameInfo implementation for spectator mode |
 | `tt/classes/com/oddlabs/tt/net/EventLog.java` | Records and serializes game events for catch-up replay |
-| `tt/classes/com/oddlabs/tt/net/ReplayWorldStarter.java` | Fast-forward world construction for mid-game spectate and rejoin |
+| `tt/classes/com/oddlabs/tt/net/ReplayWorldStarter.java` | Fast-forward world construction for mid-game spectate, rejoin, and late join |
 | `tt/classes/com/oddlabs/tt/form/ReconnectForm.java` | Disconnect dialog with reconnect countdown |
 
 ### Modified Files
@@ -611,23 +839,25 @@ When a player is disconnected (network error, `PeerHub.routerFailed()` at line 1
 |------|---------|
 | `tt/net/PlayerSlot.java` | Add `SPECTATOR = 5` type constant |
 | `common/matchmaking/PlayerTypes.java` | Add `Spectator` enum value |
-| `tt/net/Server.java` | Accept spectator/rejoin connections; track spectators separately; allow mid-game join; match rejoin identity |
-| `tt/net/Client.java` | Add `spectator`/`rejoin` flags; handle `startSpectating()`/`startRejoin()` |
-| `tt/net/GameClientInterface.java` | Add `startSpectating()` and `startRejoin()` methods |
+| `tt/net/Server.java` | Accept spectator/rejoin/late-join connections; track spectators separately; allow mid-game join; match rejoin identity; track AI slots for late join |
+| `tt/net/Client.java` | Add `spectator`/`rejoin`/`late_join` flags; handle `startSpectating()`/`startRejoin()`/`startLateJoin()` |
+| `tt/net/GameClientInterface.java` | Add `startSpectating()`, `startRejoin()`, and `startLateJoin()` methods |
 | `tt/net/GameServerInterface.java` | Add spectator join method |
 | `tt/net/WorldStarter.java` | Support spectator viewer creation with observer mode from tick 0 |
-| `tt/net/PeerHub.java` | Add `is_spectator` flag; skip checksum sending; no-op player interface; event logging on host; `temporarily_disconnected` set; grace period timer; `rejoinPeer()` method; `playerReconnected()` handler |
+| `tt/net/PeerHub.java` | Add `is_spectator` flag; skip checksum sending; no-op player interface; event logging on host; `temporarily_disconnected` set; grace period timer; `rejoinPeer()` method; `playerReconnected()` handler; `handleTakeoverSlot()` for AI->human transition |
+| `tt/net/PeerHubInterface.java` | Add `takeoverSlot(int slot_index)` and optionally `renamePlayer(int slot, String name)` |
 | `tt/net/Peer.java` | No changes needed (events execute the same way) |
+| `tt/player/AI.java` | No code changes needed (cleanup via existing `removeAnimation` + `setAI(null)`) |
 | `tt/delegate/SelectionDelegate.java` | No changes needed (observer mode already works) |
 | `tt/viewer/WorldViewer.java` | Minor: accept spectator flag for PeerHub construction |
 | `common/matchmaking/MatchmakingServerInterface.java` | Add `TYPE_SPECTATABLE_GAME`; add `playerDisconnectedNotify()`/`playerReconnectedNotify()` |
-| `common/matchmaking/Game.java` | Add `allow_spectators` field |
+| `common/matchmaking/Game.java` | Add `allow_spectators` and `allow_late_join` fields |
 | `common/router/Session.java` | Support adding a player to an already-started session |
 | `common/router/RouterClient.java` | Handle rejoin reconnection; optionally defer `playerDisconnected` broadcast |
 | `common/router/RouterClientInterface.java` | Add `playerReconnected(int client_id)` |
 | `server/matchserver/TimestampedGameSession.java` | Add `PARTICIPANT_DISCONNECTED` state; `participantRejoined()` method |
-| `server/matchserver/MatchmakingServer.java` | Serve spectatable game list; handle disconnect/reconnect notifications |
-| `tt/form/SelectGameMenu.java` | Add "Spectate" button/tab for in-progress games |
+| `server/matchserver/MatchmakingServer.java` | Serve spectatable game list; handle disconnect/reconnect notifications; include AI slot info in listings |
+| `tt/form/SelectGameMenu.java` | Add "Spectate" and "Join" options for in-progress games |
 
 ---
 
@@ -676,6 +906,19 @@ Phase 5 (Player rejoin — builds on Phases 2 & 3)
   5.10 Headless units during disconnect (no-op; optional AI deferred)
   5.11 Rejoin UI (ReconnectForm with countdown)
   5.12 Rated game rejoin rules
+
+Phase 6 (Late join: human takes over AI slot — builds on Phases 2 & 3)
+  6.1  takeoverSlot event protocol (PeerHubInterface or PlayerInterface)
+  6.2  PeerHub handleTakeoverSlot (synchronized AI->human transition)
+  6.3  Server accepts late-join connections (AI slot matching)
+  6.4  Client handles startLateJoin()
+  6.5  ReplayWorldStarter late-join path (fast-forward with AI, then takeover)
+  6.6  AI cleanup on takeover (removeAnimation + setAI(null))
+  6.7  Player name and identity (renamePlayer event)
+  6.8  Lobby UI for late join (show AI slots in game listings)
+  6.9  Rated game restrictions (disallow late join in rated)
+  6.10 Multiple AI slots (independent takeover per slot)
+  6.11 Team considerations (inherit AI's team)
 ```
 
 ---
@@ -695,3 +938,6 @@ Phase 5 (Player rejoin — builds on Phases 2 & 3)
 | Router `Session` re-entry breaks checksum coordination | Checksum comparisons fail during rejoin transition | Skip checksum comparison for one cycle after rejoin; rejoin player sends first checksum only after processing at least one full live tick |
 | Multiple disconnects/rejoins by same player | Event log ordering issues; slot confusion | Track rejoin count per player; reduce grace period on repeated disconnects; preserve original peer_index across all reconnections |
 | Disconnected player's units get destroyed while away | Poor experience on rejoin | Intentional design — this is part of the game. Players should reconnect quickly. The grace period timer communicates urgency |
+| AI->human transition desync (Phase 6) | All peers must stop AI at exact same tick | Use timestamped Router event (`takeoverSlot`) so all peers execute the transition at the same tick; this is the same mechanism used for all other synchronized commands |
+| AI random state diverges during fast-forward (Phase 6) | Late-joiner's AI produces different commands than live peers' AI | AI uses `world.getRandom()` which is deterministic from the world seed; `World.tick()` runs both animation managers, so AI ticks identically during fast-forward; already proven correct by existing checksum system |
+| Late-joiner inherits bad AI state | Frustrating experience (AI spent all resources, built poorly) | Intentional — this is the trade-off for joining late. Show the AI's current unit/building count in the join UI so players can make an informed choice |
