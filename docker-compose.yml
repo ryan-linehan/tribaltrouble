@@ -1,0 +1,68 @@
+# ============================================================
+# Tribal Trouble - Local Development Stack
+# ============================================================
+# Starts MySQL + Matchmaker + Router for local server dev.
+#
+# Quick start:
+#   docker compose up --build
+#
+# Connect your game client to localhost to play against
+# this local server.
+#
+# NOTE: The game client (tt/) cannot run inside Docker
+# because it requires OpenGL/GPU access. Run the client
+# natively: cd tt && ant run
+# ============================================================
+
+services:
+  db:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: oddlabs
+      MYSQL_USER: matchmaker
+      MYSQL_PASSWORD: tribaltrouble
+    ports:
+      - "3306:3306"
+    volumes:
+      - db-data:/var/lib/mysql
+      - ./docker/init-db.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  matchmaker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      SERVER_ROLE: matchmaker
+      SQL_HOST: db
+      SQL_PASS: tribaltrouble
+      # Optional - set these if you want Discord integration:
+      # DISCORD_BOT_TOKEN: your-token-here
+      # DISCORD_SERVER_ID: your-server-id
+    ports:
+      - "33214:33214"
+
+  router:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      SERVER_ROLE: router
+      SQL_HOST: db
+      SQL_PASS: tribaltrouble
+    ports:
+      - "11221:11221"
+
+volumes:
+  db-data:

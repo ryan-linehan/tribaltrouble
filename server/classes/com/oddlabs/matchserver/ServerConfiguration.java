@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.util.Properties;
 
 public class ServerConfiguration {
+    public static final String SQL_HOST = "SQL_HOST";
     public static final String SQL_PASS = "SQL_PASS";
     public static final String DISCORD_BOT_TOKEN = "DISCORD_BOT_TOKEN";
     public static final String DISCORD_SERVER_ID = "DISCORD_SERVER_ID";

@@ -1,0 +1,34 @@
+# Build artifacts
+**/build/
+ivy_lib_game/
+
+# IDE files
+.vs/
+.project
+.classpath
+*.iml
+.idea/
+
+# Git
+.git/
+.github/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Game client save data
+tt/save_data/
+
+# Server credentials (never bake into image)
+server/server.properties
+
+# Website
+website/
+
+# Documentation
+docs/
+*.md
+
+# Binaries directory (prebuilt releases)
+binaries/
