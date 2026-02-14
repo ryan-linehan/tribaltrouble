@@ -32,43 +32,40 @@ simulation at ~2,000-5,000 ticks/second without rendering).
 | Server spectator file writing | `server/matchserver/TimestampedGameSession.java:53-55` | Writes game events to `/var/games/{id}` |
 | World generation from seed | `tt/resource/WorldGenerator.java` | Deterministic world from seed — no terrain serialization needed |
 | InGameInfo abstraction | `tt/viewer/InGameInfo.java` | Clean place to add `SpectatorInGameInfo` |
-| Player slot types | `tt/net/PlayerSlot.java:22-25` | `OPEN`, `CLOSED`, `HUMAN`, `AI` — add `SPECTATOR` |
+| Player slot types | `tt/net/PlayerSlot.java:22-25` | `OPEN`, `CLOSED`, `HUMAN`, `AI` — unchanged; spectators are outside the slot system |
 
 ---
 
-## Phase 1: Spectator Player Slot & Pre-Game Join
+## Phase 1: Spectator Connection & Pre-Game Join
 
 **Goal:** A player can join a game lobby as a spectator before the game starts, and watch
 from tick 0 in observer mode.
 
-### 1.1 Add SPECTATOR slot type
+**Design decision:** Spectators are **completely outside the player slot system**. They
+don't get a `PlayerSlot`, don't get a `Player` object in the simulation, and don't appear
+in the lobby's player slot UI. The `Server` tracks them in a separate connection list.
+Each spectator constructs their own independent `WorldViewer` locally (with its own
+`Camera`, `SelectionDelegate`, etc.), giving every spectator fully independent camera
+controls.
 
-**File:** `tt/classes/com/oddlabs/tt/net/PlayerSlot.java`
-
-- Add `public static final int SPECTATOR = 5;` alongside the existing slot types (line 25)
-- Update `isValidType()` (line 41) to accept `SPECTATOR`
-- Add `getPlayerType()` mapping for `SPECTATOR` — return a new `PlayerTypes.Spectator` enum value
-
-**File:** `common/classes/com/oddlabs/matchmaking/PlayerTypes.java`
-
-- Add `Spectator` enum value
-
-### 1.2 Server accepts spectator connections
+### 1.1 Server tracks spectator connections separately
 
 **File:** `tt/classes/com/oddlabs/tt/net/Server.java`
 
-- Modify `incomingConnection()` (line 264): Add a separate path for spectator connections.
-  Spectators should NOT consume a regular player slot. Instead, track them in a separate
-  `List<ClientConnection> spectator_connections` field.
+- Add a `List<ClientConnection> spectator_connections` field, separate from the existing
+  `connection_to_client` map (which holds game participants).
+- Modify `incomingConnection()` (line 264): When a connection arrives with a spectator
+  flag, add it to `spectator_connections` instead of assigning a `PlayerSlot`. Do not call
+  `locateAvailableSlot()` — spectators don't consume slots.
 - Modify `startServer()` (line 172): Do NOT wait for spectators to be "ready." Only count
-  HUMAN players when checking `getNumReady() == getNumClients()`.
+  HUMAN players in `connection_to_client` when checking `getNumReady() == getNumClients()`.
 - Modify `broadcastInits()` (line 246): Also send `startGame()` to spectator connections.
-- Modify `broadcastPlayers()` (line 229): Include spectator connection clients so they see
-  the player list updates.
-- Add `locateAvailableSpectatorSlot()`: Spectators don't take player slots. Instead, assign
-  them a slot index >= MAX_PLAYERS (or -1) so they never map to a game `Player`.
+- Modify `broadcastPlayers()` (line 229): Include spectator connections so they see
+  the player list updates (for display purposes, not slot assignment).
 
-### 1.3 Client spectator connection flow
+No changes to `PlayerSlot.java` or `PlayerTypes.java` — spectators don't need a slot type.
+
+### 1.2 Client spectator connection flow
 
 **File:** `tt/classes/com/oddlabs/tt/net/Client.java`
 
@@ -76,19 +73,22 @@ from tick 0 in observer mode.
 - `startGame()` (line 133): When `spectator == true`, pass a flag through to `WorldStarter`
   so it knows to create a spectator viewer.
 
-### 1.4 WorldStarter creates spectator WorldViewer
+### 1.3 WorldStarter creates spectator WorldViewer
 
 **File:** `tt/classes/com/oddlabs/tt/net/WorldStarter.java`
 
-- In `load()` (line 54): If the joining player is a spectator (`player_slot == -1` or a
-  spectator flag is set):
-  - Set `corrected_player_slot` to 0 (spectator views from first player's perspective for
-    world construction, but doesn't control them).
+- In `load()` (line 54): If the joining client is a spectator:
+  - Construct the `World` from the seed and create all `Player` objects as normal (the
+    spectator needs the full simulation to replay events).
+  - Set `local_player` to `players[0]` — this is only used for camera starting position
+    and rendering context, not for control.
   - Pass a `SpectatorInGameInfo` instead of the normal `ingame_info`.
   - After creating the `WorldViewer`, immediately call
     `viewer.getDelegate().setObserverMode()` to enter observer mode from tick 0.
+  - Each spectator gets their own `WorldViewer` instance with its own `Camera` and
+    `SelectionDelegate`, so camera controls are fully independent per spectator.
 
-### 1.5 SpectatorInGameInfo
+### 1.4 SpectatorInGameInfo
 
 **File (new):** `tt/classes/com/oddlabs/tt/viewer/SpectatorInGameInfo.java`
 
@@ -107,23 +107,25 @@ public final strictfp class SpectatorInGameInfo implements InGameInfo {
 }
 ```
 
-### 1.6 PeerHub handles spectator peers
+### 1.5 PeerHub spectator mode
 
 **File:** `tt/classes/com/oddlabs/tt/net/PeerHub.java`
 
-- In the constructor (line 88): When building the peer list, skip `SPECTATOR` slots.
-  Spectators should NOT be added to `peer_index_to_peer`, `player_to_peer`, or
-  `peer_to_player`. They are passive recipients.
-- The spectator's local `PeerHub` will receive events via the Router but will never send
-  game state events (no `PlayerInterface` commands).
-- `sendChecksum()` (line 360): Spectator's PeerHub should still compute checksums locally
-  for its own consistency but should NOT send them to the Router. If a spectator desyncs,
-  it should not affect the active game. Add an `is_spectator` flag to control this.
+The spectator's `WorldViewer` creates a `PeerHub` as normal, but with an `is_spectator`
+flag that changes its behavior:
+
+- The spectator's `PeerHub` receives events via the Router and executes them locally to
+  keep the simulation in sync. But the spectator has no `Player` it controls — it doesn't
+  appear in `peer_index_to_peer`, `player_to_peer`, or `peer_to_player`.
+- `sendChecksum()` (line 360): Compute checksums locally for its own consistency but do
+  NOT send them to the Router. A spectator desync should not affect the active game.
 - `doTick()` (line 321): Skip `sendStatusUpdate()`, `sendMap()`, `sendInitInfo()`,
   `sendTrees()`, `sendSpectatorInfo()` calls when `is_spectator == true` — only the host
   should send these.
+- `getPlayerInterface()`: Return a no-op stub that drops all commands. This is
+  defense-in-depth beyond the UI-level observer mode guard.
 
-### 1.7 Lobby UI for spectator join
+### 1.6 Lobby UI for spectator join
 
 **File:** `tt/classes/com/oddlabs/tt/form/SelectGameMenu.java`
 
@@ -134,14 +136,6 @@ public final strictfp class SpectatorInGameInfo implements InGameInfo {
 
 - Add a `joinAsSpectator()` method (or add a boolean parameter to the connection protocol)
   so the server knows the connecting client is a spectator.
-
-### 1.8 Prevent spectator commands at the network level
-
-**File:** `tt/classes/com/oddlabs/tt/net/PeerHub.java`
-
-- When `is_spectator == true`, the `player_interface` proxy should be a no-op
-  implementation. Override `getPlayerInterface()` to return a stub that drops all commands.
-  This is defense-in-depth beyond the UI-level observer mode guard.
 
 ---
 
@@ -829,9 +823,7 @@ The late-joining human inherits the AI's team assignment. This means:
 
 | File | Changes |
 |------|---------|
-| `tt/net/PlayerSlot.java` | Add `SPECTATOR = 5` type constant |
-| `common/matchmaking/PlayerTypes.java` | Add `Spectator` enum value |
-| `tt/net/Server.java` | Accept spectator/rejoin/late-join connections; track spectators separately; allow mid-game join; match rejoin identity; track AI slots for late join |
+| `tt/net/Server.java` | Accept spectator/rejoin/late-join connections; track spectators in separate `spectator_connections` list; allow mid-game join; match rejoin identity; track AI slots for late join |
 | `tt/net/Client.java` | Add `spectator`/`rejoin`/`late_join` flags; handle `startSpectating()`/`startRejoin()`/`startLateJoin()` |
 | `tt/net/GameClientInterface.java` | Add `startSpectating()`, `startRejoin()`, and `startLateJoin()` methods |
 | `tt/net/GameServerInterface.java` | Add spectator join method |
@@ -857,14 +849,12 @@ The late-joining human inherits the AI's team assignment. This means:
 
 ```
 Phase 1 (Pre-game spectating — foundation)
-  1.1  PlayerSlot.SPECTATOR type + PlayerTypes.Spectator
-  1.2  Server.java spectator connection handling
-  1.3  Client.java spectator flag
-  1.4  WorldStarter spectator path
-  1.5  SpectatorInGameInfo
-  1.6  PeerHub spectator peer handling
-  1.7  Lobby UI (spectate button)
-  1.8  No-op PlayerInterface for spectators
+  1.1  Server.java spectator connection tracking (separate from player slots)
+  1.2  Client.java spectator flag
+  1.3  WorldStarter spectator path (independent WorldViewer per spectator)
+  1.4  SpectatorInGameInfo
+  1.5  PeerHub spectator mode (is_spectator flag, no-op PlayerInterface)
+  1.6  Lobby UI (spectate button)
 
 Phase 2 (Event recording — prerequisite for mid-game spectate & rejoin)
   2.1  EventLog class + host-side recording in PeerHub
