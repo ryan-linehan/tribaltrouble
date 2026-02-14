@@ -322,22 +322,40 @@ already in observer mode, no "Observer Mode" button is needed.
 
 - `addGameOverGUI()`: Show stats + "Main Menu" button only.
 
-### 4.4 Matchmaking server: list spectatable games
+### 4.4 Matchmaking server: keep games listed after start
+
+Currently, `Server.startServer()` (line 177) calls `unregisterGame()` which removes the
+game from matchmaking entirely. This must change so that running games remain visible in
+the lobby for spectators (and later, late joiners) to click into.
 
 **File:** `common/classes/com/oddlabs/matchmaking/MatchmakingServerInterface.java`
 
 - Add `public static final int TYPE_SPECTATABLE_GAME = 3;` (alongside existing TYPE_GAME,
   TYPE_CHAT_ROOM, etc.)
-- `requestList(TYPE_SPECTATABLE_GAME, ...)` returns in-progress games that allow spectating.
+- Add `public void updateGameStatus(int status);` to notify the matchmaking server that a
+  game has transitioned from lobby to in-progress.
+- `requestList(TYPE_SPECTATABLE_GAME, ...)` returns in-progress games.
+
+**File:** `common/classes/com/oddlabs/matchmaking/Game.java`
+
+- Add `int status` field with constants `STATUS_LOBBY = 0` and `STATUS_IN_PROGRESS = 1`.
+- Spectating is always allowed — no per-game toggle needed.
 
 **File:** `server/classes/com/oddlabs/matchserver/MatchmakingServer.java`
 
 - Track active game sessions (already done via `TimestampedGameSession`).
-- Respond to `TYPE_SPECTATABLE_GAME` list requests with games currently in progress.
+- Handle `updateGameStatus()`: mark the game as in-progress instead of removing it.
+- Respond to `TYPE_SPECTATABLE_GAME` list requests with games in `STATUS_IN_PROGRESS`.
+- Respond to `TYPE_GAME` list requests with only `STATUS_LOBBY` games (preserving existing
+  behavior — players shouldn't see in-progress games in the normal "Join Game" list).
 
-**File:** `common/classes/com/oddlabs/matchmaking/Game.java`
+**File:** `tt/classes/com/oddlabs/tt/net/Server.java`
 
-- Add `boolean allow_spectators` field (host can opt-in/out).
+- In `startServer()` (line 177): replace `unregisterGame()` with a call to
+  `updateGameStatus(Game.STATUS_IN_PROGRESS)`. The game stays registered but is moved
+  from the lobby list to the spectatable/joinable list.
+- `unregisterGame()` is now only called when the game truly ends (all players leave or
+  game-over).
 
 ### 4.5 Maximum spectator count
 
@@ -765,21 +783,44 @@ Options:
 Recommend **Option B** for clarity. Add a `renamePlayer(int slot, String name)` event to
 `PeerHubInterface`, broadcast alongside `takeoverSlot`.
 
-### 6.8 Lobby UI for late join
+### 6.8 Game setup: `allow_late_join` setting
 
-**File:** `tt/classes/com/oddlabs/tt/form/SelectGameMenu.java`
-
-- When listing in-progress games (Phase 4.4's `TYPE_SPECTATABLE_GAME`), indicate which
-  games have AI slots available for takeover.
-- Add a "Join" option (distinct from "Spectate") for games with available AI slots.
-- If a game has both AI slots and spectating enabled, show both options.
+The host must opt-in to late join when creating the game. This setting is configured in
+`TerrainMenu` alongside other game options and baked into the `Game` object.
 
 **File:** `common/classes/com/oddlabs/matchmaking/Game.java`
 
 - Add `boolean allow_late_join` field.
+- Add it to the constructor and getter.
+
+**File:** `tt/classes/com/oddlabs/tt/form/TerrainMenu.java`
+
+- Add a "Allow Late Join" checkbox (`CheckBox`) in the standard options panel, alongside
+  the existing rated game checkbox (around line 164-176).
+- The checkbox is only shown when `multiplayer == true` (same guard as rated checkbox).
+- When the `Game` object is constructed in `startGame()` (line 700-712), pass the
+  checkbox value as `allow_late_join`.
+- **Interaction with rated games:** Late join is not allowed in rated games (see 6.10).
+  When the "Rated" checkbox is checked, auto-uncheck and disable the "Allow Late Join"
+  checkbox. When "Rated" is unchecked, re-enable it.
+
+**File:** `tt/classes/com/oddlabs/tt/form/GameInfoForm.java`
+
+- Display the `allow_late_join` setting in the read-only game info panel so joining
+  players can see whether the game supports late join.
+
+### 6.9 Lobby UI for late join
+
+**File:** `tt/classes/com/oddlabs/tt/form/SelectGameMenu.java`
+
+- When listing in-progress games (Phase 4.4's `TYPE_SPECTATABLE_GAME`), indicate which
+  games have `allow_late_join == true` and available AI slots for takeover.
+- Add a "Join" option (distinct from "Spectate") for games with available AI slots.
+- Both options are always visible for eligible games (spectating is always allowed, late
+  join depends on the `allow_late_join` setting and available AI slots).
 - Matchmaking server includes AI slot count in game listing data.
 
-### 6.9 Rated game restrictions
+### 6.10 Rated game restrictions
 
 Late join should NOT be allowed in rated games. The rating system assumes a fixed set of
 players from game start. Replacing an AI mid-game introduces rating complications:
@@ -789,7 +830,7 @@ players from game start. Replacing an AI mid-game introduces rating complication
 For unrated/casual games, late join adds a fun social dynamic — a friend can jump into
 your game and take over a bot.
 
-### 6.10 Multiple AI slots
+### 6.11 Multiple AI slots
 
 If a game has multiple AI slots, late join can happen for each one independently. Each
 `takeoverSlot` event is a separate synchronized event at potentially different ticks.
@@ -797,7 +838,7 @@ If a game has multiple AI slots, late join can happen for each one independently
 The `Server` should track which AI slots have been taken over and which are still
 available. A second late-joiner can take a different AI slot.
 
-### 6.11 Team considerations
+### 6.12 Team considerations
 
 The late-joining human inherits the AI's team assignment. This means:
 - They can only join on a team that currently has an AI player.
@@ -834,13 +875,15 @@ The late-joining human inherits the AI's team assignment. This means:
 | `tt/player/AI.java` | No code changes needed (cleanup via existing `removeAnimation` + `setAI(null)`) |
 | `tt/delegate/SelectionDelegate.java` | No changes needed (observer mode already works) |
 | `tt/viewer/WorldViewer.java` | Minor: accept spectator flag for PeerHub construction |
-| `common/matchmaking/MatchmakingServerInterface.java` | Add `TYPE_SPECTATABLE_GAME`; add `playerDisconnectedNotify()`/`playerReconnectedNotify()` |
-| `common/matchmaking/Game.java` | Add `allow_spectators` and `allow_late_join` fields |
+| `common/matchmaking/MatchmakingServerInterface.java` | Add `TYPE_SPECTATABLE_GAME`; add `updateGameStatus()`; add `playerDisconnectedNotify()`/`playerReconnectedNotify()` |
+| `common/matchmaking/Game.java` | Add `status` field (`STATUS_LOBBY`/`STATUS_IN_PROGRESS`) and `allow_late_join` field |
 | `common/router/Session.java` | Support adding a player to an already-started session |
 | `common/router/RouterClient.java` | Handle rejoin reconnection; optionally defer `playerDisconnected` broadcast |
 | `common/router/RouterClientInterface.java` | Add `playerReconnected(int client_id)` |
 | `server/matchserver/TimestampedGameSession.java` | Add `PARTICIPANT_DISCONNECTED` state; `participantRejoined()` method |
 | `server/matchserver/MatchmakingServer.java` | Serve spectatable game list; handle disconnect/reconnect notifications; include AI slot info in listings |
+| `tt/form/TerrainMenu.java` | Add "Allow Late Join" checkbox; pass to Game constructor; disable when rated |
+| `tt/form/GameInfoForm.java` | Display `allow_late_join` setting in read-only game info |
 | `tt/form/SelectGameMenu.java` | Add "Spectate" and "Join" options for in-progress games |
 
 ---
@@ -871,7 +914,7 @@ Phase 4 (Spectator polish)
   4.1  Spectator disconnect handling
   4.2  Spectator chat
   4.3  Game-over for spectators
-  4.4  Matchmaking server game listing
+  4.4  Keep games listed after start (update status, not unregister)
   4.5  Max spectator count
   4.6  Rated game considerations
 
@@ -896,10 +939,11 @@ Phase 6 (Late join: human takes over AI slot — builds on Phases 2 & 3)
   6.5  ReplayWorldStarter late-join path (fast-forward with AI, then takeover)
   6.6  AI cleanup on takeover (removeAnimation + setAI(null))
   6.7  Player name and identity (renamePlayer event)
-  6.8  Lobby UI for late join (show AI slots in game listings)
-  6.9  Rated game restrictions (disallow late join in rated)
-  6.10 Multiple AI slots (independent takeover per slot)
-  6.11 Team considerations (inherit AI's team)
+  6.8  Game setup: allow_late_join checkbox in TerrainMenu
+  6.9  Lobby UI for late join (show AI slots in game listings)
+  6.10 Rated game restrictions (disallow late join in rated)
+  6.11 Multiple AI slots (independent takeover per slot)
+  6.12 Team considerations (inherit AI's team)
 ```
 
 ---
