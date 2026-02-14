@@ -1,0 +1,73 @@
+# ============================================================
+# Tribal Trouble - Development Stack (live reload)
+# ============================================================
+# Mounts your local source code into the containers so code
+# changes are picked up on container restart. No local JDK
+# or Ant installation needed - just Docker.
+#
+# Quick start:
+#   docker compose -f docker-compose.dev.yml up --build
+#
+# After editing Java code, restart to recompile + relaunch:
+#   docker compose -f docker-compose.dev.yml restart matchmaker router
+#
+# NOTE: The game client (tt/) cannot run inside Docker
+# because it requires OpenGL/GPU. To build the client
+# without local tooling, use the dev container:
+#   docker compose -f docker-compose.dev.yml run --rm matchmaker bash
+#   cd /app/tt && ant run   # (won't work headless, but ant compile will)
+# ============================================================
+
+services:
+  db:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: oddlabs
+      MYSQL_USER: matchmaker
+      MYSQL_PASSWORD: tribaltrouble
+    ports:
+      - "3306:3306"
+    volumes:
+      - db-data:/var/lib/mysql
+      - ./docker/init-db.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  matchmaker:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      SERVER_ROLE: matchmaker
+      SQL_HOST: db
+      SQL_PASS: tribaltrouble
+    ports:
+      - "33214:33214"
+    volumes:
+      - .:/app
+
+  router:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      SERVER_ROLE: router
+      SQL_HOST: db
+      SQL_PASS: tribaltrouble
+    ports:
+      - "11221:11221"
+    volumes:
+      - .:/app
+
+volumes:
+  db-data:

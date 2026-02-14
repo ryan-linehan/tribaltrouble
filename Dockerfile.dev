@@ -1,0 +1,27 @@
+# ============================================================
+# Tribal Trouble - Development Container
+# ============================================================
+# Full JDK + Ant environment for compiling and running the
+# server with live source code mounted as a volume.
+#
+# Used by docker-compose.dev.yml - not for production.
+# ============================================================
+
+FROM eclipse-temurin:24-jdk
+
+# Install Apache Ant
+ENV ANT_VERSION=1.10.15
+RUN apt-get update && apt-get install -y --no-install-recommends curl && \
+    curl -fsSL "https://dlcdn.apache.org/ant/binaries/apache-ant-${ANT_VERSION}-bin.tar.gz" \
+      | tar -xz -C /opt && \
+    ln -s "/opt/apache-ant-${ANT_VERSION}" /opt/ant && \
+    apt-get purge -y curl && apt-get autoremove -y && rm -rf /var/lib/apt/lists/*
+ENV ANT_HOME=/opt/ant
+ENV PATH="${ANT_HOME}/bin:${PATH}"
+
+WORKDIR /app
+
+COPY docker/dev-entrypoint.sh /dev-entrypoint.sh
+RUN chmod +x /dev-entrypoint.sh
+
+ENTRYPOINT ["/dev-entrypoint.sh"]
