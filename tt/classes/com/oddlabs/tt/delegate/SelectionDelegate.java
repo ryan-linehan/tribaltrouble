@@ -27,6 +27,7 @@ import java.util.Set;
 public final strictfp class SelectionDelegate extends ControllableCameraDelegate {
     private final InGameChatForm chat_form;
     private final Label observer_label;
+    private final Label filter_label;
     private final GameCamera game_camera;
 
     private boolean close_chat_override = false;
@@ -40,6 +41,7 @@ public final strictfp class SelectionDelegate extends ControllableCameraDelegate
     private boolean map_mode = false;
     private boolean observer = false;
     private int last_idle_peon_name = -1;
+    private SelectionFilter selection_filter = SelectionFilter.ALL;
 
     public SelectionDelegate(WorldViewer viewer, GameCamera camera) {
         super(viewer, camera);
@@ -48,6 +50,7 @@ public final strictfp class SelectionDelegate extends ControllableCameraDelegate
                         ResourceBundle.getBundle(SelectionDelegate.class.getName()),
                         "observer_mode");
         this.observer_label = new Label(observer_mode, Skin.getSkin().getHeadlineFont());
+        this.filter_label = new Label("", Skin.getSkin().getHeadlineFont());
         this.game_camera = (GameCamera) getCamera();
         displayChangedNotify(LocalInput.getViewWidth(), LocalInput.getViewHeight());
         addChild(getViewer().getPanel());
@@ -83,6 +86,7 @@ public final strictfp class SelectionDelegate extends ControllableCameraDelegate
                     map_mode = true;
                     if (observer) observer_label.remove();
                     else getActionButtonPanel().remove();
+                    if (selection_filter != SelectionFilter.ALL) filter_label.remove();
                     getCamera().disable();
                     setCamera(new MapCamera(this, game_camera));
                     getCamera().enable();
@@ -154,6 +158,15 @@ public final strictfp class SelectionDelegate extends ControllableCameraDelegate
                     getGUIRoot()
                             .pushDelegate(
                                     new BeaconDelegate(getViewer(), (GameCamera) getCamera()));
+                }
+                break;
+            case Keyboard.KEY_Q:
+                if (!map_mode && !observer) {
+                    if (event.isShiftDown()) {
+                        setSelectionFilter(SelectionFilter.ALL);
+                    } else {
+                        setSelectionFilter(selection_filter.next());
+                    }
                 }
                 break;
             case Keyboard.KEY_N:
@@ -283,6 +296,7 @@ public final strictfp class SelectionDelegate extends ControllableCameraDelegate
         getCamera().enable();
         if (observer) addChild(observer_label);
         else addChild(getActionButtonPanel());
+        if (selection_filter != SelectionFilter.ALL) addChild(filter_label);
 
         if (chat_visible) {
             chat_form.remove();
@@ -361,8 +375,12 @@ public final strictfp class SelectionDelegate extends ControllableCameraDelegate
                     if (selectable != null) {
                         if (selectable.getOwner() == getViewer().getLocalPlayer()) {
                             if (selectable instanceof Building) friendly_building = selectable;
-                            else if (selectable instanceof Unit) friendly_units.add(selectable);
-                            else throw new RuntimeException();
+                            else if (selectable instanceof Unit) {
+                                if (selection_filter.matches(
+                                        selectable, getViewer().getLocalPlayer())) {
+                                    friendly_units.add(selectable);
+                                }
+                            } else throw new RuntimeException();
                         } else {
                             enemy = selectable;
                         }
@@ -470,10 +488,35 @@ public final strictfp class SelectionDelegate extends ControllableCameraDelegate
         }
     }
 
+    private void setSelectionFilter(SelectionFilter filter) {
+        selection_filter = filter;
+        if (filter == SelectionFilter.ALL) {
+            filter_label.remove();
+        } else {
+            String prefix =
+                    Utils.getBundleString(
+                            ResourceBundle.getBundle(SelectionDelegate.class.getName()),
+                            "filter_prefix");
+            String text = prefix + filter.getDisplayName();
+            filter_label.set(text);
+            filter_label.setDim(
+                    filter_label.getFont().getWidth(text), filter_label.getFont().getHeight());
+            if (filter_label.getParent() == null) {
+                addChild(filter_label);
+            }
+            positionFilterLabel();
+        }
+    }
+
+    private void positionFilterLabel() {
+        filter_label.setPos(10, 10);
+    }
+
     public final void displayChangedNotify(int width, int height) {
         super.displayChangedNotify(width, height);
         observer_label.setPos(
                 (width - observer_label.getWidth()) / 2, height - observer_label.getHeight());
+        positionFilterLabel();
     }
 
     private final strictfp class ChatCloseListener implements CloseListener {
