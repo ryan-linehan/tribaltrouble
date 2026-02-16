@@ -123,7 +123,7 @@ fileTree("textures") {
     include("**/*.png")
     exclude("font/**")
 }.forEach { png ->
-    val rel = png.relativeTo(file("textures")).path
+    val rel = png.relativeTo(file("textures")).invariantSeparatorsPath
     when {
         rel.startsWith("pixelperfect") -> convertTexture("${png.nameWithoutExtension}_pixelperfect", png, "-flip", "-format", "png", "gui")
         rel.startsWith("gui") -> convertTexture("${png.nameWithoutExtension}_gui", png, "-flip", "-format", "png", "gui")

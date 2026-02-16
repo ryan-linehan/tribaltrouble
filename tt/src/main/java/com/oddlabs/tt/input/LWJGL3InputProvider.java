@@ -96,9 +96,11 @@ public final class LWJGL3InputProvider implements InputProvider<Long> {
         });
 
         glfwSetCursorPosCallback(windowHandle, (window, xpos, ypos) -> {
-             float[] scale = this.window.getWindowContentScale();
+             // Don't scale mouse coordinates on Windows since we disabled GLFW_SCALE_TO_MONITOR
+             boolean isWindows = System.getProperty("os.name").toLowerCase().contains("win");
+             float[] scale = isWindows ? new float[]{1.0f, 1.0f} : this.window.getWindowContentScale();
              this.mouseX = xpos * scale[0];
-             this.mouseY = this.window.getHeight() - (ypos * scale[1]) - 1; // Invert Y for OpenGL coords and scale
+             this.mouseY = this.window.getHeight() - (ypos * scale[1]) - 1; // Invert Y for OpenGL coords
              synchronized (mouseEvents) {
                  mouseEvents.add(new MouseEvent(-1, false, (int)mouseX, (int)mouseY, 0));
              }
@@ -224,7 +226,9 @@ public final class LWJGL3InputProvider implements InputProvider<Long> {
 
     @Override
     public void setCursorPosition(int x, int y) {
-        float[] scale = this.window.getWindowContentScale();
+        // Don't scale cursor position on Windows since we disabled GLFW_SCALE_TO_MONITOR
+        boolean isWindows = System.getProperty("os.name").toLowerCase().contains("win");
+        float[] scale = isWindows ? new float[]{1.0f, 1.0f} : this.window.getWindowContentScale();
         // Convert OpenGL pixels back to screen coordinates
         // Y inversion: pixelY = height - screenY * scale - 1
         // screenY * scale = height - pixelY - 1

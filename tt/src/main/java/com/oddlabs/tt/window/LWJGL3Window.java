@@ -36,6 +36,7 @@ import static org.lwjgl.glfw.GLFW.GLFW_OPENGL_FORWARD_COMPAT;
 import static org.lwjgl.glfw.GLFW.GLFW_OPENGL_PROFILE;
 import static org.lwjgl.glfw.GLFW.GLFW_RESIZABLE;
 import static org.lwjgl.glfw.GLFW.GLFW_SAMPLES;
+import static org.lwjgl.glfw.GLFW.GLFW_SCALE_TO_MONITOR;
 import static org.lwjgl.glfw.GLFW.GLFW_TRUE;
 import static org.lwjgl.glfw.GLFW.GLFW_VISIBLE;
 import static org.lwjgl.glfw.GLFW.glfwCreateWindow;
@@ -130,6 +131,9 @@ public final class LWJGL3Window implements Window {
         
         if (System.getProperty("os.name").toLowerCase().contains("mac")) {
             glfwWindowHint(GLFW_COCOA_RETINA_FRAMEBUFFER, GLFW_TRUE);
+        } else if (System.getProperty("os.name").toLowerCase().contains("win")) {
+            // Disable DPI scaling on Windows to avoid mouse offset issues
+            glfwWindowHint(GLFW_SCALE_TO_MONITOR, GLFW_FALSE);
         }
 
         Settings settings = Settings.getSettings();
