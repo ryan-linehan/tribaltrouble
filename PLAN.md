@@ -6,10 +6,10 @@ Players want adjustable per-unit-type stats as game creation settings, exposed i
 
 | Unit Type | Configurable Stats |
 |---|---|
-| **Warriors (Rock/Iron/Rubber, both races)** | HP, speed, damage |
+| **Warriors (Rock/Iron/Rubber, both races)** | HP, speed, damage, defense chance (dodge %) |
 | **Iron Warrior specifically** | Melee vs ranged toggle (currently all warriors are ranged/throwing) |
-| **Peons** | HP, speed, damage |
-| **Chieftains** | HP, speed, damage |
+| **Peons** | HP, speed, damage, defense chance |
+| **Chieftains** | HP, speed, damage, defense chance |
 | **Buildings (Quarters/Armory/Tower)** | HP |
 
 ## Current Architecture
@@ -23,10 +23,19 @@ Players want adjustable per-unit-type stats as game creation settings, exposed i
 6. **UnitTemplate.java** - Immutable value object holding a unit's stats (meters_per_second, max_hit_points, weapon_factory, etc.)
 
 ### Current unit defaults:
-- **All warriors**: 1 HP, 4 m/s speed, damage 1/2/2 (rock/iron/rubber), all ranged (THROW ability)
-- **Peons**: 1 HP, 5 m/s speed, 1 damage (melee)
-- **Chieftains**: Viking 60 HP / Native 40 HP, 4 m/s speed, 3 damage (melee)
-- **Buildings**: Quarters 200 HP, Armory 200 HP, Tower 100 HP
+Warriors have only 1 HP but survive through `defense_chance` (dodge probability) defined in `Template.java`. This is the primary survivability mechanic for warriors — not HP.
+
+| Unit | HP | Defense Chance | Speed | Damage | Effective Survivability |
+|---|---|---|---|---|---|
+| Rock Warrior | 1 | 50% | 4 m/s | 1 | ~2 hits to kill |
+| Iron Warrior | 1 | 70% | 4 m/s | 2 | ~3.3 hits to kill |
+| Rubber Warrior | 1 | 70% | 4 m/s | 2 | ~3.3 hits to kill |
+| Peon | 1 | 0% | 5 m/s | 1 (melee) | 1 hit to kill |
+| Viking Chieftain | 60 | 50% | 4 m/s | 3 (melee) | Very tanky |
+| Native Chieftain | 40 | 50% | 4 m/s | 3 (melee) | Tanky |
+| Quarters | 200 | — | — | — | — |
+| Armory | 200 | — | — | — | — |
+| Tower | 100 | — | — | — | — |
 
 ## Implementation Plan
 
@@ -40,8 +49,9 @@ These are straightforward because they're just numbers plugged into `UnitTemplat
   - Warrior HP (shared across rock/iron/rubber, per race or global - recommend global for simplicity)
   - Warrior Speed
   - Warrior Damage multiplier (or per-tier)
-  - Peon HP, Speed
-  - Chieftain HP (Viking), Chieftain HP (Native)
+  - Warrior Defense Chance (dodge %) — this is the primary survivability stat for warriors since base HP is 1
+  - Peon HP, Speed, Defense Chance
+  - Chieftain HP (Viking), Chieftain HP (Native), Defense Chance
   - Building HP multiplier
 
   The existing slider infrastructure (`Slider` class, 0-N range, value listeners) is directly reusable.
