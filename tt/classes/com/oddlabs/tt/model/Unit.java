@@ -359,6 +359,17 @@ public strictfp class Unit extends Selectable implements Occupant, Movable {
             stun_marker.done();
             stun_marker = null;
         }
+
+        // Decrement gatherer counter if this unit was gathering
+        if (home_building != null && !home_building.isDead() && getCurrentController() instanceof GatherController) {
+            GatherController gather_controller = (GatherController) getCurrentController();
+            Class supply_type = gather_controller.getSupplyType();
+            GathererCounter counter = home_building.getGathererCounter(supply_type);
+            if (counter != null) {
+                counter.decrementGatherers();
+            }
+        }
+
         super.removeDying();
     }
 
@@ -672,5 +683,21 @@ public strictfp class Unit extends Selectable implements Occupant, Movable {
 
     public final void debugRender() {
         path_tracker.debugRender();
+    }
+
+    /**
+     * Called when a controller is removed from this unit's stack.
+     * Handles decrementing the gatherer counter when a GatherController is removed.
+     */
+    protected void onControllerRemoved(Controller controller) {
+        // If a GatherController is being removed, decrement the gatherer counter
+        if (controller instanceof GatherController && home_building != null && !home_building.isDead()) {
+            GatherController gather_controller = (GatherController) controller;
+            Class supply_type = gather_controller.getSupplyType();
+            GathererCounter counter = home_building.getGathererCounter(supply_type);
+            if (counter != null) {
+                counter.decrementGatherers();
+            }
+        }
     }
 }

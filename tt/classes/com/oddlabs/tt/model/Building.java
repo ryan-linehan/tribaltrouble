@@ -313,7 +313,14 @@ public final strictfp class Building extends Selectable implements Occupant {
             getUnitContainer().prepareDeploy(-1);
             getUnitContainer().exit();
             Unit unit = createUnit(null, race.getUnitTemplate(Race.UNIT_PEON));
+            unit.setHomeBuilding(this); // Track which building deployed this unit
             unit.pushController(new GatherController(unit, null, supply_type));
+
+            // Increment gatherer counter for this resource type
+            GathererCounter counter = getGathererCounter(supply_type);
+            if (counter != null) {
+                counter.incrementGatherers();
+            }
         }
     }
 
