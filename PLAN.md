@@ -15,7 +15,6 @@ Players want adjustable per-unit-type stats as game creation settings, exposed i
 | **Chieftains** | HP, speed, damage, defense chance, HP regeneration, aggro range |
 | **Buildings (Quarters/Armory/Tower)** | HP |
 | **Towers** | Continuous targeting (no pause after kill) |
-| **Chicken warrior cost** | Resource cost (2w+1c vs 2w+1r+1i+1c) |
 | **Tower build cost** | Peons needed (10 vs 20) |
 
 ## Current Architecture
@@ -81,9 +80,6 @@ These are straightforward because they're just numbers plugged into `UnitTemplat
   - Tower continuous targeting toggle (TT2: no pause after kill)
   - Tower build cost — peons needed (TT2: 10 vs TT1: 20)
 
-  **Economy section:**
-  - Chicken warrior resource cost toggle (TT2: 2w+1c; TT1: 2w+1r+1i+1c)
-
   The existing slider infrastructure (`Slider` class, 0-N range, value listeners) is directly reusable.
 
 **3. Thread `UnitSettings` through the startup path:**
@@ -127,8 +123,6 @@ These are straightforward because they're just numbers plugged into `UnitTemplat
 
 **14. Tower build cost** - TT2 required only 10 peons with wood to fully build a tower (TT1: 20). This is in building construction logic.
 
-**15. Chicken warrior resource cost** - TT2: 2 wood + 1 chicken. TT1: 2 wood + 1 rock + 1 iron + 1 chicken. This is in the armory/weapon crafting recipe definitions.
-
 ## TT2 Feature Mapping (from Issue #136)
 
 These are the TT2 changes compared to TT1, with original TT2 unit names. The goal is to make all of these configurable as game creation settings so players can toggle "TT2 mode."
@@ -149,7 +143,6 @@ These are the TT2 changes compared to TT1, with original TT2 unit names. The goa
 - Chieftains regenerate HP at a slow rate
 - Peons and chieftains have smaller aggro range
 - Towers: 10 peons to build (TT1: 20), continuous targeting (no 1-2s pause after kill)
-- Chicken warrior cost: 2 wood + 1 chicken (TT1: 2 wood + 1 rock + 1 iron + 1 chicken)
 
 ## Recommended Approach
 
@@ -176,4 +169,3 @@ Key design decisions:
 | `ThrowingFactory.java` / weapon factories | Parameterize attack speed and range |
 | Tower targeting logic | Continuous targeting toggle |
 | Building construction logic | Tower build cost |
-| Armory/weapon recipe logic | Chicken warrior resource cost |
