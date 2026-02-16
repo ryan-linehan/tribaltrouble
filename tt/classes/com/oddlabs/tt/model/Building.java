@@ -70,6 +70,7 @@ public final strictfp class Building extends Selectable implements Occupant {
 
     private final Map supply_containers = new HashMap();
     private final Map build_containers = new HashMap();
+    private final Map gatherer_counters = new HashMap();
     private final DeployContainer[] deploy_containers = new DeployContainer[12];
     private final LinearEmitter damaged_emitter;
     private final LinearEmitter production_emitter;
@@ -244,6 +245,13 @@ public final strictfp class Building extends Selectable implements Occupant {
     public final SupplyContainer getSupplyContainer(Class key) {
         assert !isDead();
         return (SupplyContainer) supply_containers.get(key);
+    }
+
+    public final GathererCounter getGathererCounter(Class key) {
+        if (!isDead()) {
+            return (GathererCounter) gatherer_counters.get(key);
+        }
+        return null;
     }
 
     public final BuildSupplyContainer getBuildSupplyContainer(Class key) {
@@ -482,6 +490,16 @@ public final strictfp class Building extends Selectable implements Occupant {
                     supply_containers.put(RockSupply.class, rock_supply);
                     supply_containers.put(IronSupply.class, iron_supply);
                     supply_containers.put(RubberSupply.class, rubber_supply);
+
+                    // Initialize gatherer counters for tracking active peon gatherers
+                    GathererCounter tree_gatherer = new GathererCounter(this, TreeSupply.class);
+                    GathererCounter rock_gatherer = new GathererCounter(this, RockSupply.class);
+                    GathererCounter iron_gatherer = new GathererCounter(this, IronSupply.class);
+                    GathererCounter rubber_gatherer = new GathererCounter(this, RubberSupply.class);
+                    gatherer_counters.put(TreeSupply.class, tree_gatherer);
+                    gatherer_counters.put(RockSupply.class, rock_gatherer);
+                    gatherer_counters.put(IronSupply.class, iron_gatherer);
+                    gatherer_counters.put(RubberSupply.class, rubber_gatherer);
 
                     SupplyContainer rock_weapon_container = new SupplyContainer(MAX_SUPPLY_COUNT);
                     supply_containers.put(RockAxeWeapon.class, rock_weapon_container);

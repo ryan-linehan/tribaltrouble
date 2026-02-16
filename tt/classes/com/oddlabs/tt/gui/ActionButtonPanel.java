@@ -795,12 +795,16 @@ public final strictfp class ActionButtonPanel extends GUIObject implements Anima
         weapon_rubber_status.setCounter(weapon_rubber_counter);
         SupplyCounter tree_counter = new SupplyCounter(current_building, TreeSupply.class);
         tree_status.setCounter(tree_counter);
+        tree_status.setGathererCounter(current_building.getGathererCounter(TreeSupply.class));
         SupplyCounter rock_counter = new SupplyCounter(current_building, RockSupply.class);
         rock_status.setCounter(rock_counter);
+        rock_status.setGathererCounter(current_building.getGathererCounter(RockSupply.class));
         SupplyCounter iron_counter = new SupplyCounter(current_building, IronSupply.class);
         iron_status.setCounter(iron_counter);
+        iron_status.setGathererCounter(current_building.getGathererCounter(IronSupply.class));
         SupplyCounter rubber_counter = new SupplyCounter(current_building, RubberSupply.class);
         rubber_status.setCounter(rubber_counter);
+        rubber_status.setGathererCounter(current_building.getGathererCounter(RubberSupply.class));
 
         harvest_tree_button.setContainers(
                 current_building, Building.KEY_DEPLOY_PEON_HARVEST_TREE, null);

@@ -172,14 +172,26 @@ public abstract class Selectable extends Model implements Target, Animated, Mode
 
     public final void swapController(Controller controller) {
         assert !isDead();
+        Controller old_controller = (Controller) controller_stack.get(controller_stack.size() - 1);
+        onControllerRemoved(old_controller);
         controller_stack.remove(controller_stack.size() - 1);
         pushController(controller);
     }
 
     public final void popController() {
         assert !isDead();
+        Controller old_controller = (Controller) controller_stack.get(controller_stack.size() - 1);
+        onControllerRemoved(old_controller);
         controller_stack.remove(controller_stack.size() - 1);
         decide();
+    }
+
+    /**
+     * Called when a controller is removed from the stack.
+     * Can be overridden by subclasses to handle cleanup.
+     */
+    protected void onControllerRemoved(Controller controller) {
+        // Default implementation does nothing
     }
 
     public final void setBehaviour(Behaviour behaviour) {
@@ -197,6 +209,10 @@ public abstract class Selectable extends Model implements Target, Animated, Mode
 
     protected final void clearControllerStack() {
         Controller default_controller = (Controller) controller_stack.get(0);
+        // Notify about all controllers being removed (except the default one)
+        for (int i = controller_stack.size() - 1; i > 0; i--) {
+            onControllerRemoved((Controller) controller_stack.get(i));
+        }
         controller_stack.clear();
         controller_stack.add(default_controller);
     }
