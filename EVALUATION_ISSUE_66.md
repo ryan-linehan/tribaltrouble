@@ -180,21 +180,102 @@ for (int i = 0; i < picked.length; i++) {
 
 Note: The filter should only apply to **drag selection** (box select), not single-click selection. Since single clicks go through `createSinglePick()` in `Picker.java` and the threshold check (`abs < SELECTION_THRESHOLD`), we can check `abs(x1-x2) >= SELECTION_THRESHOLD || abs(y1-y2) >= SELECTION_THRESHOLD` before applying the filter, or simply always apply it (including for single-click) which may also be desirable UX.
 
-#### 6. Visual feedback (optional enhancement)
+#### 6. Visual feedback (critical — not optional)
 
-Render the current preference as a small persistent label in `render2D()`:
+A filter that silently changes selection behavior is a serious UX hazard. If a player
+accidentally hits the cycle key, drag-select will appear broken with no explanation.
+The game already has this problem with `aggressive_units` (Ctrl+A), which only shows
+a transient 8-second InfoPrinter message. A selection filter would be far worse because
+it makes the primary interaction — drag-selecting units — seem non-functional.
+
+**Three layers of feedback are recommended (implement at least the first two):**
+
+##### Layer 1: Persistent on-screen label (required)
+
+Follow the existing **observer mode label** pattern (`SelectionDelegate.java:29-72`).
+When in observer mode, a `Label` is added as a persistent child of the delegate, using
+`Skin.getSkin().getHeadlineFont()`, centered at the top of the screen. This label is
+always visible until the mode is exited.
+
+```java
+// In the constructor, create the label (hidden initially):
+private Label selection_filter_label;
+
+// In constructor:
+this.selection_filter_label = new Label("", Skin.getSkin().getHeadlineFont());
+
+// When preference changes:
+if (selection_preference == PREF_ALL) {
+    selection_filter_label.remove();
+} else {
+    // Use BackgroundLabelBox for a visible background behind the text
+    selection_filter_label.remove();
+    selection_filter_label = new Label(
+        "Selection Filter: " + PREF_NAMES[selection_preference],
+        Skin.getSkin().getHeadlineFont());
+    addChild(selection_filter_label);
+}
+
+// Position in displayChangedNotify():
+selection_filter_label.setPos(
+    (width - selection_filter_label.getWidth()) / 2,
+    height - selection_filter_label.getHeight() - 5);
+```
+
+For even better visibility, wrap in a `BackgroundLabelBox` (used by `InfoPrinter`) which
+renders text over a semi-transparent background box via `Skin.getSkin().getBackgroundBox()`.
+
+**Estimated code: ~15 lines.**
+
+##### Layer 2: Selection rectangle color change (required)
+
+The drag-selection rectangle is currently always blue (`r=0.3, g=1.0, b=0.0, a=1.0`).
+When a filter is active, tint it a different color — this provides feedback exactly where
+the player is already looking (at their drag box). For example, orange for filtered mode:
 
 ```java
 public final void render2D() {
     if (selection) {
-        GW.renderRect(selection_x1, selection_x2, selection_y1, selection_y2,
-                      0f, .3f, 1f, 0f, 1f);
-    }
-    if (selection_preference != PREF_ALL) {
-        // Render preference label near selection box or in a fixed screen position
+        if (selection_preference != PREF_ALL) {
+            // Orange box when filter is active
+            GW.renderRect(selection_x1, selection_x2, selection_y1, selection_y2,
+                          0f, 1f, .6f, 0f, 1f);
+        } else {
+            // Default blue box
+            GW.renderRect(selection_x1, selection_x2, selection_y1, selection_y2,
+                          0f, .3f, 1f, 0f, 1f);
+        }
     }
 }
 ```
+
+**Estimated code: ~5 lines (an if/else around the existing renderRect call).**
+
+##### Layer 3: Transient notification on toggle (nice-to-have)
+
+An `InfoPrinter.print()` message when cycling provides immediate confirmation of the
+action but disappears after 8 seconds. Useful as supplementary feedback, but must not
+be the only indicator.
+
+```java
+getViewer().getGUIRoot().getInfoPrinter()
+    .print("Selection Filter: " + PREF_NAMES[selection_preference]);
+```
+
+**Estimated code: 1 line.**
+
+##### Why all three layers matter
+
+| Scenario | Layer 1 (Label) | Layer 2 (Box color) | Layer 3 (Toast) |
+|---|---|---|---|
+| Player cycles preference intentionally | Confirms current mode | Reinforces during drag | Immediate feedback |
+| Player accidentally hits hotkey | **Catches the mistake** — always visible | Noticeable during next drag | May already have faded |
+| Player returns after AFK | **Still visible** | Visible on next drag | Gone |
+| Player is focused on the battlefield, not HUD | May miss it | **Catches attention** — right at the cursor | May miss it |
+
+No single layer covers all cases. The persistent label is the most important (covers the
+"accidental press" and "returned from AFK" cases), the box color change is the most
+noticeable during active gameplay, and the toast is the most immediately responsive.
 
 ## Design Considerations
 
@@ -235,7 +316,7 @@ Currently, double-clicking a warrior selects all warriors on screen (via `Abilit
 
 ## Estimated Scope
 
-- **Lines of code changed**: ~80-120 lines across 2-3 files
+- **Lines of code changed**: ~100-140 lines across 2-3 files (includes visual feedback)
 - **Risk level**: Low — changes are isolated to client-side selection logic with no impact on game simulation determinism, networking, or rendering pipelines
 - **No new dependencies** required
 - **No database changes** required
