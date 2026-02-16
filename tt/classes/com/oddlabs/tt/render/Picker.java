@@ -18,6 +18,8 @@ import com.oddlabs.tt.model.Building;
 import com.oddlabs.tt.model.ModelToolTip;
 import com.oddlabs.tt.model.SceneryModel;
 import com.oddlabs.tt.model.Selectable;
+import com.oddlabs.tt.model.Unit;
+import com.oddlabs.tt.model.UnitTemplate;
 import com.oddlabs.tt.pathfinder.UnitGrid;
 import com.oddlabs.tt.player.Player;
 import com.oddlabs.tt.player.PlayerInterface;
@@ -247,7 +249,9 @@ public final strictfp class Picker implements Updatable {
     private final Selectable[] createSinglePick(CameraState camera, int clicks) {
         Selectable nearest = (Selectable) getNearestPick(element_pick_list, Selectable.class);
         if (nearest != null) {
-            if (clicks > 1) {
+            if (clicks > 2 && nearest instanceof Unit) {
+                return pickAllSameType(camera, ((Unit) nearest).getUnitTemplate());
+            } else if (clicks > 1) {
                 if (nearest.getAbilities().hasAbilities(Abilities.THROW)) {
                     return pickAll(camera, Abilities.THROW);
                 } else if (nearest.getAbilities().hasAbilities(Abilities.HARVEST)) {
@@ -288,6 +292,28 @@ public final strictfp class Picker implements Updatable {
         for (int i = 0; i < complete_list.length; i++) {
             Selectable selectable = complete_list[i];
             if (selectable.getAbilities().hasAbilities(ability_filter)) {
+                result.add(selectable);
+            }
+        }
+        Selectable[] array = new Selectable[result.size()];
+        result.toArray(array);
+        return array;
+    }
+
+    private final Selectable[] pickAllSameType(CameraState camera, UnitTemplate unit_template) {
+        List result = new ArrayList();
+        Selectable[] complete_list =
+                pickBoxed(
+                        camera,
+                        0,
+                        0,
+                        LocalInput.getViewWidth() - 1,
+                        LocalInput.getViewHeight() - 1,
+                        1);
+        for (int i = 0; i < complete_list.length; i++) {
+            Selectable selectable = complete_list[i];
+            if (selectable instanceof Unit
+                    && ((Unit) selectable).getUnitTemplate() == unit_template) {
                 result.add(selectable);
             }
         }
