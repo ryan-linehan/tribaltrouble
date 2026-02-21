@@ -1,6 +1,101 @@
 <ivy-module version="2.0">
-  <info organisation="tribaltrouble" module="tribaltrouble"/>
+  <info organisation="tribaltrouble" module="tribaltrouble-game"/>
+  <configurations>
+    <conf name="default" description="Default game dependencies"/>
+    <conf name="lwjgl" description="LWJGL core modules"/>
+    <conf name="lwjgl-natives-linux" description="LWJGL Linux natives"/>
+    <conf name="lwjgl-natives-windows" description="LWJGL Windows natives"/>
+    <conf name="lwjgl-natives-macos" description="LWJGL macOS x86_64 natives"/>
+    <conf name="lwjgl-natives-macos-arm64" description="LWJGL macOS ARM64 natives"/>
+  </configurations>
   <dependencies>
-    <dependency org="com.code-disaster.steamworks4j" name="steamworks4j" rev="1.10.0"/>
+    <!-- Steamworks4J -->
+    <dependency org="com.code-disaster.steamworks4j" name="steamworks4j" rev="1.10.0" conf="default->default"/>
+
+    <!-- Audio -->
+    <dependency org="org.jcraft" name="jorbis" rev="0.0.17" conf="default->default"/>
+
+    <!-- Apache Commons -->
+    <dependency org="commons-pool" name="commons-pool" rev="1.2" conf="default->default"/>
+    <dependency org="commons-dbcp" name="commons-dbcp" rev="1.2.1" conf="default->default"/>
+    <dependency org="commons-collections" name="commons-collections" rev="3.1" conf="default->default"/>
+
+    <!-- Logging -->
+    <dependency org="org.apache.logging.log4j" name="log4j-api" rev="2.0-beta9" conf="default->default"/>
+
+    <!-- LWJGL 3.3.6 Core modules -->
+    <dependency org="org.lwjgl" name="lwjgl" rev="3.3.6" conf="lwjgl->default"/>
+    <dependency org="org.lwjgl" name="lwjgl-opengl" rev="3.3.6" conf="lwjgl->default"/>
+    <dependency org="org.lwjgl" name="lwjgl-openal" rev="3.3.6" conf="lwjgl->default"/>
+    <dependency org="org.lwjgl" name="lwjgl-glfw" rev="3.3.6" conf="lwjgl->default"/>
+    <dependency org="org.lwjgl" name="lwjgl-jawt" rev="3.3.6" conf="lwjgl->default"/>
+
+    <!-- LWJGL Linux natives -->
+    <dependency org="org.lwjgl" name="lwjgl" rev="3.3.6" conf="lwjgl-natives-linux->default">
+      <artifact name="lwjgl" type="jar" e:classifier="natives-linux" xmlns:e="http://ant.apache.org/ivy/extra"/>
+    </dependency>
+    <dependency org="org.lwjgl" name="lwjgl-opengl" rev="3.3.6" conf="lwjgl-natives-linux->default">
+      <artifact name="lwjgl-opengl" type="jar" e:classifier="natives-linux" xmlns:e="http://ant.apache.org/ivy/extra"/>
+    </dependency>
+    <dependency org="org.lwjgl" name="lwjgl-openal" rev="3.3.6" conf="lwjgl-natives-linux->default">
+      <artifact name="lwjgl-openal" type="jar" e:classifier="natives-linux" xmlns:e="http://ant.apache.org/ivy/extra"/>
+    </dependency>
+    <dependency org="org.lwjgl" name="lwjgl-glfw" rev="3.3.6" conf="lwjgl-natives-linux->default">
+      <artifact name="lwjgl-glfw" type="jar" e:classifier="natives-linux" xmlns:e="http://ant.apache.org/ivy/extra"/>
+    </dependency>
+    <dependency org="org.lwjgl" name="lwjgl-jawt" rev="3.3.6" conf="lwjgl-natives-linux->default">
+      <artifact name="lwjgl-jawt" type="jar" e:classifier="natives-linux" xmlns:e="http://ant.apache.org/ivy/extra"/>
+    </dependency>
+
+    <!-- LWJGL Windows natives -->
+    <dependency org="org.lwjgl" name="lwjgl" rev="3.3.6" conf="lwjgl-natives-windows->default">
+      <artifact name="lwjgl" type="jar" e:classifier="natives-windows" xmlns:e="http://ant.apache.org/ivy/extra"/>
+    </dependency>
+    <dependency org="org.lwjgl" name="lwjgl-opengl" rev="3.3.6" conf="lwjgl-natives-windows->default">
+      <artifact name="lwjgl-opengl" type="jar" e:classifier="natives-windows" xmlns:e="http://ant.apache.org/ivy/extra"/>
+    </dependency>
+    <dependency org="org.lwjgl" name="lwjgl-openal" rev="3.3.6" conf="lwjgl-natives-windows->default">
+      <artifact name="lwjgl-openal" type="jar" e:classifier="natives-windows" xmlns:e="http://ant.apache.org/ivy/extra"/>
+    </dependency>
+    <dependency org="org.lwjgl" name="lwjgl-glfw" rev="3.3.6" conf="lwjgl-natives-windows->default">
+      <artifact name="lwjgl-glfw" type="jar" e:classifier="natives-windows" xmlns:e="http://ant.apache.org/ivy/extra"/>
+    </dependency>
+    <dependency org="org.lwjgl" name="lwjgl-jawt" rev="3.3.6" conf="lwjgl-natives-windows->default">
+      <artifact name="lwjgl-jawt" type="jar" e:classifier="natives-windows" xmlns:e="http://ant.apache.org/ivy/extra"/>
+    </dependency>
+
+    <!-- LWJGL macOS x86_64 natives -->
+    <dependency org="org.lwjgl" name="lwjgl" rev="3.3.6" conf="lwjgl-natives-macos->default">
+      <artifact name="lwjgl" type="jar" e:classifier="natives-macos" xmlns:e="http://ant.apache.org/ivy/extra"/>
+    </dependency>
+    <dependency org="org.lwjgl" name="lwjgl-opengl" rev="3.3.6" conf="lwjgl-natives-macos->default">
+      <artifact name="lwjgl-opengl" type="jar" e:classifier="natives-macos" xmlns:e="http://ant.apache.org/ivy/extra"/>
+    </dependency>
+    <dependency org="org.lwjgl" name="lwjgl-openal" rev="3.3.6" conf="lwjgl-natives-macos->default">
+      <artifact name="lwjgl-openal" type="jar" e:classifier="natives-macos" xmlns:e="http://ant.apache.org/ivy/extra"/>
+    </dependency>
+    <dependency org="org.lwjgl" name="lwjgl-glfw" rev="3.3.6" conf="lwjgl-natives-macos->default">
+      <artifact name="lwjgl-glfw" type="jar" e:classifier="natives-macos" xmlns:e="http://ant.apache.org/ivy/extra"/>
+    </dependency>
+    <dependency org="org.lwjgl" name="lwjgl-jawt" rev="3.3.6" conf="lwjgl-natives-macos->default">
+      <artifact name="lwjgl-jawt" type="jar" e:classifier="natives-macos" xmlns:e="http://ant.apache.org/ivy/extra"/>
+    </dependency>
+
+    <!-- LWJGL macOS ARM64 natives -->
+    <dependency org="org.lwjgl" name="lwjgl" rev="3.3.6" conf="lwjgl-natives-macos-arm64->default">
+      <artifact name="lwjgl" type="jar" e:classifier="natives-macos-arm64" xmlns:e="http://ant.apache.org/ivy/extra"/>
+    </dependency>
+    <dependency org="org.lwjgl" name="lwjgl-opengl" rev="3.3.6" conf="lwjgl-natives-macos-arm64->default">
+      <artifact name="lwjgl-opengl" type="jar" e:classifier="natives-macos-arm64" xmlns:e="http://ant.apache.org/ivy/extra"/>
+    </dependency>
+    <dependency org="org.lwjgl" name="lwjgl-openal" rev="3.3.6" conf="lwjgl-natives-macos-arm64->default">
+      <artifact name="lwjgl-openal" type="jar" e:classifier="natives-macos-arm64" xmlns:e="http://ant.apache.org/ivy/extra"/>
+    </dependency>
+    <dependency org="org.lwjgl" name="lwjgl-glfw" rev="3.3.6" conf="lwjgl-natives-macos-arm64->default">
+      <artifact name="lwjgl-glfw" type="jar" e:classifier="natives-macos-arm64" xmlns:e="http://ant.apache.org/ivy/extra"/>
+    </dependency>
+    <dependency org="org.lwjgl" name="lwjgl-jawt" rev="3.3.6" conf="lwjgl-natives-macos-arm64->default">
+      <artifact name="lwjgl-jawt" type="jar" e:classifier="natives-macos-arm64" xmlns:e="http://ant.apache.org/ivy/extra"/>
+    </dependency>
   </dependencies>
 </ivy-module>

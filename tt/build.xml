@@ -4,18 +4,21 @@
 		classpath="../ivy_lib/ivy-2.5.3.jar" />
 	<property name="ivy.settings.file" value="../ivysettings.xml" />
 
-	<!-- Ivy resolve target to fetch dependencies -->
+	<!-- Ivy resolve target to fetch game dependencies (LWJGL + Steamworks + commons) -->
 	<target name="resolve">
 		<ivy:settings file="../ivysettings.xml" />
-		<ivy:resolve file="../tt/ivy.xml" />
-		<ivy:retrieve pattern="../ivy_lib_game/[artifact]-[revision](-[classifier]).[ext]" />
+		<ivy:resolve file="ivy.xml" />
+		<!-- Retrieve all confs into the shared ivy_lib directory -->
+		<ivy:retrieve pattern="../ivy_lib/[artifact]-[revision](-[classifier]).[ext]" conf="*" />
 	</target>
 
 	<import file="../common/common.xml" />
 
-	<!-- Define classpath for resolved game dependencies -->
+	<!-- Define classpath for resolved game dependencies (Steamworks4J) -->
 	<path id="game.ivy.classpath">
-		<fileset dir="../ivy_lib_game" includes="*.jar" erroronmissingdir="false"/>
+		<fileset dir="../ivy_lib" erroronmissingdir="false">
+			<include name="steamworks4j-*.jar" />
+		</fileset>
 	</path>
 
 	<!-- Override the common compile classpath to include game dependencies -->
@@ -63,7 +66,7 @@
 
 	<!--	<property name="webstartdist" location="webstartdist"/>-->
 
-	<target name="compiledeps" depends="compile-common, resolve">
+	<target name="compiledeps" depends="resolve, compile-common">
 	</target>
 
 	<target name="rundeps" depends="textures, geometry, revision">
@@ -226,7 +229,7 @@
 		<mkdir dir="${dist}/macosx-x86" />
 		<mkdir dir="${dist}/macosx-arm64" />
 		<copy todir="${dist}/common">
-			<fileset dir="../ivy_lib_game">
+			<fileset dir="../ivy_lib">
 				<include name="steamworks4j-*.jar" />
 			</fileset>
     	</copy>
@@ -262,15 +265,6 @@
 		</jar>
 		<copy todir="${dist}/common">
 			<fileset dir="${build}">
-				<!--			<include name="com/oddlabs/tt/**/*class"/>
-				<include name="com/oddlabs/net/**/*class"/>
-				<include name="com/oddlabs/util/**/*class"/>
-				<include name="com/oddlabs/registration/**/*class"/>
-				<include name="com/oddlabs/matchmaking/**/*class"/>
-				<include name="com/oddlabs/bugreport/**/*class"/>
-				<include name="com/oddlabs/updater/**/*class"/>
-				<include name="com/oddlabs/loader/**/*class"/>
-				-->
 				<include name="textures/gui/*image" />
 				<include name="textures/gui/*dxtn" />
 				<include name="textures/models/*dxtn" />
@@ -293,16 +287,19 @@
 				<include name="music/*.ogg" />
 				<include name="font/*font" />
 				<include name="*.png" />
-				<!--				<include name="textures/models/*png"/>
-				<include name="textures/models/*jpg"/>-->
 			</fileset>
+			<!-- LWJGL core JARs and other Ivy deps (exclude native JARs handled by platform-natives) -->
+			<fileset dir="../ivy_lib">
+				<include name="lwjgl-3.*.jar" />
+				<include name="lwjgl-glfw-3.*.jar" />
+				<include name="lwjgl-opengl-3.*.jar" />
+				<include name="lwjgl-openal-3.*.jar" />
+				<include name="lwjgl-jawt-3.*.jar" />
+				<include name="jorbis-*.jar" />
+				<exclude name="*-natives-*.jar" />
+			</fileset>
+			<!-- Non-Maven JARs from lib -->
 			<fileset dir="${lib}">
-				<include name="lwjgl.jar" />
-				<include name="lwjgl-glfw.jar" />
-				<include name="lwjgl-opengl.jar" />
-				<include name="lwjgl-openal.jar" />
-				<include name="lwjgl-jawt.jar" />
-				<include name="jorbis.jar" />
 				<include name="jsquish.jar" />
 			</fileset>
 			<path refid="${platform-natives}" />

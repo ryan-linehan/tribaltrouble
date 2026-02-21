@@ -11,11 +11,11 @@
 	<!-- Ivy resolve target to fetch dependencies -->
 	<target name="resolve">
 		<ivy:settings file="../ivysettings.xml" />
-		<ivy:resolve />
+		<ivy:resolve file="ivy.xml" />
 		<ivy:retrieve pattern="../ivy_lib/[artifact]-[revision](-[classifier]).[ext]" />
 	</target>
 
-	<target name="compiledeps" depends="compile-common, resolve">
+	<target name="compiledeps" depends="resolve, compile-common">
 	</target>
 
 	<target name="compile" depends="init,compiledeps">
@@ -55,8 +55,8 @@
 			<fileset dir="../common/build/classes" includes="com/oddlabs/registration/**/*class" />
 			<fileset dir="${build}/classes" includes="com/oddlabs/matchserver/**/*class" />
 			<fileset dir="${commonstatic}" includes="public_reg_key" />
-			<fileset dir="${lib}">
-				<include name="mysql-connector-j-9.3.0.jar" />
+			<fileset dir="../ivy_lib">
+				<include name="mysql-connector-j-*.jar" />
 			</fileset>
 		</jar>
 	</target>

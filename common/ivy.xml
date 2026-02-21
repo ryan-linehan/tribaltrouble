@@ -1,0 +1,14 @@
+<ivy-module version="2.0">
+  <info organisation="tribaltrouble" module="tribaltrouble-common"/>
+
+  <configurations>
+    <conf name="build" description="Build tool dependencies"/>
+  </configurations>
+
+  <dependencies>
+    <!-- Google Java Format (build tooling, used by root build.xml format targets) -->
+    <dependency org="com.google.googlejavaformat" name="google-java-format" rev="1.28.0" conf="build->default">
+      <artifact name="google-java-format" type="jar" e:classifier="all-deps" xmlns:e="http://ant.apache.org/ivy/extra"/>
+    </dependency>
+  </dependencies>
+</ivy-module>

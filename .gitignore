@@ -7,10 +7,15 @@ server/logs
 !server/logs/donot-delete.txt
 
 website/vendor/*
+
+# Ivy resolved dependencies (downloaded at build time)
 ivy_lib/*
 !ivy_lib/ivy-2.5.3.jar
+
+# Legacy ivy_lib_game no longer needed (merged into ivy_lib)
 ivy_lib_game/*
 !ivy_lib_game/do-not-delete.txt
+
 .project
 .classpath
 .vs/*
@@ -18,3 +23,16 @@ ivy_lib_game/*
 tt/save_data/*
 tt/steam_appid.txt
 server/server.properties
+
+# Ivy cache
+.ivy2/
+
+# JARs now managed by Ivy (no longer committed to repo)
+common/lib/java/lwjgl*.jar
+common/lib/java/commons-pool-*.jar
+common/lib/java/commons-dbcp-*.jar
+common/lib/java/commons-collections-*.jar
+common/lib/java/jorbis.jar
+common/lib/java/log4j-api-*.jar
+common/lib/java/mysql-connector-j-*.jar
+ci/google-java-format-*.jar

@@ -1,6 +1,12 @@
 <ivy-module version="2.0">
-  <info organisation="tribaltrouble" module="tribaltrouble"/>
+  <info organisation="tribaltrouble" module="tribaltrouble-server"/>
   <dependencies>
+    <!-- Server dependencies: Discord4J and MySQL -->
     <dependency org="com.discord4j" name="discord4j-core" rev="3.2.6"/>
+    <dependency org="com.mysql" name="mysql-connector-j" rev="9.3.0"/>
+    <!-- Apache Commons for DB connection pooling -->
+    <dependency org="commons-pool" name="commons-pool" rev="1.2"/>
+    <dependency org="commons-dbcp" name="commons-dbcp" rev="1.2.1"/>
+    <dependency org="commons-collections" name="commons-collections" rev="3.1"/>
   </dependencies>
 </ivy-module>

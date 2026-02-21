@@ -1,4 +1,9 @@
-<project name="common-tools" basedir="." default="compile">
+<project name="common-tools" basedir="." default="compile" xmlns:ivy="antlib:org.apache.ivy.ant">
+	<!-- Ivy Ant integration for dependency management -->
+	<taskdef resource="org/apache/ivy/ant/antlib.xml" uri="antlib:org.apache.ivy.ant"
+		classpath="../ivy_lib/ivy-2.5.3.jar" />
+	<property name="ivy.settings.file" value="../ivysettings.xml" />
+
 	<taskdef resource="net/sf/antcontrib/antcontrib.properties">
 		<classpath>
 			<pathelement location="../common/lib/java/ant-contrib-1.0b3.jar" />
@@ -7,12 +12,13 @@
 
 	<property name="build" value="build" />
 	<property name="lib" value="../common/lib/java" />
+	<property name="ivy.lib.dir" value="../ivy_lib" />
 	<property name="tools" value="../tools" />
 	<property name="nativelib" value="../common/lib/java" />
 	<property name="commonstatic" value="../common/static" />
 	<property name="java_source_version" value="1.8" />
 	<import file="../classpath.xml" />
-	
+
 	<!-- Classpaths -->
 	<path id="_common.combined.run.classpath">
 		<path refid="build.classpath" />
