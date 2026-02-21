@@ -33,5 +33,6 @@ common/lib/java/commons-pool-*.jar
 common/lib/java/commons-dbcp-*.jar
 common/lib/java/commons-collections-*.jar
 common/lib/java/jorbis.jar
+common/lib/java/log4j-api-*.jar
 common/lib/java/mysql-connector-j-*.jar
 ci/google-java-format-*.jar
