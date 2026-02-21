@@ -20,9 +20,6 @@
     <dependency org="commons-dbcp" name="commons-dbcp" rev="1.2.1" conf="default->default"/>
     <dependency org="commons-collections" name="commons-collections" rev="3.1" conf="default->default"/>
 
-    <!-- Logging -->
-    <dependency org="org.apache.logging.log4j" name="log4j-api" rev="2.0-beta9" conf="default->default"/>
-
     <!-- LWJGL 3.3.6 Core modules -->
     <dependency org="org.lwjgl" name="lwjgl" rev="3.3.6" conf="lwjgl->default"/>
     <dependency org="org.lwjgl" name="lwjgl-opengl" rev="3.3.6" conf="lwjgl->default"/>
