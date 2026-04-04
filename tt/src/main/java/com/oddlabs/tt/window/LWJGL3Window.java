@@ -206,7 +206,11 @@ public final class LWJGL3Window implements Window {
 
     @Override
     public boolean isCloseRequested() {
-        return glfwWindowShouldClose(windowHandle);
+        boolean close = glfwWindowShouldClose(windowHandle);
+        if (close) {
+            glfwSetWindowShouldClose(windowHandle, false);
+        }
+        return close;
     }
 
     @Override
