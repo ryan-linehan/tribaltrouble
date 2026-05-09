@@ -171,7 +171,7 @@ public final class Authenticator implements MatchmakingServerLoginInterface, Con
             return;
         }
 
-        String username = DBInterface.getOrCreateSteamRegistration(steamAccountId, personaName);
+        String username = DBInterface.getOrCreateSteamRegistration(steamAccountId);
         if (username == null) {
             client_interface.loginError(MatchmakingClientInterface.USER_ERROR_NO_SUCH_USER);
             MatchmakingServer.getLogger().warning("getOrCreateSteamRegistration returned null for account ID: " + steamAccountId);

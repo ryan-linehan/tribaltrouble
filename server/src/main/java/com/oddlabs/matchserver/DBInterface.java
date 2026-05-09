@@ -5,7 +5,6 @@ import com.oddlabs.matchmaking.GamePlayer;
 import com.oddlabs.matchmaking.GameSession;
 import com.oddlabs.matchmaking.Login;
 import com.oddlabs.matchmaking.LoginDetails;
-import com.oddlabs.matchmaking.NickUtils;
 import com.oddlabs.matchmaking.Participant;
 import com.oddlabs.matchmaking.Profile;
 import com.oddlabs.matchmaking.RankingEntry;
@@ -277,7 +276,7 @@ public final class DBInterface {
         }
     }
 
-    public static String getOrCreateSteamRegistration(long steamId, String personaName) {
+    public static String getOrCreateSteamRegistration(long steamId) {
         // Look up existing registration by Steam ID
         boolean isBannedOrDisabled = false;
         String existingUsername = null;
@@ -313,7 +312,7 @@ public final class DBInterface {
 
         // No registration yet — create one. Profile is left unset; the client will
         // be routed to the profile-creation screen so the player picks their own nick.
-        String username = NickUtils.generateSteamNick(personaName, steamId);
+        String username = "steam_" + steamId;
         String email = "steam_" + steamId + "@steam.internal";
 
         try (Connection conn = DBUtils.createDatabaseConnection();
